@@ -1,7 +1,7 @@
 #ifndef UNIX
 #define UNIX
 #endif
-#undef UNIX
+//#undef UNIX
 #ifndef UNIX
 #include <windows.h>
 #endif
@@ -21,6 +21,9 @@ int main(int argc, char **argv)
 {
 	MakeWindow(800,600,32,"Atom Engine",WINDOWED);
 	return 0;
+}
+int GetLastErr (ERROR err) {
+  return err.code;
 }
 
 
