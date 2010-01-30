@@ -1,12 +1,13 @@
 #ifndef UNIX
-#define UNIX
-#endif
-//#undef UNIX
-#ifndef UNIX
 #include <windows.h>
 #endif
 
+#include "../preproc.h"
+
 #include "window.h"
+#include "error.h"
+
+AtomLog atomlog;
 
 #ifndef UNIX
 int WINAPI WinMain(
@@ -29,7 +30,4 @@ int main(int argc, char **argv)
 // Create window
   wnd.MakeWindow(&wnd.param);
   return 0;
-}
-int GetLastErr (ERROR err) {
-  return err.code;
 }

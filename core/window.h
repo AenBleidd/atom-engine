@@ -1,23 +1,16 @@
-#ifndef _WINDOW_H_
-#define _WINDOW_H_
+#ifndef _CORE_WINDOW_H_
+#define _CORE_WINDOW_H_
 
 #include <SDL/SDL.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 
+#include "error.h"
+
 enum MODE {
 	FULLSCREEN,
 	WINDOWED
 };
-
-typedef struct ERR
-{
-      int code;
-      int sub_code;
-      int *func;
-      const char *description;
-}ERROR;
-
 // Parameters of game window
 struct GAMEWND {
   int width;
@@ -26,8 +19,6 @@ struct GAMEWND {
   const char *title;
   MODE mode;
 };
-
-int GetLastErr (ERROR err);
 
 class GameWnd {
   public:
@@ -44,4 +35,6 @@ class GameWnd {
   bool GLInit (void);
 };
 
-#endif
+extern AtomLog atomlog;
+
+#endif //_CORE_WINDOW_H_
