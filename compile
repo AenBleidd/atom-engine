@@ -1,0 +1,175 @@
+#!/bin/sh
+function clean_atom {
+  echo "Cleaning..."
+  rm -v "core/obj/main.o"
+  rm -v "core/obj/window.o"
+  rm -v "core/obj/gamefs.o"
+  rm -v "core/obj/error.o"
+  rm -v "atom-engine-test/atom"
+}
+
+function clean_fsman {
+  echo "Cleaning..."
+  rm -v "utils/obj/fsman.o"
+  rm -v "utils/obj/gamefs.o"
+  rm -v "utils/obj/error.o"
+  rm -v "atom-engine-test/fsman"
+}
+
+function quit {
+  read -p "Press any key to exit..."
+  exit
+}
+
+optr=" -DUNIX "
+optd=" -DATOM_DEBUG -g "
+fsmanopt=" -D_FSMANAGER_ "
+
+atomlink="-lSDL -lGL"
+
+function compile_atom {
+  echo "Compiling 'atom'"
+
+  echo "Compiling 'core/main.cpp'"
+  if g++ "core/main.cpp" -c -O3 -o "core/obj/main.o" $opt
+  then echo "'core/main.cpp' compiled successfully"
+  else quit
+  fi
+
+  echo "Compiling 'core/window.cpp'"
+  if g++ "core/window.cpp" -c -O3 -o "core/obj/window.o" $opt
+  then echo "'core/window.cpp' compiled successfully"
+  else quit
+  fi
+
+  echo "Compiling 'core/gamefs.cpp'"
+  if g++ "core/gamefs.cpp" -c -O3 -o "core/obj/gamefs.o" $opt
+  then echo "'core/gamefs.cpp' compiled successfully"
+  else quit
+  fi
+
+  echo "Compiling 'core/error.cpp'"
+  if g++ "core/error.cpp" -c -O3 -o "core/obj/error.o" $opt
+  then echo "'core/error.cpp' compiled successfully"
+  else quit
+  fi
+}
+
+function compile_fsman {
+  echo "Compiling 'utils/fsman'"
+
+  echo "Compiling 'utils/fsman.cpp'"
+  if g++ "utils/fsman.cpp" -c -O3 -o "utils/obj/fsman.o" $opt$fsmanopt
+  then echo "'utils/fsman.cpp' compiled successfully"
+  else quit
+  fi
+
+  echo "Compiling 'core/gamefs.cpp'"
+  if g++ "core/gamefs.cpp" -c -O3 -o "utils/obj/gamefs.o" $opt$fsmanopt
+  then echo "'core/gamefs.cpp' compiled successfully"
+  else quit
+  fi
+
+  echo "Compiling 'core/error.cpp'"
+  if g++ "core/error.cpp" -c -O3 -o "utils/obj/error.o" $opt$fsmanopt
+  then echo "'core/error.cpp' compiled successfully"
+  else quit
+  fi
+
+  echo "Compiling 'utils/crc32.cpp'"
+  if g++ "utils/crc32.cpp" -c -O3 -o "utils/obj/crc32.o" $opt$fsmanopt
+  then echo "'utils/crc32.cpp' compiled successfully"
+  else quit
+  fi
+}
+
+function link_atom {
+  echo "Linking 'atom'"
+  if g++ "core/obj/main.o" "core/obj/window.o" "core/obj/gamefs.o" "core/obj/error.o" -o "atom-engine-test/atom" $atomlink
+  then echo "'atom' linked successfully"
+  else quit
+  fi
+}
+
+function link_fsman {
+  echo "Linking 'fsman'"
+  if g++ "utils/obj/fsman.o" "utils/obj/gamefs.o" "utils/obj/error.o" "utils/obj/crc32.o" -o "atom-engine-test/fsman"
+  then echo "'fsman' linked successfully"
+  else quit
+  fi
+}
+
+function all {
+  compile_atom
+  link_atom
+  compile_fsman
+  link_fsman
+}
+
+function force {
+  if test $compcom = "atom"
+    then
+      clean_atom
+  else if test $compcom = "fsman"
+    then
+      clean_fsman
+  else if test $compcom = "all"
+    then
+      clean_atom
+      clean_fsman
+  else
+    echo "Error! Wrong target "$compcom
+    quit
+  fi
+  fi
+  fi
+}
+
+for a in $@
+do
+  if test $a = "-d"
+    then opt=$opt$optr$optd
+  else if test $a = "-r"
+    then opt=$opt$optr
+  else if test $a = "atom"
+    then compcom="atom"
+  else if test $a = "fsman"
+    then compcom="fsman"
+  else if test $a = "all"
+    then compcom="all"
+  else if test $a = "-f"
+    then force="force"
+  else
+    echo "Error while parsing command line. Exiting."
+    quit
+  fi
+  fi
+  fi
+  fi
+  fi
+  fi
+done
+
+if test $force = "force"
+  then force
+fi
+
+if test $compcom = "atom"
+  then
+    compile_atom
+    link_atom
+else if test $compcom = "fsman"
+  then
+    compile_fsman
+    link_fsman
+else if test $compcom = "all"
+  then
+    all
+else
+  echo "Error! Wrong target "$compcom
+  quit
+fi
+fi
+fi
+
+quit
