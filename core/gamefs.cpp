@@ -22,7 +22,7 @@ AtomFS::~AtomFS() {
   delete root;
 }
 int AtomFS::Mount (char* filename) {
-/*  atomlog.DebugMessage("Begin mounting filesystem...");
+  atomlog.DebugMessage("Begin mounting filesystem...");
   atomlog.DebugMessage("Reading mount file...");
 // open configuration file for reading
   FILE *conf = fopen(filename, "rb");
@@ -62,24 +62,33 @@ int AtomFS::Mount (char* filename) {
   bool folderflag = false;
   bool priorflag = false;
   bool quotes = false;
+// reading configuration
   while (end != true) {
-    atomlog.DebugMessage("Cycle");
+// this is end
+    if (pos == size || pos > size) {
+      end = true;
+      break;
+    }
+// if it is space
+    else if ((buf[pos] == 0x20 || buf[pos] == 0x0A) && pos < size) pos++;
 // if it is a comment
     if (buf[pos] == 0x23) {
-      atomlog.DebugMessage("Comment");
-      while (buf[pos] != 0x0A || pos < size) { pos++; }
+      while (buf[pos] != 0x0A) pos++;
 // last comment
-      if (pos == size) { end = true; atomlog.DebugMessage("Last comment"); break; };
+      if (pos == size || pos == (size-1)) {
+        end = true;
+        break;
+      }
+      else pos++;
     }
-// this is end
-    else if (pos == size || pos > size) end = true;
-// reading configuration
 // if it is quotes
-    else  if (buf[pos] == 0x22) {
-        atomlog.DebugMessage("Quotes");
+    if (buf[pos] == 0x22) {
         tsize = 0;
-        while (buf[pos++] != 0x22 || pos < size) tsize++;
         pos++;
+        while (buf[pos] != 0x22 && pos <= size) {
+          pos++;
+          tsize++;
+        }
         quotes = true;
         if (pos == size && buf[pos] != 0x22) {
           atomlog.SetLastErr(ERROR_CORE_FS, ERROR_PARSE_MOUNT_FILE_QUOTES);
@@ -87,34 +96,29 @@ int AtomFS::Mount (char* filename) {
           return -1;
         }
       }
-// if it is space
-      else if (buf[pos] == 0x20 || buf[pos] == 0x0A) { pos++; }
 // yeah! it's some symbol here!
       else {
-        atomlog.DebugMessage("Symbol");
         tsize = 0;
-        while (buf[pos] != 0x20 || buf[pos] != 0x0A) { pos++; tsize++; }
-}
+        while (buf[pos] != 0x20 && buf[pos] != 0x0A) {
+          pos++;
+          tsize++;
+        }
+      }
 // rewind to read the string
-      if (quotes == true) pos -= tsize+1;
-      else pos -= tsize;
-      quotes = false;
+      pos -= tsize;
       char *file;
       char *mountpoint;
       char *prior;
 // it's file
       if (fileflag == false) {
-        atomlog.DebugMessage("File");
         file = new char [tsize];
         for (int i = 0; i < tsize+1; i++)
           file[i] = buf[pos++];
         file[tsize] = '\0';
-        pos++;
         fileflag = true;
       }
 // it's mountpoint
       else if (folderflag == false) {
-        atomlog.DebugMessage("Mount point");
         mountpoint = new char [tsize];
         for (int i = 0; i < tsize+1; i++)
           mountpoint[i] = buf[pos++];
@@ -123,7 +127,6 @@ int AtomFS::Mount (char* filename) {
       }
 // it's priority
       else if (priorflag == false) {
-        atomlog.DebugMessage("Priority");
 // too big priority or some another string
         if (tsize > 255) {
           atomlog.SetLastErr(ERROR_CORE_FS, ERROR_PARSE_MOUNT_FILE_PRIORITY);
@@ -144,9 +147,10 @@ int AtomFS::Mount (char* filename) {
 // mount this file
         if (Mount(file, mountpoint, (unsigned char)num) == -1) { delete [] buf; return -1; }
       }
+      if (quotes == true) quotes = false;
   }
 // cleaning
-  delete [] buf;*/
+  delete [] buf;
   return 0;
 }
 // Mount single file
