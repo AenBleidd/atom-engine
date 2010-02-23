@@ -75,6 +75,12 @@ void AtomLog::SetLastErr (unsigned int code, unsigned int subcode) {
           len += 78;
           break;
         }
+        case ERROR_OPEN_FOLDER: {
+          s_subcode = new char [30];
+          s_subcode = "Couldn't open the directory.";
+          len += 78;
+          break;
+        }
       }
       break;
     }

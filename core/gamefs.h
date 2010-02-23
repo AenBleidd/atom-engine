@@ -11,6 +11,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifdef _FSMAN_
+#include <dirent.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#endif // _FSMAN_
+
 // main constants
 static const unsigned int magic = 0x41454653; // Magic number ("AEFS")
 static const unsigned char version = 0x01; // current version (1)
@@ -114,6 +120,17 @@ class AtomFS {
  private:
 // root directory
   TREE_FOLDER *root;
+// WAKE crypt algorithm
+  unsigned int wake_table[257];
+  void GenKey (unsigned int k0, unsigned int k1, unsigned int k2, unsigned int k3);
+  void Decrypt (unsigned int *data, int lenght, unsigned int k[4], unsigned int r[4], unsigned int *t);
+#ifdef _FSMAN_
+  void Crypt (unsigned int *data, int lenght, unsigned int k[4], unsigned int r[4], unsigned int *t);
+#endif // _FSMAN_
+#ifdef _FSMAN_
+// Scan for all files and directories to add to the packed file
+  long int FolderScan (char *ch, int level);
+#endif // _FSMAN_
 };
 extern AtomLog atomlog;
 #endif //_CORE_GAMEFS_H_
