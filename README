@@ -1,0 +1,6 @@
+To make this project run 'make'
+Additional parameters:
+  to compile in *nix system:
+SYSTEM=UNIX
+  to compile with debug messaging
+DEBUG=TRUE
