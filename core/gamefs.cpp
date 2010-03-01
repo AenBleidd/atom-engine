@@ -15,10 +15,12 @@ AtomFS::AtomFS() {
   root->tree_folder = 0;
   root->tree_file = 0;
 // Mounting...
+#ifndef _FSMAN_
   if (Mount("mount") == -1) {
     atomlog.SetLastErr(ERROR_CORE_FS, ERROR_MOUNT_FS);
     throw ERROR_MOUNT_FS;
   }
+#endif // _FSMAN_
 }
 AtomFS::~AtomFS() {
 // delete root directory
@@ -312,6 +314,19 @@ long int AtomFS::FolderScan(char *ch,int level=0)
   chdir("..");
   }
   return res;
+}
+#endif // _FSMAN_
+/*qword GenCRC32(byte *buf, qword lenght)
+{
+	qword crc = mask;
+	while (lenght--)
+		crc = crc32table[(crc ^ *buf++) & 0xFF] ^ (crc >> 8);
+
+	return crc ^ mask;
+}*/
+#ifdef _FSMAN_
+int AtomFS::Create (char **input, unsigned int count, char *file) {
+  return 0;
 }
 #endif // _FSMAN_
 /*
