@@ -47,13 +47,13 @@ void AtomLog::SetLastErr (unsigned int code, unsigned int subcode) {
       switch (global_error.sub_code) {
         case ERROR_OPEN_FILE: {
           s_subcode = new char [31];
-          s_subcode = "Error while opening the file.\n";
+          s_subcode = "Error while opening the file.";
           len += 31;
           break;
         }
         case ERROR_READ_FILE: {
           s_subcode = new char [31];
-          s_subcode = "Error while reading the file.\n";
+          s_subcode = "Error while reading the file.";
           len += 31;
           break;
         }
@@ -78,6 +78,12 @@ void AtomLog::SetLastErr (unsigned int code, unsigned int subcode) {
         case ERROR_OPEN_FOLDER: {
           s_subcode = new char [30];
           s_subcode = "Couldn't open the directory.";
+          len += 78;
+          break;
+        }
+        case ERROR_WRITE_FILE: {
+          s_subcode = new char [30];
+          s_subcode = "Error while writing the file.";
           len += 78;
           break;
         }
