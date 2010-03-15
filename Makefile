@@ -2,11 +2,11 @@ CXX = g++
 FLAGS := -Wall -c
 #For debug
 ifeq ($(DEBUG),TRUE)
-	FLAGS += $(FLAGS) -g -DATOM_DEBUG
+	FLAGS +=  -g -DATOM_DEBUG
 endif
 #For linux
 ifeq ($(SYSTEM),UNIX)
-	FLAGS += $(FLAGS) -DUNIX
+	FLAGS +=  -DUNIX
 endif
 COREPATH = core/obj/
 COREOBJ = $(COREPATH)error.o $(COREPATH)gamefs.o $(COREPATH)window.o $(COREPATH)main.o
