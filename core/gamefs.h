@@ -27,9 +27,9 @@ static const unsigned char bytescrypt = 10; // count of first bytes to encrypt
 static const unsigned char ff_ro = 0x80; // read-only
 static const unsigned char ff_rw = 0x0; // read-write
 
-static const unsigned char eoc = 0xCE; // end of catalogue
-static const unsigned char file = 0xff;
-static const unsigned char folder = 0x0;
+static const unsigned char flag_eoc = 0xCE; // end of catalogue
+static const unsigned char flag_file = 0x0F;
+static const unsigned char flag_folder = 0x0C;
 // CRC32
 #ifdef _CRC_CHECK_
 // crc32 table generated using standart polynom
