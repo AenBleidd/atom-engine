@@ -304,7 +304,7 @@ LIST* AtomFS::FolderScan(char *ch, LIST* element, FILE *out, int level=0)
           atomlog.DebugMessage(buf);
 
           element = new LIST;
-          element->record.flag = folder;
+          element->record.flag = flag_folder;
           element->record.namelen = strlen(eps[cnt]->d_name);
           element->record.name = eps[cnt]->d_name;
           element->record.size = 0;
@@ -317,7 +317,7 @@ LIST* AtomFS::FolderScan(char *ch, LIST* element, FILE *out, int level=0)
           prev = element;
 // End of catalogue
           element = new LIST;
-          element->record.flag = eoc;
+          element->record.flag = flag_eoc;
           element->record.namelen = 0;
           element->record.name = 0;
           element->record.size = 0;
@@ -337,7 +337,7 @@ LIST* AtomFS::FolderScan(char *ch, LIST* element, FILE *out, int level=0)
           // printf("%-30s   %ld\n",eps[cnt]->d_name, (long int)st.st_size);
 
           element = new LIST;
-          element->record.flag = file;
+          element->record.flag = flag_file;
           element->record.namelen = strlen(eps[cnt]->d_name);
           element->record.name = eps[cnt]->d_name;
           element->record.size = st.st_size;
@@ -421,7 +421,7 @@ void AtomFS::Write (FILE *out, char *in, LIST *element) {
 }
 
 int AtomFS::Create (char **input, unsigned int count, char *file) {
-  FILE *outfile;
+  FILE *outfile, *tempfile;
   datasize = 0;
 // check if file utput file exists
   outfile = fopen(file, "r");
@@ -437,12 +437,19 @@ int AtomFS::Create (char **input, unsigned int count, char *file) {
       temp = new char [strlen(file)+k+2];
 // create filename
       sprintf(temp, "%s.%i\0", file, i);
-      if (rename(file,temp) == 0) flag = true;
-      else i++;
+      tempfile = fopen(temp, "r");
+      if (tempfile == NULL) {
+        if (rename(file,temp) == 0) flag = true;
+        else i++;
+      }
+      else {
+        fclose(tempfile);
+        i++;
+      }
       delete [] temp;
     }
+    fclose(outfile);
   }
-  fclose(outfile);
 // open file for writing
   outfile = fopen(file, "wb");
 // Create file (NIGHTMARE!!!)
@@ -456,7 +463,7 @@ int AtomFS::Create (char **input, unsigned int count, char *file) {
 // Linked list of records
   LIST *list, *head, *prev;
   list = new LIST;
-  list->record.flag = folder;
+  list->record.flag = flag_folder;
   list->record.namelen = 1;
   list->record.name = "/";
   list->record.size = 0;
@@ -465,13 +472,21 @@ int AtomFS::Create (char **input, unsigned int count, char *file) {
   head = list; // save the head of the list
 
 // Scanning...
-// TODO: Add check for inputs if it is folder or file
   for (int i = 0; i < count; i++) {
+  prev = list;
+#ifdef UNIX
+  struct stat64 st;
+  stat64(input[i], &st);
+  if (st.st_mode = S_IFDIR)
     list = FolderScan(input[i], list, outfile, 0);
+  if (st.st_mode = S_IFREG)
+    Write(outfile, input[i], list);
+#endif // UNIX
+    prev->link = list;
   }
   prev = list;
   list = new LIST;
-  list->record.flag = eoc;
+  list->record.flag = flag_eoc;
   list->record.namelen = 0;
   list->record.name = 0;
   list->record.size = 0;
@@ -486,8 +501,8 @@ int AtomFS::Create (char **input, unsigned int count, char *file) {
   unsigned short int len = 0;
   while(list->link != NULL) {
 // write end of catalogue flag
-    if (list->record.flag == eoc) {
-      if(fwrite((const void*)list->record.flag, sizeof(list->record.flag), 1, outfile) != 1) {
+    if (list->record.flag == flag_eoc) {
+      if(fwrite(&list->record.flag, sizeof(list->record.flag), 1, outfile) != 1) {
         atomlog.SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
         fclose(outfile);
         return -1;
@@ -495,19 +510,19 @@ int AtomFS::Create (char **input, unsigned int count, char *file) {
       tablesize += sizeof(list->record.flag);
     }
 // write a folder
-    if (list->record.flag == folder) {
-      if(fwrite((const void*)list->record.flag, sizeof(list->record.flag), 1, outfile) != 1) {
+    else if (list->record.flag == flag_folder) {
+      if(fwrite(&list->record.flag, sizeof(list->record.flag), 1, outfile) != 1) {
         atomlog.SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
         fclose(outfile);
         return -1;
       }
-      if(fwrite((const void*)list->record.namelen, sizeof(list->record.namelen), 1, outfile) != 1) {
+      if(fwrite(&list->record.namelen, sizeof(list->record.namelen), 1, outfile) != 1) {
         atomlog.SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
         fclose(outfile);
         return -1;
       }
       len = strlen(list->record.name);
-      if(fwrite((const void*)list->record.name, 1, len, outfile) != len) {
+      if(fwrite(&list->record.name, 1, len, outfile) != len) {
         atomlog.SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
         fclose(outfile);
         return -1;
@@ -516,33 +531,33 @@ int AtomFS::Create (char **input, unsigned int count, char *file) {
     }
 // write a file
     else {
-    if(fwrite((const void*)list->record.flag, sizeof(list->record.flag), 1, outfile) != 1) {
+    if(fwrite(&list->record.flag, sizeof(list->record.flag), 1, outfile) != 1) {
         atomlog.SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
         fclose(outfile);
         return -1;
       }
-      if(fwrite((const void*)list->record.namelen, sizeof(list->record.namelen), 1, outfile) != 1) {
+      if(fwrite(&list->record.namelen, sizeof(list->record.namelen), 1, outfile) != 1) {
         atomlog.SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
         fclose(outfile);
         return -1;
       }
       len = strlen(list->record.name);
-      if(fwrite((const void*)list->record.name, 1, len, outfile) != len) {
+      if(fwrite(&list->record.name, 1, len, outfile) != len) {
         atomlog.SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
         fclose(outfile);
         return -1;
       }
-      if(fwrite((const void*)list->record.size, sizeof(list->record.size), 1, outfile) != 1) {
+      if(fwrite(&list->record.size, sizeof(list->record.size), 1, outfile) != 1) {
         atomlog.SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
         fclose(outfile);
         return -1;
       }
-      if(fwrite((const void*)list->record.offset, sizeof(list->record.offset), 1, outfile) != 1) {
+      if(fwrite(&list->record.offset, sizeof(list->record.offset), 1, outfile) != 1) {
         atomlog.SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
         fclose(outfile);
         return -1;
       }
-      if(fwrite((const void*)list->record.crc, sizeof(list->record.crc), 1, outfile) != 1) {
+      if(fwrite(&list->record.crc, sizeof(list->record.crc), 1, outfile) != 1) {
         atomlog.SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
         fclose(outfile);
         return -1;
@@ -557,7 +572,7 @@ int AtomFS::Create (char **input, unsigned int count, char *file) {
   rewind(outfile);
   header->tablesize = tablesize;
   header->filesize = tablesize+datasize;
-  if(fwrite((const void*)header, sizeof(header), 1, outfile) != 1) {
+  if(fwrite(&header, sizeof(header), 1, outfile) != 1) {
         atomlog.SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
         fclose(outfile);
         return -1;
@@ -565,6 +580,13 @@ int AtomFS::Create (char **input, unsigned int count, char *file) {
 // end work with file
   fclose(outfile);
   delete header;
+  list = head;
+  while(list->link != NULL) {
+    head = list->link;
+    delete list;
+    list = head;
+  }
+  delete list;
   return 0;
 }
 #endif // _FSMAN_
