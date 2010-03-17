@@ -15,6 +15,8 @@ Atom File System\nOptions:\n\t-t, --test\t\tTest default file system \
 with standart mount file\n\t-t, --test [mountfile]\tTest file system\n\
 \t-n,--new [output] [input]\tCreate new file with name [output] using \
 folders or files [input], for current folder use './'\n";
+  try { atomfs = new AtomFS; }
+  catch (int i) { }
   if (arg == 1 || strcmp(argc[1], "-h") == 0 || \
       strcmp(argc[1], "--help") == 0 || strcmp(argc[1], "-help") == 0 || \
       strcmp(argc[1], "/?") == 0) {
@@ -24,8 +26,6 @@ folders or files [input], for current folder use './'\n";
 // Testing filesystem
   else if (strcmp(argc[1], "-t") == 0 || strcmp(argc[1], "--test") == 0) {
     atomlog.DebugMessage("Test file system");
-    try { atomfs = new AtomFS; }
-    catch (int i) { }
     if (arg == 2) {
       atomfs->Mount("mount");
     }
