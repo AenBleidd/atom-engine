@@ -1,13 +1,27 @@
 #include "error.h"
-AtomLog::AtomLog () {
-// get current date and time
+// returns current system time in text format
+char* CurDateTime () {
   time_t seconds = time(NULL);
   tm* timeinfo = localtime(&seconds);
-  char buffer [80];
+  char *date = new char[20];
+  sprintf(date, "%i.%02i.%02i %02i:%02i:%02i",
+          timeinfo->tm_year+1900, timeinfo->tm_mon,
+          timeinfo->tm_mday, timeinfo->tm_hour,
+          timeinfo->tm_min, timeinfo->tm_sec);
+  return date;
+}
+char* CurTime () {
+  time_t seconds = time(NULL);
+  tm* timeinfo = localtime(&seconds);
+  char *time = new char [10];
+  sprintf(time, "%02i:%02i:%02i", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+  return time;
+}
+AtomLog::AtomLog () {
   char logfilename [100];
-  char *pbuffer = buffer;
   char *plogfilename = logfilename;
-  pbuffer = asctime(timeinfo);
+// get current date and time
+  char *pbuffer = CurDateTime();
 
 #ifdef _FSMAN_
   strcpy(plogfilename, "log/fsman ");
@@ -24,6 +38,7 @@ AtomLog::~AtomLog () {
   fclose(logfile);
 }
 void AtomLog::LogMessage (char *string) {
+  fputs(CurTime(), logfile), fputs("\t", logfile);
   fputs(string, logfile), fputs("\n", logfile), fflush(logfile);
 }
 void AtomLog::DebugMessage (char *string) {
@@ -92,7 +107,9 @@ void AtomLog::SetLastErr (unsigned int code, unsigned int subcode) {
     }
   }
 // add an error description
-  global_error.description = new char [len+7];
+  global_error.description = new char [len+17];
+  strcpy(global_error.description, CurTime());
+  strcpy(global_error.description, "\t");
   strcpy(global_error.description, "ERROR:\t");
   strcat(global_error.description, s_code);
   strcat(global_error.description, s_subcode);

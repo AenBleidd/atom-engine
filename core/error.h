@@ -9,10 +9,20 @@
 
 struct ERR
 {
-      int code;
-      int sub_code;
-      char *description;
+  int code;
+  int sub_code;
+  char *description;
 };
+struct ERRDESCR
+{
+  unsigned int len;
+  char *descr;
+};
+
+// returns current system time in text format
+// can be useful in another modules
+char* CurDateTime (void);
+char* CurTime (void);
 
 class AtomLog {
  public:
