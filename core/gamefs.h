@@ -222,7 +222,7 @@ class AtomFS {
 // Scan for all files and directories to add to the packed file
   LIST* FolderScan (char *ch, LIST* element, FILE *out, int level);
 // Write data from added files
-  void Write (FILE *out, char *in, LIST *element);
+  int Write (FILE *out, char *in, LIST *element);
 #endif // _FSMAN_
 };
 extern AtomLog atomlog;
