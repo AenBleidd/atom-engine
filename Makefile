@@ -7,10 +7,14 @@ endif
 #For linux
 ifeq ($(SYSTEM),UNIX)
 	FLAGS +=  -DUNIX
+	CORELIB = -lSDL -lGL
+endif
+#For windows
+ifeq ($(SYSTEM),WINDOWS)
+	CORELIB = -lSDL -lopengl32
 endif
 COREPATH = core/obj/
 COREOBJ = $(COREPATH)error.o $(COREPATH)gamefs.o $(COREPATH)window.o $(COREPATH)main.o
-CORELIB = -lSDL -lGL
 UTILSPATH = utils/obj/
 FSMANFLAGS = -D_FSMANAGER_
 FSMANOBJ = $(UTILSPATH)crc32.o $(UTILSPATH)error.o $(UTILSPATH)gamefs.o $(UTILSPATH)fsman.o 
@@ -21,6 +25,7 @@ all : atom fsman
 # Atom Engine
 atom : $(COREOBJ)
 	-mkdir atom-engine-test
+	-mkdir $(COREPATH)
 	$(CXX) $(CORELIB) $(COREOBJ) -o atom-engine-test/atom
 $(COREPATH)error.o : core/error.cpp core/error.h preproc.h
 	$(CXX) $(FLAGS) core/error.cpp -o $(COREPATH)error.o
@@ -34,6 +39,8 @@ $(COREPATH)main.o : core/main.cpp preproc.h core/window.h core/error.h
 # File System Manager (FSMan)
 fsman: $(FSMANOBJ)
 	-mkdir atom-engine-test
+	-mkdir $(COREPATH)
+	-mkdir $(UTILSPATH)
 	$(CXX) $(FSMANOBJ) -o atom-engine-test/fsman
 $(UTILSPATH)crc32.o : utils/crc32.cpp utils/crc32.h
 	$(CXX) $(FLAGS) $(FSMANFLAGS) utils/crc32.cpp -o $(UTILSPATH)crc32.o
