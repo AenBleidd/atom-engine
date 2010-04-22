@@ -2,5 +2,7 @@ To make this project run 'make'
 Additional parameters:
   to compile in *nix system:
 SYSTEM=UNIX
+  to compile in win32 system:
+SYSTEM=WINDOWS
   to compile with debug messaging
 DEBUG=TRUE
