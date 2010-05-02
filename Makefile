@@ -11,7 +11,7 @@ ifeq ($(SYSTEM),UNIX)
 endif
 #For windows
 ifeq ($(SYSTEM),WINDOWS)
-	CORELIB = -lSDL -lopengl32
+	CORELIB = -lSDLmain -lSDL -lopengl32
 endif
 COREPATH = core/obj/
 COREOBJ = $(COREPATH)error.o $(COREPATH)gamefs.o $(COREPATH)window.o $(COREPATH)main.o
@@ -48,9 +48,16 @@ $(UTILSPATH)fsman.o : utils/fsman.cpp preproc.h core/gamefs.h core/error.h
 
 # Prepare the system to compiling
 prepare :
+ifeq ($(SYSTEM),WINDOWS)
+	-md core\obj
+	-md utils\obj
+	-md atom-engine-test
+endif
+ifeq ($(SYSTEM),UNIX)
 	-mkdir $(COREPATH)
 	-mkdir $(UTILSPATH)
 	-mkdir atom-engine-test
+endif
 # Cleaning the project
 .PHONY : clean
 clean : 
