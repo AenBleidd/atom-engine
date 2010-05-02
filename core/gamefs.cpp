@@ -267,6 +267,7 @@ inline static int dot_exclude (const struct dirent64 *dir)
   return 1;
 }
 #endif // UNIX
+//TODO: (Lawliet) Write windows version of this function
 LIST* AtomFS::FolderScan(char *ch, LIST* element, FILE *out, int level=0)
 {
   LIST *prev = element;
