@@ -10,16 +10,12 @@
 AtomLog atomlog;
 
 #ifndef UNIX
-int WINAPI WinMain(
-	HINSTANCE hInstance,
-	HINSTANCE hPrevInstance,
-    LPSTR lpCmdLine,
-    int nCmdShow
-)
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
+                   LPSTR lpCmdLine, int nCmdShow)
 #else
 int main(int argc, char **argv)
 #endif
-{
+{  // NOLINT
 // Set window parameters
   GameWnd wnd;
   wnd.param.width = 800;
