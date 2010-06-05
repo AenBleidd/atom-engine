@@ -8,8 +8,8 @@
 #include "error.h"
 
 enum MODE {
-	FULLSCREEN,
-	WINDOWED
+  FULLSCREEN,
+  WINDOWED
 };
 // Parameters of game window
 struct GAMEWND {
@@ -24,7 +24,7 @@ class GameWnd {
   public:
   SDL_Event event;
   SDL_Surface *screen;
-  GAMEWND param; // Parameters of game window
+  GAMEWND param;  // Parameters of game window
 
   GameWnd();
   ~GameWnd();
@@ -32,9 +32,9 @@ class GameWnd {
   bool MakeWindow(const GAMEWND* param);
   private:
   bool SDLInit(const GAMEWND* param);
-  bool GLInit (void);
+  bool GLInit(void);
 };
 
 extern AtomLog atomlog;
 
-#endif //_CORE_WINDOW_H_
+#endif  // _CORE_WINDOW_H_
