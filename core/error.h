@@ -1,28 +1,26 @@
 #ifndef _CORE_ERROR_H_
 #define _CORE_ERROR_H_
 
-#include "../preproc.h"
-
 #include <string.h>
 #include <stdio.h>
 #include <ctime>
 
-struct ERR
-{
+#include "../preproc.h"
+
+struct ERR {
   int code;
   int sub_code;
   char *description;
 };
-struct ERRDESCR
-{
+struct ERRDESCR {
   unsigned int len;
   char *descr;
 };
 
 // returns current system time in text format
 // can be useful in another modules
-char* CurDateTime (void);
-char* CurTime (void);
+char* CurDateTime(void);
+char* CurTime(void);
 
 class AtomLog {
  public:
@@ -36,11 +34,11 @@ class AtomLog {
   FILE *logfile;
  public:
 // get last error and warning
-  ERR GetLastErr () { return global_error; }
-  ERR GetLastWrn () { return global_warning; }
+  ERR GetLastErr() { return global_error; }
+  ERR GetLastWrn() { return global_warning; }
 // write last error and warning into the log
-  void SetLastErr (unsigned int code, unsigned int subcode);
-  void SetLastWrn (unsigned int code, unsigned int subcode);
+  void SetLastErr(unsigned int code, unsigned int subcode);
+  void SetLastWrn(unsigned int code, unsigned int subcode);
 // write log message
   void LogMessage(char *string);
 // write debug log message
@@ -56,4 +54,4 @@ class AtomLog {
 #define ERROR_OPEN_FOLDER 0x00000006
 #define ERROR_WRITE_FILE 0x00000007
 
-#endif //_CORE_ERROR_H_
+#endif  // _CORE_ERROR_H_

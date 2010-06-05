@@ -6,4 +6,4 @@
 #define _CRC_CHECK_
 #endif
 
-#endif // _PREPROC_H_
+#endif  // _PREPROC_H_
