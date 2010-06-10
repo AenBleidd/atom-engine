@@ -1,7 +1,8 @@
 #include "window.h"
 
 // Window Constructor
-GameWnd::GameWnd() {
+GameWnd::GameWnd(AtomLog *log) {
+  atomlog = log;
 }
 // Window Destructor
 GameWnd::~GameWnd() {

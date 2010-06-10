@@ -21,20 +21,19 @@ struct GAMEWND {
 };
 
 class GameWnd {
-  public:
+ public:
   SDL_Event event;
   SDL_Surface *screen;
   GAMEWND param;  // Parameters of game window
 
-  GameWnd();
+  explicit GameWnd(AtomLog *log);
   ~GameWnd();
   // This Function Create Window
   bool MakeWindow(const GAMEWND* param);
-  private:
+ private:
+  AtomLog *atomlog;
   bool SDLInit(const GAMEWND* param);
   bool GLInit(void);
 };
-
-extern AtomLog atomlog;
 
 #endif  // _CORE_WINDOW_H_

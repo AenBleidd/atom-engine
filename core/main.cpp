@@ -7,7 +7,7 @@
 #include "window.h"
 #include "error.h"
 
-AtomLog atomlog;
+AtomLog *atomlog;
 
 #ifndef UNIX
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
@@ -17,7 +17,8 @@ int main(int argc, char **argv)
 #endif
 {  // NOLINT
 // Set window parameters
-  GameWnd wnd;
+  atomlog = new AtomLog;
+  GameWnd wnd(atomlog);
   wnd.param.width = 800;
   wnd.param.height = 600;
   wnd.param.bpp = 32;

@@ -30,10 +30,10 @@ AtomLog::AtomLog() {
   char *pbuffer = CurDateTime();
 
 #ifdef _FSMAN_
-  snprintf(plogfilename, s, "%s %s %s",
+  snprintf(plogfilename, s, "%s %s%s",
            "log/fsman", pbuffer, ".log");
 #else
-  snprintf(plogfilename, s, "%s %s %s",
+  snprintf(plogfilename, s, "%s %s%s",
            "log/atom", pbuffer, ".log");
 #endif  // _FSMAN_
 // open log file
@@ -43,69 +43,86 @@ AtomLog::~AtomLog() {
 // close log file
   fclose(logfile);
 }
-void AtomLog::LogMessage(char *string) {
-  fputs(CurTime(), logfile), fputs("\t", logfile);
-  fputs(string, logfile), fputs("\n", logfile), fflush(logfile);
+void AtomLog::LogMsg(char *string, char *file, int line) {
+  fprintf(logfile, "%s %s:%i\t%s\n", CurTime(), file, line, string);
+  fflush(logfile);
+  return;
 }
-void AtomLog::DebugMessage(char *string) {
+void AtomLog::LogMsg(char *string) {
+  fprintf(logfile, "%s %s\n", CurTime(), string);
+  fflush(logfile);
+  return;
+}
+void AtomLog::DebugMsg(char *string, char *file, int line) {
 #ifdef ATOM_DEBUG
-  LogMessage(string);
+  LogMsg(string, file, line);
 #endif
 return;
 }
-void AtomLog::SetLastErr(unsigned int code, unsigned int subcode) {
+void AtomLog::DebugMsg(char *string) {
+#ifdef ATOM_DEBUG
+  LogMsg(string);
+#endif
+return;
+}
+void AtomLog::SetLastError(unsigned int code, unsigned int subcode,
+                           char* file, int line) {
   char *s_code, *s_subcode;
   unsigned int len = 0;
+  unsigned int glen = 0;
   global_error.code = code;
   global_error.sub_code = subcode;
 // looking for error code
   switch (global_error.code) {
     case ERROR_CORE_FS: {
-      s_code = new char[33];
-      s_code = "Core Error. File System Error.\t";
-      len = 33;
+      glen = 30;
+      s_code = new char[glen];
+      snprintf(s_code, glen, "%s", "Core Error. File System Error.");
 // looking for error subcode
       switch (global_error.sub_code) {
         case ERROR_OPEN_FILE: {
-          s_subcode = new char[31];
-          s_subcode = "Error while opening the file.";
-          len += 31;
+          len = 29;
+          s_subcode = new char[len];
+          snprintf(s_subcode, len, "%s", "Error while opening the file.");
           break;
         }
         case ERROR_READ_FILE: {
-          s_subcode = new char[31];
-          s_subcode = "Error while reading the file.";
-          len += 31;
+          len = 29;
+          s_subcode = new char[len];
+          snprintf(s_subcode, len, "%s", "Error while reading the file.");
           break;
         }
         case ERROR_PARSE_MOUNT_FILE_QUOTES: {
-          s_subcode = new char[56];
-          s_subcode = "Error while parsing the mount file. No closing quotes.";
-          len += 56;
+          len = 54;
+          s_subcode = new char[len];
+          snprintf(s_subcode, len, "%s",
+"Error while parsing the mount file. No closing quotes.");
           break;
         }
         case ERROR_PARSE_MOUNT_FILE_PRIORITY: {
-          s_subcode = new char[78];
-/*NOLINT*/s_subcode = "Error while parsing the mount file. To big priority or it's somesthing else.";
-          len += 78;
+          len = 75;
+          s_subcode = new char[len];
+          snprintf(s_subcode, len, "%s",
+"Error while parsing the mount file. To big priority or it's something else.");
           break;
         }
         case ERROR_MOUNT_FS: {
-          s_subcode = new char[38];
-          s_subcode = "Error while mounting the file system.";
-          len += 78;
+          len = 37;
+          s_subcode = new char[len];
+          snprintf(s_subcode, len, "%s",
+"Error while mounting the file system.");
           break;
         }
         case ERROR_OPEN_FOLDER: {
-          s_subcode = new char[30];
-          s_subcode = "Couldn't open the directory.";
-          len += 78;
+          len = 28;
+          s_subcode = new char[len];
+          snprintf(s_subcode, len, "%s", "Couldn't open the directory.");
           break;
         }
         case ERROR_WRITE_FILE: {
-          s_subcode = new char[30];
-          s_subcode = "Error while writing the file.";
-          len += 78;
+          len = 29;
+          s_subcode = new char[len];
+          snprintf(s_subcode, len, "%s", "Error while writing the file.");
           break;
         }
       }
@@ -113,15 +130,16 @@ void AtomLog::SetLastErr(unsigned int code, unsigned int subcode) {
     }
   }
 // add an error description
-  global_error.description = new char[len+17];
-  snprintf(global_error.description, len+17, "%s\tERROR:\t%s%s",
-           CurTime(), s_code, s_subcode);
+  global_error.description = new char[glen+len+300];
+  snprintf(global_error.description, glen+len+300, "%s:%i\tERROR: %s\t%s",
+           file, line, s_code, s_subcode);
 // log the error
-  LogMessage(global_error.description);
+  LogMsg(global_error.description);
 // cleaning
   delete [] s_code;
   delete [] s_subcode;
 }
-void AtomLog::SetLastWrn(unsigned int code, unsigned int subcode) {
+void AtomLog::SetLastWarning(unsigned int code, unsigned int subcode,
+                             char* file, int line) {
   return;
 }
