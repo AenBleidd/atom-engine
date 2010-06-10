@@ -177,7 +177,7 @@ struct LIST {
 class AtomFS {
  public:
 // constructor
-  AtomFS();
+  explicit AtomFS(AtomLog *log);
 /* Mounting single file
    filename - name of the mounted file
    mountfolder - folder in the FS to mount the file system
@@ -214,6 +214,7 @@ class AtomFS {
  private:
 // root directory
   TREE_FOLDER *root;
+  AtomLog *atomlog;
 // WAKE crypt algorithm
   unsigned int wake_table[257];
   unsigned int wake_key[4];
@@ -230,6 +231,5 @@ class AtomFS {
   int Write(FILE *out, char *in, LIST *element);
 #endif  // _FSMAN_
 };
-extern AtomLog atomlog;
 
 #endif  // _CORE_GAMEFS_H_

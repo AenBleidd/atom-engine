@@ -12,11 +12,6 @@ struct ERR {
   int sub_code;
   char *description;
 };
-struct ERRDESCR {
-  unsigned int len;
-  char *descr;
-};
-
 // returns current system time in text format
 // can be useful in another modules
 char* CurDateTime(void);
@@ -37,13 +32,25 @@ class AtomLog {
   ERR GetLastErr() { return global_error; }
   ERR GetLastWrn() { return global_warning; }
 // write last error and warning into the log
-  void SetLastErr(unsigned int code, unsigned int subcode);
-  void SetLastWrn(unsigned int code, unsigned int subcode);
+  void SetLastError(unsigned int code, unsigned int subcode,
+                    char* file, int line);
+  void SetLastWarning(unsigned int code, unsigned int subcode,
+                      char* file, int line);
 // write log message
-  void LogMessage(char *string);
+  void LogMsg(char *string, char *file, int line);
 // write debug log message
-  void DebugMessage(char *string);
+  void DebugMsg(char *string, char *file, int line);
+ private:
+// write log message
+  void LogMsg(char *string);
+// write debug log message
+  void DebugMsg(char *string);
 };
+
+#define SetLastErr(code,subcode) SetLastError(code,subcode,__FILE__,__LINE__);  /*NOLINT*/
+#define SetLastWnd(code,subcode) SetLastWarning(code,subcode,__FILE__,__LINE__);  /*NOLINT*/
+#define LogMessage(string) LogMsg(string,__FILE__,__LINE__);  /*NOLINT*/
+#define DebugMessage(string) DebugMsg(string,__FILE__,__LINE__);  /*NOLINT*/
 
 #define ERROR_CORE_FS 0x00000001
 #define ERROR_OPEN_FILE 0x00000001
