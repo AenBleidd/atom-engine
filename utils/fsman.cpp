@@ -40,7 +40,6 @@ int main(int arg, char *argc[]) {
       char **input = new char*[arg-3];
       for (int i = 0; i < arg-3; i++)
         input[i] = argc[i+3];
-//      atomlog->SetLastErr(0, 0);
       atomlog->DebugMessage("Create new file");
       atomfs->Create(input, arg-3, argc[2]);
     } else {

@@ -331,17 +331,19 @@ LIST* AtomFS::FolderScan(char *ch, LIST* element, FILE *out, int level = 0) {
         }
         if (eps[cnt]->d_type == DT_REG) {
           if (stat64(eps[cnt]->d_name, &st) == 0) res += (long int)st.st_size;
-          const unsigned char s = 65535;
-          char *buf = new char[s];
+          const unsigned short int s = 65535;
+//          char *buf = new char[s];
+          char buf[s];
           snprintf(buf, s, "%-30s   %ld\n",
                    eps[cnt]->d_name, (long int)st.st_size);
           atomlog->DebugMessage(buf);
-          delete [] buf;
+//          delete [] buf;
+//          buf = 0;
           element = new LIST;
           element->record.flag = flag_file;
           element->record.namelen = strlen(eps[cnt]->d_name);
           element->record.name = eps[cnt]->d_name;
-          element->record.size = st.st_size;
+          element->record.size = st.st_size-1;
           Write(out, eps[cnt]->d_name, element);
         }
       }
@@ -483,7 +485,7 @@ int AtomFS::Create(char **input, unsigned int count, char *file) {
   if (S_ISDIR(st.st_mode) == true)
     list = FolderScan(input[i], list, outfile, 0);
   if (S_ISREG(st.st_mode) == true) {
-    list->record.size = st.st_size;
+    list->record.size = st.st_size-1;
     if (Write(outfile, input[i], list) != 0) {
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
       fclose(outfile);
