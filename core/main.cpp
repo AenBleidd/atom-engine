@@ -18,6 +18,7 @@ int main(int argc, char **argv)
 {  // NOLINT
 // Set window parameters
   atomlog = new AtomLog;
+  atomlog->LogMessage("atom start");
   GameWnd wnd(atomlog);
   wnd.param.width = 800;
   wnd.param.height = 600;
@@ -26,5 +27,6 @@ int main(int argc, char **argv)
   wnd.param.mode = WINDOWED;
 // Create window
   wnd.MakeWindow(&wnd.param);
+  atomlog->LogMessage("atom finish");
   return 0;
 }

@@ -21,11 +21,12 @@ char* CurTime() {
   char *time = new char[s];
   snprintf(time, s, "%02i:%02i:%02i", timeinfo->tm_hour,
           timeinfo->tm_min, timeinfo->tm_sec);
+  delete timeinfo;
   return time;
 }
 AtomLog::AtomLog() {
   const unsigned char s = 100;
-  char *plogfilename = new char[s];
+  char plogfilename[s];
 // get current date and time
   char *pbuffer = CurDateTime();
 
@@ -36,6 +37,7 @@ AtomLog::AtomLog() {
   snprintf(plogfilename, s, "%s %s%s",
            "log/atom", pbuffer, ".log");
 #endif  // _FSMAN_
+  delete [] pbuffer;
 // open log file
   logfile = fopen(plogfilename, "wt");
 }
