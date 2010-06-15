@@ -260,12 +260,11 @@ int AtomFS::Mount(char* filename) {
 }
 // Mount single file
 int AtomFS::Mount(char* filename, char* mountfolder, unsigned char priority) {
-  const unsigned char s = 1000;
-  char *pbuf = new char[s];
+  const unsigned short s = 1000;
+  char pbuf[s];
   snprintf(pbuf, s, "Mounting %s to %s with %i",
            filename, mountfolder, priority);
   atomlog->DebugMessage(pbuf);
-  delete [] pbuf;
   return 0;
 }
 #ifdef _FSMAN_
@@ -283,6 +282,7 @@ inline static int dot_exclude(const struct dirent64 *dir) {
 LIST* AtomFS::FolderScan(char *ch, LIST* element, FILE *out, int level = 0) {
   LIST *prev = element;
   long int res = 0;
+// TODO(Lawliet): We really need next 2 lines ?
   element->size = 0;
   element->link = 0;
   if (ch !=NULL) {
@@ -295,17 +295,11 @@ LIST* AtomFS::FolderScan(char *ch, LIST* element, FILE *out, int level = 0) {
     if (n >= 0) {
       int cnt;
       for (cnt = 0; cnt < n; ++cnt) {
-        int i = 0;
-        while (i < (level-1)) {
-          atomlog->DebugMessage(" | ");
-          i++;
-        }
         if (eps[cnt]->d_type == DT_DIR) {
-          const unsigned char s = 65535;
-          char *buf = new char[65535];
-          snprintf(buf, s, "%-30s\n", eps[cnt]->d_name);
+          const unsigned short s = strlen(eps[cnt]->d_name) + 14;
+          char buf[s];
+          snprintf(buf, s, "Write folder %s", eps[cnt]->d_name);
           atomlog->DebugMessage(buf);
-          delete [] buf;
           element = new LIST;
           element->record.flag = flag_folder;
           element->record.namelen = strlen(eps[cnt]->d_name);
@@ -319,6 +313,7 @@ LIST* AtomFS::FolderScan(char *ch, LIST* element, FILE *out, int level = 0) {
           res+=element->size;
           prev = element;
 // End of catalogue
+// TODO(Lawliet): Check recurse in this function
           element = new LIST;
           element->record.flag = flag_eoc;
           element->record.namelen = 0;
@@ -331,24 +326,21 @@ LIST* AtomFS::FolderScan(char *ch, LIST* element, FILE *out, int level = 0) {
         }
         if (eps[cnt]->d_type == DT_REG) {
           if (stat64(eps[cnt]->d_name, &st) == 0) res += (long int)st.st_size;
-          const unsigned short int s = 65535;
-//          char *buf = new char[s];
+          const unsigned short s = strlen(eps[cnt]->d_name) + 40;
           char buf[s];
-          snprintf(buf, s, "%-30s   %ld\n",
+          snprintf(buf, s, "Write file %s (%ld bytes)",
                    eps[cnt]->d_name, (long int)st.st_size);
           atomlog->DebugMessage(buf);
-//          delete [] buf;
-//          buf = 0;
           element = new LIST;
           element->record.flag = flag_file;
           element->record.namelen = strlen(eps[cnt]->d_name);
           element->record.name = eps[cnt]->d_name;
-          element->record.size = st.st_size-1;
+          element->record.size = st.st_size - 1;
           Write(out, eps[cnt]->d_name, element);
         }
       }
     for (cnt = 0; cnt < n; ++cnt) free(eps[cnt]);
-    free(eps);
+    free(eps);  //TODO(Lawliet): Maybe we have fuck here?
     } else {
       atomlog->LogMessage("Couldn't open the directory");
     }
@@ -380,12 +372,12 @@ int AtomFS::Write(FILE *out, char *in, LIST *element) {
 #endif  // UNIX
   unsigned long int crc = mask;
 // encrypt
-  unsigned char *buf, count;
+  unsigned char count;
   if (bytescrypt < element->record.size)
     count = bytescrypt;
   else
     count = element->record.size;
-  buf = new unsigned char[count];
+  unsigned char *buf = new unsigned char[count];
   if (fread(buf, 1, count, file) != count) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
     fclose(file);
@@ -409,6 +401,7 @@ int AtomFS::Write(FILE *out, char *in, LIST *element) {
     if (fread(&t, 1, 1, file) != 1) {
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
       fclose(file);
+      delete [] buf;
       return -1;
     }
     crc = crc32table[(crc ^ t) & 0xFF] ^ (crc >> 8);
@@ -419,6 +412,7 @@ int AtomFS::Write(FILE *out, char *in, LIST *element) {
       return -1;
     }
   }
+  delete [] buf;
   element->record.crc = crc ^ mask;
   element->record.offset = datasize;
   datasize += element->record.size;
@@ -484,7 +478,7 @@ int AtomFS::Create(char **input, unsigned int count, char *file) {
   stat64(input[i], &st);
   if (S_ISDIR(st.st_mode) == true)
     list = FolderScan(input[i], list, outfile, 0);
-  if (S_ISREG(st.st_mode) == true) {
+  else if (S_ISREG(st.st_mode) == true) {
     list->record.size = st.st_size-1;
     if (Write(outfile, input[i], list) != 0) {
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
@@ -534,7 +528,7 @@ int AtomFS::Create(char **input, unsigned int count, char *file) {
         fclose(outfile);
         return -1;
       }
-      len = strlen(list->record.name);
+      len = list->record.namelen;
       if (fwrite(&list->record.name, 1, len, outfile) != len) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
         fclose(outfile);
@@ -554,7 +548,7 @@ int AtomFS::Create(char **input, unsigned int count, char *file) {
         fclose(outfile);
         return -1;
       }
-      len = strlen(list->record.name);
+      len = list->record.namelen;
       if (fwrite(&list->record.name, 1, len, outfile) != len) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
         fclose(outfile);
