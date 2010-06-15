@@ -1,5 +1,5 @@
 #include "error.h"
-// returns current system time in text format
+// returns current system date & time in text format
 char* CurDateTime() {
   time_t seconds = time(NULL);
   tm *timeinfo = new tm;
@@ -12,17 +12,6 @@ char* CurDateTime() {
           timeinfo->tm_min, timeinfo->tm_sec);
   delete timeinfo;
   return date;
-}
-char* CurTime() {
-  time_t seconds = time(NULL);
-  tm *timeinfo = new tm;
-  timeinfo = localtime_r(&seconds, timeinfo);
-  const unsigned char s = 10;
-  char *time = new char[s];
-  snprintf(time, s, "%02i:%02i:%02i", timeinfo->tm_hour,
-          timeinfo->tm_min, timeinfo->tm_sec);
-  delete timeinfo;
-  return time;
 }
 AtomLog::AtomLog() {
   const unsigned char s = 100;
@@ -40,18 +29,24 @@ AtomLog::AtomLog() {
   delete [] pbuffer;
 // open log file
   logfile = fopen(plogfilename, "wt");
+  global_error.code = 0;
+  global_error.sub_code = 0;
+  global_error.description = 0;
+  global_warning.code = 0;
+  global_warning.sub_code = 0;
+  global_warning.description = 0;
 }
 AtomLog::~AtomLog() {
 // close log file
   fclose(logfile);
 }
 void AtomLog::LogMsg(char *string, char *file, int line) {
-  fprintf(logfile, "%s %s:%i\t%s\n", CurTime(), file, line, string);
+  fprintf(logfile, "%s %s:%i\t%s\n", __TIME__, file, line, string);
   fflush(logfile);
   return;
 }
 void AtomLog::LogMsg(char *string) {
-  fprintf(logfile, "%s %s\n", CurTime(), string);
+  fprintf(logfile, "%s %s\n", __TIME__, string);
   fflush(logfile);
   return;
 }
@@ -72,6 +67,8 @@ void AtomLog::SetLastError(unsigned int code, unsigned int subcode,
   char *s_code, *s_subcode;
   unsigned int len = 0;
   unsigned int glen = 0;
+  if ((global_error.code == 0) && (global_error.sub_code == 0))
+    delete [] global_error.description, global_error.description = 0;
   global_error.code = code;
   global_error.sub_code = subcode;
 // looking for error code
