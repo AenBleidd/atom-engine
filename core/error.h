@@ -15,7 +15,6 @@ struct ERR {
 // returns current system time in text format
 // can be useful in another modules
 char* CurDateTime(void);
-char* CurTime(void);
 
 class AtomLog {
  public:

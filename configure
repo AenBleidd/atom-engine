@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+
+# Variables
+
+DEBUG=0
+SYSTEM=unix
+HELP=0
+CODECHECK=0
+DEVELOP=0
+
+# Default compiler settings
+CXX=${CXX:-g++}
+LINK=${LINK:-g++}
+FLAGS=${FLAGS:--Wall -c}
+DEBUGFLAGS=${DEBUGFLAGS:--g -DATOM_DEBUG}
+UNIXGLAGS=${UNIXFLAGS:--DUNIX}
+UNIXCORELIB=${UNIXCORELIB:--lSDL -lGL}
+WINDOWSCORELIB=${WINDOWSCORELIB:--lSDLmain -lSDL -lopengl32}
+FSMANFLAGS=${FSMANFLAGS:--D_FSMANAGER_}
+UNIXCPPLINT=${UNIXCPPLINT:-python cpplint.py}
+WINDOWSCPPLINT=${WINDOWSCPPLINT:-python.exe cpplint.py}
+CPPLINTFLAGS=${CPPLINTFLAGS:---filter=-legal/copyright,-build/header_guard,-build/include,-runtime/int,-runtime/references,-whitespace/newline}
+
+# Parse command line arguments
+for arg in $*; do
+  case $arg in
+    --enable-debug*)
+      DEBUG=1
+      ;;
+    --system=*)
+      SYSTEM=`echo "${arg}" | cut -d= -f2`
+      ;;
+    --develop*)
+      DEVELOP=1
+      CODECHECK=1
+      DEBUG=1
+      ;;
+    --help)
+      HELP=1
+      ;;
+    -h)
+      HELP=1DEBUGFLAGS
+      ;;
+  esac
+done
+
+# Print Command Line Options
+if [[ $HELP -eq 1 ]] ; then
+  echo "Available options:"
+  echo "   --enable-debug                  Compile with debug information"
+  echo "   --system=<p>                    Target system (windows, unix)"
+  echo "   --develop                       Enable develop build (with codecheck & debug)"
+  echo "   -h,--help                       Show this Help"
+  exit 0
+fi
+
+# Begin processing...
+
+if [[ $DEVELOP -eq 1 ]] ; then
+  echo "Build develop version"
+fi
+
+# Debug/Release mode
+if [[ $DEBUG -eq 1 ]] ; then
+  echo "Debug information will be available"
+  FLAGS+=" "
+  FLAGS+=$DEBUGFLAGS
+else
+  echo "Build release version"
+fi
+
+# Target system
+if [ $SYSTEM = "unix" ] ; then
+  echo "Target system is unix"
+  FLAGS+=" "
+  FLAGS+=$UNIXFLAGS
+  CORELIB=${CORELIB:-$UNIXCORELIB}
+fi
+if [ $SYSTEM = "windows" ] ; then
+  echo "Target system is windows"
+  CORELIB=${CORELIB:-$WINDOWSCORELIB}
+fi
+
+# Code check
+if [[ $CODECHECK -eq 1 ]] ; then
+  echo "Code check is enabled"
+  if [ $SYSTEM = "unix" ] ; then 
+    CPPLINT=${CPPLINT:-$UNIXCPPLINT}
+  fi
+  if [ $SYSTEM = "windows" ] ; then
+    CPPLINT=${CPPLINT:-$WINDOWSCPPLINT}
+  fi
+fi

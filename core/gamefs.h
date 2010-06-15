@@ -116,7 +116,7 @@ struct HEADER {
 // identify each record in filetable of the packed file
 struct RECORD {
 // flag of the file
-// (0x0 - it's folder; 0xff - it's file; 0xCE - it's the end of folder)
+// (0x0F - it's folder; 0x0C - it's file; 0xCE - it's the end of folder)
   unsigned char flag;
 // lenght of the file or folder name
   unsigned short int namelen;

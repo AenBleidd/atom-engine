@@ -11,7 +11,10 @@ AtomFS *atomfs;
 int main(int arg, char *argc[]) {
 // input parameters processing
   atomlog = new AtomLog;
-  atomlog->LogMessage("Begin fsman...");
+  unsigned char versionlen = 30;
+  char version[versionlen];
+  snprintf(version, versionlen, "Start fsman version %s", _FSMAN_VERSION_);
+  atomlog->LogMessage(version);
 /*NOLINT*/  char help[] = "File System  Manager - utility to work with Atom File System\nOptions:\n\t-t, --test\t\tTest default file system with standart mount file\n\t-t, --test [mountfile]\tTest file system\n\t-n,--new [output] [input]\tCreate new file with name [output] using folders or files [input], for current folder use './'\n";
   try { atomfs = new AtomFS(atomlog); }
   catch(int i) { }
@@ -40,7 +43,10 @@ int main(int arg, char *argc[]) {
       char **input = new char*[arg-3];
       for (int i = 0; i < arg-3; i++)
         input[i] = argc[i+3];
-      atomlog->DebugMessage("Create new file");
+      unsigned char s = strlen(argc[2]) + 17;
+      char buf[s];
+      snprintf(buf, s, "Create new file %s", argc[2]);
+      atomlog->DebugMessage(buf);
       atomfs->Create(input, arg-3, argc[2]);
     } else {
       atomlog->DebugMessage(help);
