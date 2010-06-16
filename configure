@@ -13,7 +13,7 @@ CXX=${CXX:-g++}
 LINK=${LINK:-g++}
 FLAGS=${FLAGS:--Wall -c}
 DEBUGFLAGS=${DEBUGFLAGS:--g -DATOM_DEBUG}
-UNIXGLAGS=${UNIXFLAGS:--DUNIX}
+UNIXFLAGS=${UNIXFLAGS:--DUNIX}
 UNIXCORELIB=${UNIXCORELIB:--lSDL -lGL}
 WINDOWSCORELIB=${WINDOWSCORELIB:--lSDLmain -lSDL -lopengl32}
 FSMANFLAGS=${FSMANFLAGS:--D_FSMANAGER_}
@@ -36,8 +36,8 @@ UNIXATOM=atom
 WINDOWSATOM=atom.exe
 UNIXFSMAN=fsman
 WINDOWSFSMAN=fsman.exe
-GCCOBJEXT=${GCCEXT:-.o}
-WINOBJEXT=${WINEXT:-.obj}
+GCCOBJEXT=${GCCOBJEXT:-.o}
+WINOBJEXT=${WINOBJEXT:-.obj}
 
 # Parse command line arguments
 for arg in $*; do
@@ -228,8 +228,8 @@ echo ".PHONY : clean"                                         >> Makefile
 echo "clean :"                                                >> Makefile
 echo "	-rm -r $COREOBJPATH"                                  >> Makefile
 echo "	-rm -r $UTILSOBJPATH"                                 >> Makefile
-echo "	-rm $ATOM"                                            >> Makefile
-echo "	-rm $FSMAN"                                           >> Makefile
+echo "	-rm ${BINPATH}${ATOM}"                                >> Makefile
+echo "	-rm ${BINPATH}${FSMAN}"                               >> Makefile
 
 echo "Done"
 echo "Please rum \"make\" to compile atom engine"

@@ -15,7 +15,7 @@ char* CurDateTime() {
 }
 AtomLog::AtomLog() {
   const unsigned char s = 100;
-  char plogfilename[s];
+  char *plogfilename  = new char[s];
 // get current date and time
   char *pbuffer = CurDateTime();
 
@@ -29,6 +29,7 @@ AtomLog::AtomLog() {
   delete [] pbuffer;
 // open log file
   logfile = fopen(plogfilename, "wt");
+  delete [] plogfilename;
   global_error.code = 0;
   global_error.sub_code = 0;
   global_error.description = 0;
