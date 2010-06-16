@@ -261,10 +261,11 @@ int AtomFS::Mount(char* filename) {
 // Mount single file
 int AtomFS::Mount(char* filename, char* mountfolder, unsigned char priority) {
   const unsigned short s = 1000;
-  char pbuf[s];
+  char *pbuf = new char[s];
   snprintf(pbuf, s, "Mounting %s to %s with %i",
            filename, mountfolder, priority);
   atomlog->DebugMessage(pbuf);
+  delete [] pbuf;
   return 0;
 }
 #ifdef _FSMAN_
@@ -297,9 +298,10 @@ LIST* AtomFS::FolderScan(char *ch, LIST* element, FILE *out, int level = 0) {
       for (cnt = 0; cnt < n; ++cnt) {
         if (eps[cnt]->d_type == DT_DIR) {
           const unsigned short s = strlen(eps[cnt]->d_name) + 14;
-          char buf[s];
+          char *buf = new char[s];
           snprintf(buf, s, "Write folder %s", eps[cnt]->d_name);
           atomlog->DebugMessage(buf);
+          delete [] buf;
           element = new LIST;
           element->record.flag = flag_folder;
           element->record.namelen = strlen(eps[cnt]->d_name);
@@ -327,10 +329,11 @@ LIST* AtomFS::FolderScan(char *ch, LIST* element, FILE *out, int level = 0) {
         if (eps[cnt]->d_type == DT_REG) {
           if (stat64(eps[cnt]->d_name, &st) == 0) res += (long int)st.st_size;
           const unsigned short s = strlen(eps[cnt]->d_name) + 40;
-          char buf[s];
+          char *buf = new char[s];
           snprintf(buf, s, "Write file %s (%ld bytes)",
                    eps[cnt]->d_name, (long int)st.st_size);
           atomlog->DebugMessage(buf);
+          delete [] buf;
           element = new LIST;
           element->record.flag = flag_file;
           element->record.namelen = strlen(eps[cnt]->d_name);
@@ -340,7 +343,7 @@ LIST* AtomFS::FolderScan(char *ch, LIST* element, FILE *out, int level = 0) {
         }
       }
     for (cnt = 0; cnt < n; ++cnt) free(eps[cnt]);
-    free(eps);  //TODO(Lawliet): Maybe we have fuck here?
+    free(eps);  // TODO(Lawliet): Maybe we have fuck here?
     } else {
       atomlog->LogMessage("Couldn't open the directory");
     }
