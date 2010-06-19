@@ -1,5 +1,8 @@
 #include "error.h"
 // returns current system date & time in text format
+#ifndef UNIX
+#define localtime_r(timep, result)  (localtime (timep) ? memcpy  ((result), localtime (timep), sizeof (*(result))) : 0)
+#endif  // UNIX
 char* CurDateTime() {
   time_t seconds = time(NULL);
   tm *timeinfo = new tm;
