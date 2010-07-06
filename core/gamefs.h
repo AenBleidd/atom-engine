@@ -108,15 +108,19 @@ struct HEADER {
   unsigned int magic;
 // version of the paked file
   unsigned char version;
-// size of the packed file
-  unsigned long int filesize;
-// size of the filetable
-  unsigned long int tablesize;
+// bin file count
+  unsigned long int bincount;
+// size of the packed binary data
+  unsigned long int binsize;
+// dat file count
+  unsigned long int datcount;
+// size of the filetable & header
+  unsigned long int datsize;
 };
 // identify each record in filetable of the packed file
 struct RECORD {
 // flag of the file
-// (0x0F - it's folder; 0x0C - it's file; 0xCE - it's the end of folder)
+// (0x0C - it's folder; 0x0F - it's file; 0xCE - it's the end of folder)
   unsigned char flag;
 // lenght of the file or folder name
   unsigned short int namelen;
@@ -166,12 +170,6 @@ struct TREE_FOLDER {
   TREE_FOLDER *tree_folder;
 // pointer to the next file
   TREE_FILE *tree_file;
-};
-// Linked list of records
-struct LIST {
-  RECORD record;
-  long int size;
-  LIST *link;
 };
 // FS Class
 class AtomFS {
@@ -226,9 +224,9 @@ class AtomFS {
   void Crypt(unsigned int *data, int lenght, unsigned int k[4],
              unsigned int r[4], unsigned int *t);
 // Scan for all files and directories to add to the packed file
-  LIST* FolderScan(char *ch, LIST* element, FILE *out, int level);
+  int FolderScan(char *ch, FILE *dat, FILE *bin, int level);
 // Write data from added files
-  int Write(FILE *out, char *in, LIST *element);
+  int Write(char *in,  FILE *dat, FILE *bin);
 #endif  // _FSMAN_
 };
 
