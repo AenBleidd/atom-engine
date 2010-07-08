@@ -61,11 +61,17 @@ AtomLog::~AtomLog() {
   fclose(logfile);
 }
 void AtomLog::LogMsg(const char *string, const char *file, int line) {
+#ifdef ATOM_DEBUG
+  fprintf(stderr, "%s %s:%i\t%s\n", __TIME__, file, line, string);
+#endif
   fprintf(logfile, "%s %s:%i\t%s\n", __TIME__, file, line, string);
   fflush(logfile);
   return;
 }
 void AtomLog::LogMsg(const char *string) {
+#ifdef ATOM_DEBUG
+  fprintf(stderr, "%s %s\n", __TIME__, string);
+#endif
   fprintf(logfile, "%s %s\n", __TIME__, string);
   fflush(logfile);
   return;
@@ -107,8 +113,10 @@ const char *warningsubcode[] = {
 void AtomLog::SetLastError(unsigned int code, unsigned int subcode,
                            const char* file, int line) {
 // do some clean
-  if (global_error.description != 0)
+  if (global_error.description != 0) {
     delete [] global_error.description;
+    global_error.description = 0;
+  }
   unsigned int errlen = 300 + strlen(errorcode[global_error.code]) +
                         strlen(errorsubcode[global_error.sub_code]);
   global_error.description = new char[errlen];
@@ -121,8 +129,10 @@ void AtomLog::SetLastError(unsigned int code, unsigned int subcode,
 void AtomLog::SetLastWarning(unsigned int code, unsigned int subcode,
                              const char* file, int line) {
 // do some clean
-  if (global_warning.description != 0)
+  if (global_warning.description != 0) {
     delete [] global_warning.description;
+    global_warning.description = 0;
+  }
   unsigned int warnlen = 300 + strlen(warningcode[global_warning.code]) +
                         strlen(warningsubcode[global_warning.sub_code]);
   global_warning.description = new char[warnlen];
