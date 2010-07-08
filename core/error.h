@@ -47,7 +47,7 @@ class AtomLog {
 };
 
 #define SetLastErr(code,subcode) SetLastError(code,subcode,__FILE__,__LINE__);  /*NOLINT*/
-#define SetLastWnd(code,subcode) SetLastWarning(code,subcode,__FILE__,__LINE__);  /*NOLINT*/
+#define SetLastWrn(code,subcode) SetLastWarning(code,subcode,__FILE__,__LINE__);  /*NOLINT*/
 #define LogMessage(string) LogMsg(string,__FILE__,__LINE__);  /*NOLINT*/
 #define DebugMessage(string) DebugMsg(string,__FILE__,__LINE__);  /*NOLINT*/
 

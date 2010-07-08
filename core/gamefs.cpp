@@ -418,10 +418,12 @@ int AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
     delete [] buf;
     return -1;
   }
+  unsigned int *tempbuf = buf;
   while (t--)
     crc = crc32table[(crc ^ *buf++) & 0xFF] ^ (crc >> 8);
-// TODO(Lawliet): Check next line!
-  //  delete [] buf;
+  delete [] tempbuf;
+  tempbuf = 0;
+  buf = 0;
 // writing to disk and calculating crc
   for (int i = count-1; i < record.size; i++) {
     if (fread(&t, 1, 1, file) != 1) {
@@ -526,6 +528,12 @@ int AtomFS::Create(char **input, unsigned int count, char *file) {
 // open files for writing
   binfile = fopen(bin, "wb");
   datfile = fopen(dat, "wb");
+// delete unuse filenames
+  delete [] bin;
+  bin = 0;
+  delete [] dat;
+  dat = 0;
+
 // Create file (NIGHTMARE!!!)
 // set static header information
   HEADER header;
@@ -557,22 +565,27 @@ int AtomFS::Create(char **input, unsigned int count, char *file) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
         fclose(datfile);
         fclose(binfile);
+        delete [] record.name;
         return -1;
   }
   if (fwrite(&record.namelen, sizeof(record.namelen), 1, datfile) != 1) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
         fclose(datfile);
         fclose(binfile);
+        delete [] record.name;
         return -1;
   }
   if (fwrite(&record.name, 1, record.namelen, datfile) != record.namelen) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
         fclose(datfile);
         fclose(binfile);
+        delete [] record.name;
         return -1;
   }
 // set new datasize
   datsize += (sizeof(record.flag)+sizeof(record.namelen)+record.namelen);
+  delete [] record.name;
+  record.name = 0;
 // Scanning...
   char *buf = 0;
   for (int i = 0; i < count; i++) {
