@@ -50,6 +50,8 @@ int main(int arg, char *argc[]) {
       atomlog->DebugMessage(buf);
       delete [] buf;
       atomfs->Create(input, arg-3, argc[2]);
+// Make clean
+      delete [] input;
     } else {
       atomlog->DebugMessage(help);
       printf("%s", help);
@@ -61,5 +63,6 @@ int main(int arg, char *argc[]) {
 // cleaning
   delete atomfs;
   atomlog->LogMessage("End fsman...");
+  delete atomlog;
   return 0;
 }
