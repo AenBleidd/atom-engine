@@ -288,6 +288,7 @@ int AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int level = 0) {
     if (chdir(ch) != 0) return 0;
     struct dirent64 **eps;
     struct stat64 st;
+    char *buf = 0;
     int n;
     n = scandir64("./", &eps, dot_exclude, alphasort64);
     if (n >= 0) {
@@ -295,10 +296,11 @@ int AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int level = 0) {
       for (cnt = 0; cnt < n; ++cnt) {
         if (eps[cnt]->d_type == DT_DIR) {  // it is a folder
           const unsigned short s = strlen(eps[cnt]->d_name) + 14;
-          char *buf = new char[s];
+          buf = new char[s];
           snprintf(buf, s, "Write folder %s", eps[cnt]->d_name);
           atomlog->DebugMessage(buf);
           delete [] buf;
+          buf = 0;
 // Write folder info
           RECORD record;
           record.flag = flag_folder;
@@ -342,12 +344,13 @@ int AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int level = 0) {
         }
         if (eps[cnt]->d_type == DT_REG) {  // it is a file
           stat64(eps[cnt]->d_name, &st);
-          const unsigned short s = strlen(eps[cnt]->d_name) + 40;
-          char *buf = new char[s];
-          snprintf(buf, s, "Write file %s (%ld bytes)",
+          const unsigned short s = strlen(eps[cnt]->d_name) + 45;
+          buf = new char[s];
+          snprintf(buf, s, "Writing file %s (%ld bytes)",
                    eps[cnt]->d_name, (long int)st.st_size);
           atomlog->DebugMessage(buf);
           delete [] buf;
+          buf = 0;
           if (Write(eps[cnt]->d_name, dat, bin) == -1) return -1;
         }
       }
@@ -355,10 +358,11 @@ int AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int level = 0) {
     free(eps);
     } else {
       const unsigned short s = strlen(eps[n]->d_name) + 28;
-      char *buf = new char[s];
+      buf = new char[s];
       snprintf(buf, s, "Couldn't open the directory %s",  eps[n]->d_name);
       atomlog->LogMessage(buf);
       delete [] buf;
+      buf = 0;
       return -1;
     }
   chdir("..");
@@ -397,7 +401,7 @@ int AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
     count = bytescrypt;
   else
     count = record.size;
-  unsigned char *buf = new unsigned char[count];
+  unsigned int *buf = new unsigned int[count];
   if (fread(buf, 1, count, file) != count) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
     fclose(file);
@@ -405,7 +409,7 @@ int AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
     return -1;
   }
   unsigned int r[4];
-  Crypt((unsigned int*)buf, count, wake_key, r, wake_table);
+  Crypt(buf, count, wake_key, r, wake_table);
   unsigned char t = count;
 // write to disk crypted data
   if (fwrite(buf, 1, count, bin) != count) {
@@ -432,6 +436,7 @@ int AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
       return -1;
     }
   }
+  fflush(file);
   fclose(file);
   record.crc = crc ^ mask;
   record.offset = datsize;
@@ -464,6 +469,11 @@ int AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
              sizeof(record.size) + sizeof(record.offset) + sizeof(record.crc));
 
   binsize += record.size;
+  const unsigned short int s = strlen(in) + 31;
+  char *mes = new char[s];
+  snprintf(mes, s, "File %s was successfully written", in);
+  atomlog->DebugMessage(mes);
+  delete [] mes;
   return 0;
 }
 
@@ -525,7 +535,8 @@ int AtomFS::Create(char **input, unsigned int count, char *file) {
   header.bincount = 1;
   header.binsize = 0;
   header.datcount = 1;
-  header.datsize = sizeof(HEADER);
+  header.datsize = 0;
+  datsize = sizeof(HEADER);
 // write empty header to file
   if (fwrite("0", sizeof(HEADER), 1, datfile) != 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
@@ -561,8 +572,9 @@ int AtomFS::Create(char **input, unsigned int count, char *file) {
         return -1;
   }
 // set new datasize
-  header.datsize += (sizeof(record.flag)+sizeof(record.namelen)+record.namelen);
+  datsize += (sizeof(record.flag)+sizeof(record.namelen)+record.namelen);
 // Scanning...
+  char *buf = 0;
   for (int i = 0; i < count; i++) {
 // TODO(Lawliet): Write windows version of this function
 #ifdef UNIX
@@ -576,12 +588,13 @@ int AtomFS::Create(char **input, unsigned int count, char *file) {
       }
     }
     else if (S_ISREG(st.st_mode) == true) {  // it is a file
-      const unsigned short s = strlen(input[i]) + 40;
-      char *buf = new char[s];
-      snprintf(buf, s, "Write file %s (%ld bytes)",
+      const unsigned short s = strlen(input[i]) + 45;
+      buf = new char[s];
+      snprintf(buf, s, "Writing file %s (%ld bytes)",
                input[i], (long int)st.st_size);
       atomlog->DebugMessage(buf);
       delete [] buf;
+      buf = 0;
       if (Write(input[i], datfile, binfile) != 0) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
         fclose(datfile);
@@ -612,7 +625,7 @@ int AtomFS::Create(char **input, unsigned int count, char *file) {
   rewind(datfile);
 // writing the header
   header.binsize = binsize;
-  header.datsize += datsize;
+  header.datsize = datsize;
   if (fwrite(&header.magic, sizeof(header.magic), 1, datfile) != 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
     fclose(datfile);
