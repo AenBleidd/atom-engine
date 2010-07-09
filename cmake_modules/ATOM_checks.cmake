@@ -20,3 +20,13 @@ IF ( DEFINED CMAKE_BUILD_TYPE )
 ELSE()
 	MESSAGE ( FATAL_ERROR "Build type is not defined. Possible values are: ${CMAKE_CONFIGURATION_TYPES}. Please specify one" )
 ENDIF()
+
+IF ( UNIX )
+	ADD_DEFINITIONS ( "-DUNIX" )
+ENDIF()
+
+IF ( CMAKE_BUILD_TYPE STREQUAL "Debug" )
+	ADD_DEFINITIONS ( "-DATOM-DEBUG" )
+ENDIF()
+
+
