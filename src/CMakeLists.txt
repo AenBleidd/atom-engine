@@ -32,10 +32,6 @@ SET ( CMAKE_CONFIGURATION_TYPES Release; Debug )
 
 INCLUDE ( "${MODULE_PATH}/ATOM_checks.cmake" )
 
-IF ( UNIX )
-	ADD_DEFINITIONS ( "-DUNIX" )
-ENDIF()
-
 # Recurse into subdirectory
 ADD_SUBDIRECTORY ( WindowManager )
 ADD_SUBDIRECTORY ( AtomError )
