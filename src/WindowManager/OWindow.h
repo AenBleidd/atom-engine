@@ -4,8 +4,11 @@
 class OWindow
 {
 public:
-	virtual ~OWindow();
+	OWindow(){};
+	virtual ~OWindow(){};
 	virtual bool MakeWindow( void ) = 0;
 };
+
+bool MakeWindow( void ){}
 
 #endif

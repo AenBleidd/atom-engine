@@ -1,4 +1,3 @@
-/* hello.h */
 #ifndef _WINDOWMANAGER_H
 #define _WINDOWMANAGER_H
 #include "../OWindow.h"
@@ -7,6 +6,8 @@
 class Window : public OWindow
 {
 public:
+	Window(){};
+	~Window(){};
     void Print();
 	bool MakeWindow( void );
 private:
