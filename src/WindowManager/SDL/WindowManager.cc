@@ -1,4 +1,3 @@
-/* hello.cc */
 #include "WindowManager.h"
 #include <iostream>
 
@@ -85,4 +84,9 @@ bool Window::MakeWindow ( void )
 
   SDL_Quit();
   return true;		
+}
+
+void Test( void )
+{
+	printf( "This is a test!\n" );
 }

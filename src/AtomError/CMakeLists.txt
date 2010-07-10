@@ -23,7 +23,7 @@ ADD_DEFINITIONS ( "-D_FSMANAGER_" )
 ADD_LIBRARY ( ${PROJECT_NAME} STATIC AtomError )
 
 
-# Installation instructions for the window manager
+# Installation instructions for the error handler
 INSTALL (
 	TARGETS ${PROJECT_NAME}
 	RUNTIME DESTINATION bin/${ROOT_PROJECT_NAME}
