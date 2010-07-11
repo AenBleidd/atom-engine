@@ -16,7 +16,7 @@ int main(int arg, char *argc[]) {
   snprintf(version, versionlen, "Start fsman version %s", _FSMAN_VERSION_);
   atomlog->LogMessage(version);
   delete [] version;
-/*NOLINT*/  char help[] = "File System  Manager - utility to work with Atom File System\nOptions:\n\t-t, --test\t\tTest default file system with standart mount file\n\t-t, --test [mountfile]\tTest file system\n\t-n, --new [output] [input]\tCreate new file with name [output] using folders or files [input], for current folder use './'\n";
+/*NOLINT*/  char help[] = "File System  Manager - utility to work with Atom File System\nOptions:\n\t-t, --test\t\tTest default file system with standart mount file\n\t-t, --test [mountfile]\tTest file system\n\t-n, --new\t\tCreate new file\n\t\t-o [output]\t\tOutput file name\n\t\t-i [input]\t\tInput file and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n";
   unsigned int key[] = {
     0xCEF2F7E0,
     0xFFEDE8E5,
@@ -46,25 +46,93 @@ int main(int arg, char *argc[]) {
   }
 // Create new file
   else if (strcmp(argc[1], "-n") == 0 || strcmp(argc[1], "--new") == 0) {
-    if (arg > 3) {
-      char **input = new char*[arg-3];
-      for (int i = 0; i < arg-3; i++)
-        input[i] = argc[i+3];
-      unsigned char s = strlen(argc[2]) + 17;
+    if (arg > 7) {
+      char **input = new char*[arg-7];
+      int encrypted = 0;
+      char *output = 0;
+      unsigned short int encbytes = 0;
+// Flags
+      bool error = false;
+      signed char flag_enc = 0;
+      signed char flag_out = 0;
+      signed char flag_in = 0;
+// parse commandline
+      for (int i = 2, j = 0; i < arg; i++) {
+        if (error == false) {
+// check all flags
+// encrypt flag
+          if ((strcmp(argc[i], "-e") == 0) && (flag_enc == 0) &&
+              (flag_out != 1) && (flag_in != 1)) {
+            flag_enc = 1;
+// maybe this flag set after input files ?
+            if (flag_in == 2)
+              flag_in = -1;
+          }
+// outfile flag
+          else if ((strcmp(argc[i], "-o") == 0) && (flag_out == 0) &&
+                   (flag_enc != 1)) {
+            flag_out = 1;
+// maybe this flag set after input files ?
+            if (flag_in == 2)
+              flag_in = -1;
+          }
+// infile flag
+          else if ((strcmp(argc[i], "-i") == 0) && (flag_in == 0) &&
+                   (flag_enc != 1) && (flag_out != 1)) {
+            flag_in = 1;
+          }
+// if here is not flag but smth else
+// encrypt bytes
+          else if (flag_enc == 1) {
+// there can't be another value
+            flag_enc = -1;
+            encrypted = atoi(argc[i]);
+// wrong diapasone
+            if ((encrypted == 0) || (encrypted < -1) || (encrypted > 65535))
+              error = true;
+            else
+// -1 or 65535 - all file will be encrypted (must be 0xFFFF)
+              encbytes = encrypted;
+          }
+// output file
+          else if (flag_out == 1) {
+// there can't be two output files
+            flag_out = -1;
+            output = argc[i];
+          }
+// input files
+          else if (flag_in > 0) {
+// this is at least first input file
+            flag_in = 2;
+            input[j++] = argc[i];
+          }
+// some error
+          else {
+            error = true;
+          }
+        }
+// if there is an error
+        else {
+          delete [] input;
+          atomlog->DebugMessage(help);
+          fprintf(stderr, "%s", help);
+        }
+      }
+      unsigned char s = strlen(output) + 17;
       char *buf = new char[s];
-      snprintf(buf, s, "Create new file %s", argc[2]);
+      snprintf(buf, s, "Create new file %s", output);
       atomlog->DebugMessage(buf);
       delete [] buf;
-      atomfs->Create(input, arg-3, argc[2]);
+      atomfs->Create(input, arg-7, output);
 // Make clean
       delete [] input;
     } else {
       atomlog->DebugMessage(help);
-      printf("%s", help);
+      fprintf(stderr, "%s", help);
     }
   } else {
     atomlog->DebugMessage(help);
-    printf("%s", help);
+    fprintf(stderr, "%s", help);
   }
 // cleaning
   delete atomfs;
