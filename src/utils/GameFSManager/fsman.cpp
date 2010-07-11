@@ -16,8 +16,14 @@ int main(int arg, char *argc[]) {
   snprintf(version, versionlen, "Start fsman version %s", _FSMAN_VERSION_);
   atomlog->LogMessage(version);
   delete [] version;
-/*NOLINT*/  char help[] = "File System  Manager - utility to work with Atom File System\nOptions:\n\t-t, --test\t\tTest default file system with standart mount file\n\t-t, --test [mountfile]\tTest file system\n\t-n,--new [output] [input]\tCreate new file with name [output] using folders or files [input], for current folder use './'\n";
-  try { atomfs = new AtomFS(atomlog); }
+/*NOLINT*/  char help[] = "File System  Manager - utility to work with Atom File System\nOptions:\n\t-t, --test\t\tTest default file system with standart mount file\n\t-t, --test [mountfile]\tTest file system\n\t-n, --new [output] [input]\tCreate new file with name [output] using folders or files [input], for current folder use './'\n";
+  unsigned int key[] = {
+    0xCEF2F7E0,
+    0xFFEDE8E5,
+    0x20C2E0EC,
+    0xEFE8F0E0
+  };
+  try { atomfs = new AtomFS(atomlog, key); }
   catch(int i) { }
   if (arg == 1 || strcmp(argc[1], "-h") == 0 || \
       strcmp(argc[1], "--help") == 0 || strcmp(argc[1], "-help") == 0 || \

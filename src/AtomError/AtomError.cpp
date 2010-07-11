@@ -9,7 +9,7 @@ char* CurDateTime() {
   timeinfo = (tm*) localtime_r(&seconds, timeinfo);
   const unsigned char s = 20;
   char *date = new char[s];
-  snprintf(date, s, "%i.%02i.%02i %02i:%02i:%02i",
+  snprintf(date, s, "%i.%02i.%02i %02i.%02i.%02i",
           timeinfo->tm_year+1900, timeinfo->tm_mon,
           timeinfo->tm_mday, timeinfo->tm_hour,
           timeinfo->tm_min, timeinfo->tm_sec);
@@ -44,6 +44,7 @@ AtomLog::AtomLog() {
   snprintf(plogfilename, s, "%s%s %s%s",
            temppath, "atom", pbuffer, ".log");
 #endif  // _FSMAN_
+
   delete [] temppath;
   delete [] pbuffer;
 // open log file
