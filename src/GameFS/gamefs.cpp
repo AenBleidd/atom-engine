@@ -1,12 +1,14 @@
 #include "gamefs.h"
-
-AtomFS::AtomFS(AtomLog *log) {
+// TODO(Lawliet): Move key from constructor (make it like constructor parameter)
+// TODO(Lawliet): Make variable size of crypted data (one number for the archive)
+AtomFS::AtomFS(AtomLog *log, unsigned int key[4]) {
   atomlog = log;
 // Generate crypt key
-  wake_key[0] = 0xCEF2F7E0;
-  wake_key[1] = 0xFFEDE8E5;
-  wake_key[2] = 0x20C2E0EC;
-  wake_key[3] = 0xEFE8F0E0;
+// TODO(Lawliet): Change this 4 ugly strings
+  wake_key[0] = key[0];
+  wake_key[1] = key[1];
+  wake_key[2] = key[2];
+  wake_key[3] = key[3];
   GenKey(wake_key[0], wake_key[1], wake_key[2], wake_key[3]);
 // create root directory
   root = new TREE_FOLDER;
@@ -279,54 +281,87 @@ inline static int dot_exclude(const struct dirent64 *dir) {
       (dir->d_name[2] == 0)) return 0;
   return 1;
 }
+#else
+inline static int dot_exclude(const WIN32_FIND_DATA *dir) {
+  if ((strcmp(dir->cFileName, ".") == 0) || (strcmp(dir->cFileName, "..") == 0))
+    return 0;
+  return 1;
+}
 #endif  // UNIX
-// TODO(Lawliet): Write windows version of this function
 int AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int level = 0) {
   if (ch != NULL) {
+// Write folder info
+    RECORD record;
+    record.flag = flag_folder;
+    record.namelen = strlen(ch);
+    record.name = ch;
+    record.size = 0;
+    record.offset = 0;
+    record.crc = 0;
+    if (fwrite(&record.flag, sizeof(record.flag), 1, dat) != 1) {
+      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
+      return -1;
+    }
+    if (fwrite(&record.namelen, sizeof(record.namelen), 1, dat) != 1) {
+      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
+      return -1;
+    }
+    if (fwrite(&record.name, 1, record.namelen, dat) != record.namelen) {
+      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
+      return -1;
+    }
+// set new datasize
+    char *buf = 0;
+    datsize += (sizeof(record.flag) + sizeof(record.namelen) + record.namelen);
+    const unsigned short s = strlen(ch) + 14;
+    buf = new char[s];
+    snprintf(buf, s, "Write folder %s", ch);
+    atomlog->DebugMessage(buf);
+    delete [] buf;
+    buf = 0;
+    char *curdir = 0;
 #ifdef UNIX
 // TODO(Lawliet): Check this string if first call chdir(ch) is NULL
     if (chdir(ch) != 0) return 0;
     struct dirent64 **eps;
     struct stat64 st;
-    char *buf = 0;
     int n;
     n = scandir64("./", &eps, dot_exclude, alphasort64);
     if (n >= 0) {
       int cnt;
       for (cnt = 0; cnt < n; ++cnt) {
+#else
+      WIN32_FIND_DATA st;
+      HANDLE hf;
+// go to the subfolder
+      const unsigned int size = strlen(ch) + 3; 
+      char *tmp = new char[size];
+      snprintf(tmp, size, "%s\\*", ch);
+      hf = FindFirstFile(tmp, &st);
+      if (hf == INVALID_HANDLE_VALUE) {  // there is some error
+        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FILE);
+        fclose(dat);
+        fclose(bin);
+        FindClose(hf);
+        return -1;
+      }
+      do {
+#endif  // UNIX
+#ifdef UNIX
         if (eps[cnt]->d_type == DT_DIR) {  // it is a folder
-          const unsigned short s = strlen(eps[cnt]->d_name) + 14;
-          buf = new char[s];
-          snprintf(buf, s, "Write folder %s", eps[cnt]->d_name);
-          atomlog->DebugMessage(buf);
-          delete [] buf;
-          buf = 0;
-// Write folder info
-          RECORD record;
-          record.flag = flag_folder;
-          record.namelen = strlen(eps[cnt]->d_name);
-          record.name = eps[cnt]->d_name;
-          record.size = 0;
-          record.offset = 0;
-          record.crc = 0;
-          if (fwrite(&record.flag, sizeof(record.flag), 1, dat) != 1) {
-            atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-            return -1;
-          }
-          if (fwrite(&record.namelen, sizeof(record.namelen), 1, dat) != 1) {
-            atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-            return -1;
-          }
-          if (fwrite(&record.name, 1, record.namelen, dat) !=
-              record.namelen) {
-            atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-            return -1;
-          }
-// set new datasize
-          datsize += (sizeof(record.flag) + sizeof(record.namelen) +
-                      record.namelen);
-          if (FolderScan(eps[cnt]->d_name, dat, bin, level+1) == -1) return -1;
-
+          curdir = eps[cnt]->d_name;
+#else
+        if ((st.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY) && 
+            (dot_exclude(&st) == 1)) {
+          const unsigned int fsize = sizeof(ch) + sizeof(st.cFileName) + 2;
+          curdir = new char[fsize];
+          snprintf(curdir, fsize, "%s\\%s", ch, st.cFileName);
+#endif  // UNIX
+          if (FolderScan(curdir, dat, bin, level+1) == -1) return -1;
+#ifndef UNIX
+          delete [] curdir;
+          curdir = 0;
+#endif  // UNIX
 // End of catalogue
 // TODO(Lawliet): Check recurse in this function
           record.flag = flag_eoc;
@@ -342,18 +377,43 @@ int AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int level = 0) {
 // Update datsize
           datsize += sizeof(record.flag);
         }
+#ifdef UNIX
         if (eps[cnt]->d_type == DT_REG) {  // it is a file
           stat64(eps[cnt]->d_name, &st);
-          const unsigned short s = strlen(eps[cnt]->d_name) + 45;
-          buf = new char[s];
-          snprintf(buf, s, "Writing file %s (%ld bytes)",
-                   eps[cnt]->d_name, (long int)st.st_size);
+          curdir = eps[cnt]->d_name; // but it is a file not folder
+          const unsigned short sk = strlen(eps[cnt]->d_name) + 45;
+          long int fsize = (long int)st.st_size;
+#else
+        else if (dot_exclude(&st) == 1) {
+          const unsigned short sk = strlen(st.cFileName) + 45;
+          curdir = st.cFileName;
+          long int fsize = (st.nFileSizeHigh * (MAXDWORD+1)) + st.nFileSizeLow;
+#endif  // UNIX
+          buf = new char[sk];
+          snprintf(buf, sk, "Writing file %s (%ld bytes)", curdir, fsize);
           atomlog->DebugMessage(buf);
           delete [] buf;
           buf = 0;
-          if (Write(eps[cnt]->d_name, dat, bin) == -1) return -1;
+#ifndef UNIX
+          const unsigned int st_size = strlen(ch) + strlen(st.cFileName) + 2;
+          curdir = new char[st_size];
+          snprintf(curdir, st_size, "%s\\%s", ch, st.cFileName);
+#endif  // UNIX
+          if (Write(curdir, dat, bin) == -1) return -1;
+#ifndef UNIX
+          delete [] curdir;
+          curdir = 0;
+#endif  // UNIX
         }
+#ifdef UNIX
       }
+#else
+      } while (FindNextFile(hf, &st)!= 0);
+      FindClose(hf);
+      delete [] tmp;
+      tmp = 0;
+#endif  // UNIX
+#ifdef UNIX
     for (cnt = 0; cnt < n; ++cnt) free(eps[cnt]);
     free(eps);
     } else {
@@ -494,6 +554,8 @@ int AtomFS::Create(char **input, unsigned int count, char *file) {
   binfile = fopen(bin, "r");
   datfile = fopen(dat, "r");
   if ((binfile != NULL) || (datfile != NULL)) {  // files exist
+    fclose(binfile);
+    fclose(datfile);
 // rename the files
     int i = 0, s = 0;
     bool flag = false;
@@ -522,8 +584,6 @@ int AtomFS::Create(char **input, unsigned int count, char *file) {
       delete [] bintemp;
       delete [] dattemp;
     }
-    fclose(binfile);
-    fclose(datfile);
   }
 // open files for writing
   binfile = fopen(bin, "wb");
@@ -589,22 +649,41 @@ int AtomFS::Create(char **input, unsigned int count, char *file) {
 // Scanning...
   char *buf = 0;
   for (int i = 0; i < count; i++) {
-// TODO(Lawliet): Write windows version of this function
 #ifdef UNIX
     struct stat64 st;
     stat64(input[i], &st);
     if (S_ISDIR(st.st_mode) == true) {  // it is a folder
+#else
+    WIN32_FIND_DATA st;
+    HANDLE hf;
+    hf = FindFirstFile(input[i], &st);
+    if (hf == INVALID_HANDLE_VALUE) {  // there is some error
+      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FILE);
+      fclose(datfile);
+      fclose(binfile);
+      FindClose(hf);
+      return -1;
+    }
+    FindClose(hf);
+    if (st.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY) {
+#endif  // UNIX
       if (FolderScan(input[i], datfile, binfile, 0) == -1) {
         fclose(datfile);
         fclose(binfile);
         return -1;
       }
     }
+#ifdef UNIX
     else if (S_ISREG(st.st_mode) == true) {  // it is a file
+      long int size = (long int)st.st_size;
+#else
+    else {
+      long int size = (st.nFileSizeHigh * (MAXDWORD+1)) + st.nFileSizeLow;
+#endif  // UNIX
       const unsigned short s = strlen(input[i]) + 45;
       buf = new char[s];
       snprintf(buf, s, "Writing file %s (%ld bytes)",
-               input[i], (long int)st.st_size);
+               input[i], size);
       atomlog->DebugMessage(buf);
       delete [] buf;
       buf = 0;
@@ -615,7 +694,6 @@ int AtomFS::Create(char **input, unsigned int count, char *file) {
         return -1;
       }
     }
-#endif  // UNIX
   }
 // Write end of folder flag
   record.flag = flag_eoc;
