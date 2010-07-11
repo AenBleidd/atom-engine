@@ -1,5 +1,4 @@
 #include "gamefs.h"
-// TODO(Lawliet): Move key from constructor (make it like constructor parameter)
 // TODO(Lawliet): Make variable size of crypted data (one number for the archive)
 AtomFS::AtomFS(AtomLog *log, unsigned int key[4]) {
   atomlog = log;
@@ -334,7 +333,7 @@ int AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int level = 0) {
       WIN32_FIND_DATA st;
       HANDLE hf;
 // go to the subfolder
-      const unsigned int size = strlen(ch) + 3; 
+      const unsigned int size = strlen(ch) + 3;
       char *tmp = new char[size];
       snprintf(tmp, size, "%s\\*", ch);
       hf = FindFirstFile(tmp, &st);
@@ -351,7 +350,7 @@ int AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int level = 0) {
         if (eps[cnt]->d_type == DT_DIR) {  // it is a folder
           curdir = eps[cnt]->d_name;
 #else
-        if ((st.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY) && 
+        if ((st.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY) &&
             (dot_exclude(&st) == 1)) {
           const unsigned int fsize = sizeof(ch) + sizeof(st.cFileName) + 2;
           curdir = new char[fsize];
@@ -752,92 +751,3 @@ int AtomFS::Create(char **input, unsigned int count, char *file) {
   return 0;
 }
 #endif  // _FSMAN_
-/*
-#include <cstdlib>
-#include <iostream>
-#include <windows.h>
-#include <time.h>
-
-using namespace std;
-
-bool DEBUG = FALSE;
-char folder[2048];
-char path[2048];
-char size[5];
-int nsize = 1024;
-char tg[3] = {"Kb"};
-int filecount = 0;
-char foldername[1024];
-char filename[3072];
-
-struct LIST
-{
-       int number;
-       char folder[3072];
-       char path[3072];
-       LIST *link;
-};
-
-struct STRING
-{
-       char folder[3072];
-       char path[3072];
-};
-
-LIST *head, *list, *prev;
-void ScanDir()
-{
-    WIN32_FIND_DATA FindFileData;
-	HANDLE hf;
-	int n = 0;
-	char file[3072], temp[3072], wildcard[3072];
-	strcpy(path, folder);
-	strcat(path, "\\*");
-
-	hf=FindFirstFile(path, &FindFileData);
-	if (hf!=INVALID_HANDLE_VALUE)
-	{
-		do
-		{
-            strcpy(path, folder);
-            strcat(path, "\\*");
-            if(FindFileData.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY && strcmp(FindFileData.cFileName, ".") != 0 && strcmp(FindFileData.cFileName, "..") != 0)
-            {
-             strcpy(temp, folder);
-             strcat(temp, "\\");
-			 strcpy(foldername, FindFileData.cFileName);
-			 strcat(temp, foldername);
-			 if (DEBUG == true)
-			  cout << "folder: " << temp << "\n";
-			 HANDLE handle;
-			 strcpy(wildcard, temp);
-			 strcat(wildcard, "\\*.txt");
-			 handle=FindFirstFile(wildcard, &FindFileData);
-			 if (handle!=INVALID_HANDLE_VALUE)
-			 {
-               do
-               {
-                 strcpy(file, temp);
-                 strcat(file, "\\");
-                 strcat(file, FindFileData.cFileName);
-                 if (DEBUG == true)
-			        cout << "file: " << file << "\n";
-                 list = new LIST;
-                 strcpy(list->folder, foldername);
-                 strcpy(list->path, file);
-                 list->number = filecount;
-                 if (prev != NULL) prev->link = list;
-			     if (head == NULL) head = list;
-			     prev = list;
-                 filecount++;
-               }
-             while(FindNextFile(handle, &FindFileData)!=0);
-             FindClose(handle);
-             }
-            }
-		}
-		while (FindNextFile(hf,&FindFileData)!=0);
-		FindClose(hf);
-	}
-}
-*/
