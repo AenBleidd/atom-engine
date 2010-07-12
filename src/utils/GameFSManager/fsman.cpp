@@ -8,6 +8,27 @@
 AtomLog *atomlog;
 AtomFS *atomfs;
 
+// 16-byte password input function
+int* PassPrint (void) {
+  int *key = new int[4]; // end key;
+  char *input = new char[16]; // input string
+// password input cycle
+  printf("%s\n", "Print 16-symbol password:");
+  int i = 0;
+  while(i < 16) {
+    input[i++] = getchar();
+    printf("*");
+  }
+  printf("\n");
+// processing input string
+  key[0] = (input[0] << 8) + (input[1] << 8) + (input[2] << 8) + input[3];
+  key[1] = (input[4] << 8) + (input[5] << 8) + (input[6] << 8) + input[7];
+  key[2] = (input[8] << 8) + (input[9] << 8) + (input[10] << 8) + input[11];
+  key[3] = (input[12] << 8) + (input[13] << 8) + (input[14] << 8) + input[15];
+
+  return key;
+}
+
 int main(int arg, char *argc[]) {
 // input parameters processing
   atomlog = new AtomLog;
@@ -123,6 +144,8 @@ int main(int arg, char *argc[]) {
       snprintf(buf, s, "Create new file %s", output);
       atomlog->DebugMessage(buf);
       delete [] buf;
+// Key input
+      PassPrint();
       atomfs->Create(input, arg-7, output);
 // Make clean
       delete [] input;
