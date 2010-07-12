@@ -107,6 +107,8 @@ struct HEADER {
   unsigned int magic;
 // version of the paked file
   unsigned char version;
+// crypt bytes
+  unsigned short int crypt;
 // bin file count
   unsigned long int bincount;
 // size of the packed binary data
