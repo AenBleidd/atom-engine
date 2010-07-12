@@ -1,14 +1,6 @@
 #include "gamefs.h"
-// TODO(Lawliet): Make variable size of crypted data (one number for the archive)
-AtomFS::AtomFS(AtomLog *log, unsigned int key[4]) {
+AtomFS::AtomFS(AtomLog *log) {
   atomlog = log;
-// Generate crypt key
-// TODO(Lawliet): Change this 4 ugly strings
-  wake_key[0] = key[0];
-  wake_key[1] = key[1];
-  wake_key[2] = key[2];
-  wake_key[3] = key[3];
-  GenKey(wake_key[0], wake_key[1], wake_key[2], wake_key[3]);
 // create root directory
   root = new TREE_FOLDER;
   char name[] = "/\0";
@@ -455,11 +447,11 @@ int AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
   rewind(file);
   unsigned long int crc = mask;
 // encrypt
-  unsigned char count;
-  if (bytescrypt < record.size)
-    count = bytescrypt;
-  else
+  unsigned long int count;
+  if ((bytescrypt == 0xFFFF) || (bytescrypt > record.size))
     count = record.size;
+  else
+    count = bytescrypt;
   unsigned int *buf = new unsigned int[count];
   if (fread(buf, 1, count, file) != count) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
@@ -469,7 +461,7 @@ int AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
   }
   unsigned int r[4];
   Crypt(buf, count, wake_key, r, wake_table);
-  unsigned char t = count;
+  unsigned long int t = count;
 // write to disk crypted data
   if (fwrite(buf, 1, count, bin) != count) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
@@ -484,7 +476,7 @@ int AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
   tempbuf = 0;
   buf = 0;
 // writing to disk and calculating crc
-  for (int i = count-1; i < record.size; i++) {
+  for (unsigned long int i = count-1; i < record.size; i++) {
     if (fread(&t, 1, 1, file) != 1) {
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
       fclose(file);
@@ -538,9 +530,15 @@ int AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
   return 0;
 }
 
-int AtomFS::Create(char **input, unsigned int count, char *file) {
+int AtomFS::Create(char **input, unsigned int count, char *file,
+                   unsigned short int encrypt, unsigned int *key) {
   FILE *binfile, *datfile, *bintempfile, *dattempfile;
   datsize = 0;
+// Generate crypt key
+  wake_key = key;
+  GenKey(wake_key[0], wake_key[1], wake_key[2], wake_key[3]);
+// set encrypt bytes count
+  bytescrypt = encrypt;
 // Create name of the output files
   char *bin, *dat;
   unsigned int namelen;
