@@ -8,6 +8,13 @@ CMAKE_MINIMUM_REQUIRED ( VERSION  2.6 )
 # Perform some general initialization
 INCLUDE ( "${MODULE_PATH}/init.cmake" )
 
+# Try to find ncurses
+SET ( CURSES_NEED_NCURSES TRUE )
+FIND_PACKAGE ( Curses )
+IF ( CURSES_HAVE_NCURSES_H )
+	include_directories ( ${CURSES_INCLUDE_DIR} )
+ENDIF ( CURSES_HAVE_NCURSES_H )
+
 # Project information
 PROJECT ( fsman )
 
@@ -28,7 +35,7 @@ SET ( ${PROJECT_NAME}_DEPENDS "AtomError GameFS" )
 ADD_EXECUTABLE ( ${PROJECT_NAME} fsman crc32 )
 
 # Link against libAtomError and libGameFS
-TARGET_LINK_LIBRARIES ( ${PROJECT_NAME} AtomError GameFS )
+TARGET_LINK_LIBRARIES ( ${PROJECT_NAME} AtomError GameFS ${CURSES_LIBRARIES} )
 
 # Add apptopriate library seatch paths to linker
 SET_DIRECTORY_PROPERTIES ( PROPERTIES 
