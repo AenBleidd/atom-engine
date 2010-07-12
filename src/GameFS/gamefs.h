@@ -22,7 +22,6 @@
 // main constants
 static const unsigned int magic = 0x41454653;  // Magic number ("AEFS")
 static const unsigned char version = 0x01;  // current version (1)
-static const unsigned char bytescrypt = 10;  // count of first bytes to encrypt
 // folder and file flags
 static const unsigned char ff_ro = 0x80;  // read-only
 static const unsigned char ff_rw = 0x0;  // read-write
@@ -175,7 +174,7 @@ struct TREE_FOLDER {
 class AtomFS {
  public:
 // constructor
-  explicit AtomFS(AtomLog *log, unsigned int key[4]);
+  explicit AtomFS(AtomLog *log);
 /* Mounting single file
    filename - name of the mounted file
    mountfolder - folder in the FS to mount the file system
@@ -201,11 +200,14 @@ class AtomFS {
    input - name of the folders or files or './' for current folder
    count - count of the input files and/or folders
    file - output filename
+   encrypt - count of bytes to encrypt
+   key - 16-byte key
    return value:
                 0 - there is no error
                 another value - some kind of error, look error code
 */
-  int Create(char** input, unsigned int count, char* file);
+  int Create(char** input, unsigned int count, char* file,
+             unsigned short int encrypt, unsigned int *key);
 #endif  // _FSMAN_
 // destructor
   ~AtomFS();
@@ -213,9 +215,10 @@ class AtomFS {
 // root directory
   TREE_FOLDER *root;
   AtomLog *atomlog;
+  unsigned short int bytescrypt;  // count of first bytes to encrypt
 // WAKE crypt algorithm
   unsigned int wake_table[257];
-  unsigned int wake_key[4];
+  unsigned int *wake_key;
   void GenKey(unsigned int k0, unsigned int k1,
               unsigned int k2, unsigned int k3);
   void Decrypt(unsigned int *data, int lenght, unsigned int k[4],

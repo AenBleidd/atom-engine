@@ -9,23 +9,26 @@ AtomLog *atomlog;
 AtomFS *atomfs;
 
 // 16-byte password input function
-int* PassPrint (void) {
-  int *key = new int[4]; // end key;
-  char *input = new char[16]; // input string
+unsigned int* PassPrint (void) {
+  unsigned int *key = new unsigned int[4]; // end key;
+  char *input = new char[17]; // input string
 // password input cycle
-  printf("%s:\n", "Print 16-symbol password");
-  int i = 0;
-  while(i < 16) {
-    input[i++] = getchar();
+  while(true) {
+    printf("%s:\n", "Print 16-symbol password");
+    scanf("%16s", input);
+    if (strlen(input) == 16)
+      break;
+    else {
+      printf("Password is too short! Try again\n");
+    }
   }
-  printf("\n");
-
+  input[16] = '\0';
 // processing input string
   key[0] = (input[0] << 8) + (input[1] << 8) + (input[2] << 8) + input[3];
   key[1] = (input[4] << 8) + (input[5] << 8) + (input[6] << 8) + input[7];
   key[2] = (input[8] << 8) + (input[9] << 8) + (input[10] << 8) + input[11];
   key[3] = (input[12] << 8) + (input[13] << 8) + (input[14] << 8) + input[15];
-
+  delete [] input;
   return key;
 }
 
@@ -38,13 +41,7 @@ int main(int arg, char *argc[]) {
   atomlog->LogMessage(version);
   delete [] version;
 /*NOLINT*/  char help[] = "File System  Manager - utility to work with Atom File System\nOptions:\n\t-t, --test\t\tTest default file system with standart mount file\n\t-t, --test [mountfile]\tTest file system\n\t-n, --new\t\tCreate new file\n\t\t-o [output]\t\tOutput file name\n\t\t-i [input]\t\tInput file and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n";
-  unsigned int key[] = {
-    0xCEF2F7E0,
-    0xFFEDE8E5,
-    0x20C2E0EC,
-    0xEFE8F0E0
-  };
-  try { atomfs = new AtomFS(atomlog, key); }
+  try { atomfs = new AtomFS(atomlog); }
   catch(int i) { }
   if (arg == 1 || strcmp(argc[1], "-h") == 0 || \
       strcmp(argc[1], "--help") == 0 || strcmp(argc[1], "-help") == 0 || \
@@ -145,9 +142,10 @@ int main(int arg, char *argc[]) {
       atomlog->DebugMessage(buf);
       delete [] buf;
 // Key input
-      PassPrint();
-      atomfs->Create(input, arg-7, output);
+      unsigned int *key = PassPrint();
+      atomfs->Create(input, arg-7, output, encbytes, key);
 // Make clean
+      delete [] key;
       delete [] input;
     } else {
       atomlog->DebugMessage(help);
