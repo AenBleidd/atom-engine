@@ -4,7 +4,6 @@
 #include "../../AtomError/AtomError.h"
 
 #include <stdio.h>
-#include <ncurses.h>
 
 AtomLog *atomlog;
 AtomFS *atomfs;
@@ -14,24 +13,11 @@ int* PassPrint (void) {
   int *key = new int[4]; // end key;
   char *input = new char[16]; // input string
 // password input cycle
-
-// start curses
-  initscr();
-  printw("%s:\n", "Print 16-symbol password");
+  printf("%s:\n", "Print 16-symbol password");
   int i = 0;
-//  refresh();
-// input without return
-  cbreak();
-// getch() without echo
-  noecho();
   while(i < 16) {
-    input[i++] = getch();
+    input[i++] = getchar();
   }
-// restore default settings
-  echo();
-  nocbreak();
-// end curses
-  endwin();
   printf("\n");
 
 // processing input string
