@@ -596,6 +596,7 @@ int AtomFS::Create(char **input, unsigned int count, char *file,
   HEADER header;
   header.magic = magic;
   header.version = version;
+  header.crypt = bytescrypt;
 // set variable header information
   header.bincount = 1;
   header.binsize = 0;
@@ -720,6 +721,11 @@ int AtomFS::Create(char **input, unsigned int count, char *file,
     return -1;
   }
   if (fwrite(&header.version, sizeof(header.version), 1, datfile) != 1) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
+    fclose(datfile);
+    return -1;
+  }
+  if (fwrite(&header.crypt, sizeof(header.crypt), 1, datfile) != 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
     fclose(datfile);
     return -1;
