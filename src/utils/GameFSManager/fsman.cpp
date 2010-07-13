@@ -34,6 +34,7 @@ unsigned int* PassPrint (void) {
 
 int main(int arg, char *argc[]) {
 // input parameters processing
+  unsigned int *key = 0;
   atomlog = new AtomLog;
   const unsigned char versionlen = 30;
   char *version = new char[versionlen];
@@ -142,10 +143,11 @@ int main(int arg, char *argc[]) {
       atomlog->DebugMessage(buf);
       delete [] buf;
 // Key input
-      unsigned int *key = PassPrint();
+// key is not predefined
+      if (key != 0)
+        key = PassPrint();
       atomfs->Create(input, arg-7, output, encbytes, key);
 // Make clean
-      delete [] key;
       delete [] input;
     } else {
       atomlog->DebugMessage(help);
@@ -156,6 +158,7 @@ int main(int arg, char *argc[]) {
     fprintf(stderr, "%s", help);
   }
 // cleaning
+  delete [] key;
   delete atomfs;
   atomlog->LogMessage("End fsman...");
   delete atomlog;
