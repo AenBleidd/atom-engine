@@ -75,6 +75,7 @@ int main(int arg, char *argc[]) {
       signed char flag_enc = 0;
       signed char flag_out = 0;
       signed char flag_in = 0;
+      bool flag_key = false;
 // parse commandline
       for (int i = 2, j = 0; i < arg; i++) {
         if (error == false) {
@@ -99,6 +100,14 @@ int main(int arg, char *argc[]) {
           else if ((strcmp(argc[i], "-i") == 0) && (flag_in == 0) &&
                    (flag_enc != 1) && (flag_out != 1)) {
             flag_in = 1;
+          }
+// key flag
+          else if (((strcmp(argc[i], "-k") == 0) ||
+                   (strcmp(argc[i], "--key") == 0)) && (flag_enc != 1) &&
+                   (flag_out != 1) && (flag_in != 1)) {
+            flag_key = true;
+            if (flag_in == 2)
+              flag_in = -1;
           }
 // if here is not flag but smth else
 // encrypt bytes
@@ -144,9 +153,15 @@ int main(int arg, char *argc[]) {
       delete [] buf;
 // Key input
 // key is not predefined
-      if (key != 0)
+      if (key == 0)
         key = PassPrint();
-      atomfs->Create(input, arg-7, output, encbytes, key);
+// inpur files count
+      int param;
+      if (flag_key == false)
+        param = arg - 7;
+      else
+        param = arg - 8;
+      atomfs->Create(input, param, output, encbytes, key, flag_key);
 // Make clean
       delete [] input;
     } else {
