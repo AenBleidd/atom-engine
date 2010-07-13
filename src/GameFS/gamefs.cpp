@@ -544,7 +544,8 @@ int AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
 #endif  // _FSMAN_
 #ifdef _FSMAN_
 int AtomFS::Create(char **input, unsigned int count, char *file,
-                   unsigned short int encrypt, unsigned int *key) {
+                   unsigned short int encrypt, unsigned int *key,
+                   bool keyflag) {
   FILE *binfile, *datfile, *bintempfile, *dattempfile;
   datsize = 0;
 // Generate crypt key
@@ -611,7 +612,16 @@ int AtomFS::Create(char **input, unsigned int count, char *file,
 // set static header information
   HEADER header;
   header.magic = magic;
-  header.version = version;
+  if (keyflag == false) {
+    header.version = version;
+  }
+  else {
+    header.version = addon_version;
+    header.addon_key[0] = wake_key[0];
+    header.addon_key[1] = wake_key[1];
+    header.addon_key[2] = wake_key[2];
+    header.addon_key[3] - wake_key[3];
+  }
   header.crypt = bytescrypt;
 // set variable header information
   header.bincount = 1;
@@ -619,8 +629,10 @@ int AtomFS::Create(char **input, unsigned int count, char *file,
   header.datcount = 1;
   header.datsize = 0;
   datsize = sizeof(HEADER);
+  if (keyflag == false)
+    datsize -= sizeof(header.addon_key);
 // write empty header to file
-  if (fwrite("0", sizeof(HEADER), 1, datfile) != 1) {
+  if (fwrite("0", datsize, 1, datfile) != 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
     fclose(datfile);
     fclose(binfile);
@@ -747,24 +759,32 @@ int AtomFS::Create(char **input, unsigned int count, char *file,
     return -1;
   }
   if (fwrite(&header.bincount, sizeof(header.bincount), 1, datfile) != 1) {
-        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-        fclose(datfile);
-        return -1;
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
+    fclose(datfile);
+    return -1;
   }
   if (fwrite(&header.binsize, sizeof(header.binsize), 1, datfile) != 1) {
-        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-        fclose(datfile);
-        return -1;
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
+    fclose(datfile);
+    return -1;
   }
   if (fwrite(&header.datcount, sizeof(header.datcount), 1, datfile) != 1) {
-        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-        fclose(datfile);
-        return -1;
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
+    fclose(datfile);
+    return -1;
   }
   if (fwrite(&header.datsize, sizeof(header.datsize), 1, datfile) != 1) {
-        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-        fclose(datfile);
-        return -1;
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
+    fclose(datfile);
+    return -1;
+  }
+// TODO(Lawliet): Check this
+  if (keyflag == true) {
+    if (fwrite(&header.addon_key, sizeof(header.addon_key), 1, datfile) != 1) {
+      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
+      fclose(datfile);
+      return -1;
+    }
   }
 // end work with datfile
   fclose(datfile);

@@ -22,6 +22,7 @@
 // main constants
 static const unsigned int magic = 0x41454653;  // Magic number ("AEFS")
 static const unsigned char version = 0x01;  // current version (1)
+static const unsigned char addon_version = version + 1; // current addon version
 // folder and file flags
 static const unsigned char ff_ro = 0x80;  // read-only
 static const unsigned char ff_rw = 0x0;  // read-write
@@ -117,6 +118,8 @@ struct HEADER {
   unsigned long int datcount;
 // size of the filetable & header
   unsigned long int datsize;
+// addon key
+  unsigned int addon_key[4];
 };
 // identify each record in filetable of the packed file
 struct RECORD {
@@ -209,7 +212,7 @@ class AtomFS {
                 another value - some kind of error, look error code
 */
   int Create(char** input, unsigned int count, char* file,
-             unsigned short int encrypt, unsigned int *key);
+             unsigned short int encrypt, unsigned int *key, bool keyflag);
 #endif  // _FSMAN_
 // destructor
   ~AtomFS();
