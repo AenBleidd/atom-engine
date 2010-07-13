@@ -175,8 +175,8 @@ struct TREE_FOLDER {
 // FS Class
 class AtomFS {
  public:
-// constructor
-  explicit AtomFS(AtomLog *log);
+// constructors
+  explicit AtomFS(AtomLog *log, unsigned int *key = 0);
 /* Mounting single file
    filename - name of the mounted file
    mountfolder - folder in the FS to mount the file system
