@@ -1,6 +1,12 @@
 #include "gamefs.h"
-AtomFS::AtomFS(AtomLog *log) {
+AtomFS::AtomFS(AtomLog *log, unsigned int *key) {
   atomlog = log;
+  wake_key = 0;
+// If class being created without predefined key
+  if (key != 0) {
+    wake_key = key;
+    GenKey(wake_key[0], wake_key[1], wake_key[2], wake_key[3]);
+  }
 // create root directory
   root = new TREE_FOLDER;
   char name[] = "/\0";
@@ -264,6 +270,8 @@ int AtomFS::Mount(char* filename, char* mountfolder, unsigned char priority) {
 #ifdef _FSMAN_
 unsigned long int datsize = 0;  // size of data in file
 unsigned long int binsize = 0;  // size of bin in file
+#endif  // _FSMAN_
+#ifdef _FSMAN_
 // Remove folder links
 #ifdef UNIX
 inline static int dot_exclude(const struct dirent64 *dir) {
@@ -279,6 +287,8 @@ inline static int dot_exclude(const WIN32_FIND_DATA *dir) {
   return 1;
 }
 #endif  // UNIX
+#endif  // _FSMAN_
+#ifdef _FSMAN_
 int AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int level = 0) {
   if (ch != NULL) {
 // Write folder info
@@ -421,6 +431,8 @@ int AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int level = 0) {
   }
   return 0;
 }
+#endif  // _FSMAN_
+#ifdef _FSMAN_
 int AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
   FILE *file = fopen(in, "rb");
   if (in == NULL) {
@@ -529,14 +541,18 @@ int AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
   delete [] mes;
   return 0;
 }
-
+#endif  // _FSMAN_
+#ifdef _FSMAN_
 int AtomFS::Create(char **input, unsigned int count, char *file,
                    unsigned short int encrypt, unsigned int *key) {
   FILE *binfile, *datfile, *bintempfile, *dattempfile;
   datsize = 0;
 // Generate crypt key
-  wake_key = key;
-  GenKey(wake_key[0], wake_key[1], wake_key[2], wake_key[3]);
+// If crypt key is predefined new key is ignored
+  if(wake_key == 0) {
+    wake_key = key;
+    GenKey(wake_key[0], wake_key[1], wake_key[2], wake_key[3]);
+  }
 // set encrypt bytes count
   bytescrypt = encrypt;
 // Create name of the output files
