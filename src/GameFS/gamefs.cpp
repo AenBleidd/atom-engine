@@ -160,9 +160,7 @@ int AtomFS::Mount(char* filename) {
   unsigned int tsize = 0;
 // flags
   bool end = false;
-  bool fileflag = false;
-  bool folderflag = false;
-  bool priorflag = false;
+  bool flag = false;
   bool quotes = false;
 // reading configuration
   while (end != true) {
@@ -211,58 +209,37 @@ int AtomFS::Mount(char* filename) {
       char *mountpoint;
       char *prior;
 // it's file
-      if (fileflag == false) {
+      if (flag == false) {
         file = new char[tsize];
         for (int i = 0; i < tsize+1; i++)
           file[i] = buf[pos++];
         file[tsize] = '\0';
-        fileflag = true;
+        flag = true;
       }
 // it's mountpoint
-      else if (folderflag == false) {  // NOLINT
+      else {  // NOLINT
         mountpoint = new char[tsize];
         for (int i = 0; i < tsize+1; i++)
           mountpoint[i] = buf[pos++];
         mountpoint[tsize] = '\0';
-        folderflag = true;
+        flag = false;
+// Try to mount
+        if (Mount(file, mountpoint) == -1) {
+          delete [] buf;
+          return -1;
       }
-// it's priority
-      else if (priorflag == false) {  // NOLINT
-// too big priority or some another string
-        if (tsize > 255) {
-          atomlog->SetLastErr(ERROR_CORE_FS, ERROR_PARSE_MOUNT_FILE_PRIORITY);
-          delete [] buf;
-          return -1;
-        }
-        prior = new char[tsize];
-        for (int i = 0; i < tsize+1; i++)
-          prior[i] = buf[pos++];
-        prior[tsize] = '\0';
-        int num = atoi(prior);
-        if (num < 0 || num > 255) {
-          atomlog->SetLastErr(ERROR_CORE_FS, ERROR_PARSE_MOUNT_FILE_PRIORITY);
-          delete [] buf;
-          return -1;
-        }
-        fileflag = false, folderflag = false;
-// mount this file
-        if (Mount(file, mountpoint, (unsigned char)num) == -1) {
-          delete [] buf;
-          return -1;
-        }
-      }
-      if (quotes == true) quotes = false;
+    }
   }
 // cleaning
   delete [] buf;
   return 0;
 }
 // Mount single file
-int AtomFS::Mount(char* filename, char* mountfolder, unsigned char priority) {
+int AtomFS::Mount(char* filename, char* mountfolder) {
   const unsigned short s = 1000;
   char *pbuf = new char[s];
-  snprintf(pbuf, s, "Mounting %s to %s with %i",
-           filename, mountfolder, priority);
+  snprintf(pbuf, s, "Mounting %s to %s",
+           filename, mountfolder);
   atomlog->DebugMessage(pbuf);
   delete [] pbuf;
   return 0;
@@ -545,7 +522,7 @@ int AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
 #ifdef _FSMAN_
 int AtomFS::Create(char **input, unsigned int count, char *file,
                    unsigned short int encrypt, unsigned int *key,
-                   bool keyflag) {
+                   unsigned char type) {
   FILE *binfile, *datfile, *bintempfile, *dattempfile;
   datsize = 0;
 // Generate crypt key
@@ -612,11 +589,10 @@ int AtomFS::Create(char **input, unsigned int count, char *file,
 // set static header information
   HEADER header;
   header.magic = magic;
-  if (keyflag == false) {
-    header.version = version;
-  }
-  else {
-    header.version = addon_version;
+  header.version = version;
+  header.type = type;
+// is this an addon ?
+  if (type == 1) {
     header.addon_key[0] = wake_key[0];
     header.addon_key[1] = wake_key[1];
     header.addon_key[2] = wake_key[2];
@@ -629,7 +605,7 @@ int AtomFS::Create(char **input, unsigned int count, char *file,
   header.datcount = 1;
   header.datsize = 0;
   datsize = sizeof(HEADER);
-  if (keyflag == false)
+  if (type != 1)
     datsize -= sizeof(header.addon_key);
 // write empty header to file
   if (fwrite("0", datsize, 1, datfile) != 1) {
@@ -753,6 +729,11 @@ int AtomFS::Create(char **input, unsigned int count, char *file,
     fclose(datfile);
     return -1;
   }
+  if (fwrite(&header.type, sizeof(header.type), 1, datfile) != 1) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
+    fclose(datfile);
+    return -1;
+  }
   if (fwrite(&header.crypt, sizeof(header.crypt), 1, datfile) != 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
     fclose(datfile);
@@ -779,7 +760,7 @@ int AtomFS::Create(char **input, unsigned int count, char *file,
     return -1;
   }
 // TODO(Lawliet): Check this
-  if (keyflag == true) {
+  if (type == 1) {
     if (fwrite(&header.addon_key, sizeof(header.addon_key), 1, datfile) != 1) {
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
       fclose(datfile);

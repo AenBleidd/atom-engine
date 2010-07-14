@@ -41,7 +41,7 @@ int main(int arg, char *argc[]) {
   snprintf(version, versionlen, "Start fsman version %s", _FSMAN_VERSION_);
   atomlog->LogMessage(version);
   delete [] version;
-/*NOLINT*/  char help[] = "File System  Manager - utility to work with Atom File System\nOptions:\n\t-t, --test\t\tTest default file system with standart mount file\n\t-t, --test [mountfile]\tTest file system\n\t-n, --new\t\tCreate new file\n\t\t-o [output]\t\tOutput file name\n\t\t-i [input]\t\tInput file and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n";
+/*NOLINT*/  char help[] = "File System  Manager - utility to work with Atom File System\nOptions:\n\t-t, --test\t\tTest default file system with standart mount file\n\t-t, --test [mountfile]\tTest file system\n\t-n, --new\t\tCreate new file\n\t\t-o [output]\t\tOutput file name\n\t\t-i [input]\t\tInput file and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t [type]\t\tType of new file (critical, standart, addon)\n";
   try { atomfs = new AtomFS(atomlog); }
   catch(int i) { }
   if (arg == 1 || strcmp(argc[1], "-h") == 0 || \
@@ -65,24 +65,25 @@ int main(int arg, char *argc[]) {
   }
 // Create new file
   else if (strcmp(argc[1], "-n") == 0 || strcmp(argc[1], "--new") == 0) {
-    if (arg > 7) {
-      char **input = new char*[arg-7];
+    if (arg > 9) {
+      char **input = new char*[arg - 9];
       int encrypted = 0;
       char *output = 0;
       unsigned short int encbytes = 0;
+      unsigned char type = 0;
 // Flags
       bool error = false;
       signed char flag_enc = 0;
       signed char flag_out = 0;
       signed char flag_in = 0;
-      bool flag_key = false;
+      signed char flag_type = 0;
 // parse commandline
       for (int i = 2, j = 0; i < arg; i++) {
         if (error == false) {
 // check all flags
 // encrypt flag
           if ((strcmp(argc[i], "-e") == 0) && (flag_enc == 0) &&
-              (flag_out != 1) && (flag_in != 1)) {
+              (flag_out != 1) && (flag_in != 1) && (flag_type != 1)) {
             flag_enc = 1;
 // maybe this flag set after input files ?
             if (flag_in == 2)
@@ -90,7 +91,7 @@ int main(int arg, char *argc[]) {
           }
 // outfile flag
           else if ((strcmp(argc[i], "-o") == 0) && (flag_out == 0) &&
-                   (flag_enc != 1)) {
+                   (flag_enc != 1) && (flag_type != 1)) {
             flag_out = 1;
 // maybe this flag set after input files ?
             if (flag_in == 2)
@@ -98,14 +99,13 @@ int main(int arg, char *argc[]) {
           }
 // infile flag
           else if ((strcmp(argc[i], "-i") == 0) && (flag_in == 0) &&
-                   (flag_enc != 1) && (flag_out != 1)) {
+                   (flag_enc != 1) && (flag_out != 1) && (flag_type != 1)) {
             flag_in = 1;
           }
-// key flag
-          else if (((strcmp(argc[i], "-k") == 0) ||
-                   (strcmp(argc[i], "--key") == 0)) && (flag_enc != 1) &&
-                   (flag_out != 1) && (flag_in != 1)) {
-            flag_key = true;
+// type flag
+          else if ((strcmp(argc[i], "-t") == 0) && (flag_type == 0) &&
+                   (flag_enc != 1) && (flag_out != 1) && (flag_in != 1)) {
+            flag_type = 1;
             if (flag_in == 2)
               flag_in = -1;
           }
@@ -134,6 +134,23 @@ int main(int arg, char *argc[]) {
             flag_in = 2;
             input[j++] = argc[i];
           }
+// type
+          else if (flag_type == 1) {
+            flag_type = -1;
+            if (strcmp(argc[i], "critical") == 0) {
+              type = 0xFF;
+            }
+            else if (strcmp(argc[i], "standart") == 0) {
+              type = 0;
+            }
+            else if (strcmp(argc[i], "addon") == 0) {
+              type = 1;
+            }
+// wrong type
+            else {
+              error = true;
+            }
+          }
 // some error
           else {
             error = true;
@@ -141,27 +158,29 @@ int main(int arg, char *argc[]) {
         }
 // if there is an error
         else {
-          delete [] input;
           atomlog->DebugMessage(help);
           fprintf(stderr, "%s", help);
         }
       }
-      unsigned char s = strlen(output) + 17;
-      char *buf = new char[s];
-      snprintf(buf, s, "Create new file %s", output);
-      atomlog->DebugMessage(buf);
-      delete [] buf;
+      if (error == false) {
+        unsigned char s = strlen(output) + 25;
+        char *buf = new char[s];
+        if (type == 0)
+          snprintf(buf, s, "Create new standart file %s", output);
+        else if (type == 1)
+          snprintf(buf, s, "Create new addon file %s", output);
+        else if (type == 0xFF)
+          snprintf(buf, s, "Create new critical file %s", output);
+        atomlog->DebugMessage(buf);
+        delete [] buf;
 // Key input
 // key is not predefined
-      if (key == 0)
-        key = PassPrint();
+        if (key == 0)
+          key = PassPrint();
 // inpur files count
-      int param;
-      if (flag_key == false)
-        param = arg - 7;
-      else
-        param = arg - 8;
-      atomfs->Create(input, param, output, encbytes, key, flag_key);
+        int param = arg - 9;
+        atomfs->Create(input, param, output, encbytes, key, type);
+      }
 // Make clean
       delete [] input;
     } else {
