@@ -22,7 +22,6 @@
 // main constants
 static const unsigned int magic = 0x41454653;  // Magic number ("AEFS")
 static const unsigned char version = 0x01;  // current version (1)
-static const unsigned char addon_version = version + 1; // current addon version
 // folder and file flags
 static const unsigned char ff_ro = 0x80;  // read-only
 static const unsigned char ff_rw = 0x0;  // read-write
@@ -108,6 +107,8 @@ struct HEADER {
   unsigned int magic;
 // version of the paked file
   unsigned char version;
+// type (critical, standart or addon)
+  unsigned char type;
 // crypt bytes
   unsigned short int crypt;
 // bin file count
@@ -184,15 +185,11 @@ class AtomFS {
    filename - name of the mounted file
    mountfolder - folder in the FS to mount the file system
                  located in the mounted file
-   priority - priority to overwrite existing files int the FS:
-              0 - no one can overwrite mounted files
-              another value - files can be overwritten with higher priority
-                              with warning
    return value:
                 0 - there is no error
                 another value - some kind of error, look error code
 */
-  int Mount(char* filename, char* mountfolder, unsigned char priority);
+  int Mount(char* filename, char* mountfolder);
 /* Mounting from the mount table
    filename - name of the file with configuration to mount files
    return value:
@@ -212,7 +209,8 @@ class AtomFS {
                 another value - some kind of error, look error code
 */
   int Create(char** input, unsigned int count, char* file,
-             unsigned short int encrypt, unsigned int *key, bool keyflag);
+             unsigned short int encrypt, unsigned int *key,
+             unsigned char type);
 #endif  // _FSMAN_
 // destructor
   ~AtomFS();
