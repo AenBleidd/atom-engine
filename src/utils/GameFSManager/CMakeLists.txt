@@ -18,23 +18,20 @@ SET ( ${PROJECT_NAME}_PATCH_LEVEL "0" )
 SET ( ${PROJECT_NAME}_REVISION "0" )
 SET ( ${PROJECT_NAME}_VERSION "${PROJECT_NAME}_MAJOR_VERSION.${PROJECT_NAME}_MINOR_VERSION.SET ( ${PROJECT_NAME}_PATCH_LEVEL Rev. ${PROJECT_NAME}_REVISION" )
 
-#ADD_DEFINITIONS ( "-D_FSMAN_VERSION_" )
 ADD_DEFINITIONS ( "-D_FSMANAGER_" )
 
 # Ensure that 'AtomError' and 'GameFS' targets are built before current one
-SET ( ${PROJECT_NAME}_DEPENDS "AtomError GameFS" )
+SET ( ${PROJECT_NAME}_DEPENDS "AtomError GameFS_FSMan" )
 
 # Make a binary 
 ADD_EXECUTABLE ( ${PROJECT_NAME} fsman crc32 )
 
 # Link against libAtomError and libGameFS
-TARGET_LINK_LIBRARIES ( ${PROJECT_NAME} AtomError GameFS )
+TARGET_LINK_LIBRARIES ( ${PROJECT_NAME} AtomError GameFS_FSMan )
 
 # Add apptopriate library seatch paths to linker
 SET_DIRECTORY_PROPERTIES ( PROPERTIES 
 	LINK_DIRECTORIES "${AtomError_BINARY_DIR} ${GameFS_BINARY_DIR}"
-	#LINK_DIRECTORIES "${GameFS_BINARY_DIR}" 
-	#INCLUDE_DIRECTORIES "${AtomError_BINARY_DIR} ${GameFS_BINARY_DIR}" 
 )
  
 # Installation instructions for the GameFS manager
