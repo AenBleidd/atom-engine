@@ -18,15 +18,18 @@ SET ( ${PROJECT_NAME}_PATCH_LEVEL "0" )
 SET ( ${PROJECT_NAME}_REVISION "0" )
 SET ( ${PROJECT_NAME}_VERSION "${PROJECT_NAME}_MAJOR_VERSION.${PROJECT_NAME}_MINOR_VERSION.SET ( ${PROJECT_NAME}_PATCH_LEVEL Rev. ${PROJECT_NAME}_REVISION" )
 
-ADD_DEFINITIONS ( "-D_FSMANAGER_" )
-
-# Make a static library
+# Make a static library which will be used by the engine
 ADD_LIBRARY ( ${PROJECT_NAME} STATIC gamefs )
 
-# Installation instructions for the window manager
+# Make a static library which will be used by fsman utility
+ADD_LIBRARY ( ${PROJECT_NAME}_FSMan STATIC gamefs )
+SET_TARGET_PROPERTIES ( ${PROJECT_NAME}_FSMan
+	PROPERTIES COMPILE_FLAGS "-D_FSMANAGER_"
+)
 
+# Installation instructions for the window manager
 INSTALL (
-	TARGETS ${PROJECT_NAME}
+	TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_FSMan
 	RUNTIME DESTINATION bin/${ROOT_PROJECT_NAME}
 	LIBRARY DESTINATION lib/${ROOT_PROJECT_NAME}
 	ARCHIVE DESTINATION lib/static/${ROOT_PROJECT_NAME}
