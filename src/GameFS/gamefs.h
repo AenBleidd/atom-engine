@@ -29,6 +29,10 @@ static const unsigned char ff_rw = 0x0;  // read-write
 static const unsigned char flag_eoc = 0xCE;  // end of catalogue
 static const unsigned char flag_file = 0x0F;
 static const unsigned char flag_folder = 0x0C;
+// archive types
+static const unsigned char type_critical = 0xFF;
+static const unsigned char type_standart = 0x0;
+static const unsigned char type_addon = 0x01;
 // CRC32
 #ifdef _CRC_CHECK_
 // crc32 table generated using standart polynom
@@ -155,13 +159,16 @@ struct TREE_FILE {
   unsigned long int crc;
 #endif  // _CRC_CHECK_
 // id of the packed file which contain this file
-  unsigned short int id;
+// (first packed file if the packed file is separated)
+  FILE *id;
 // rewrite priority of the file
   unsigned char priority;
 // pointer to the opened file
   FILE *file;
 // counter of the opened instances of the file
   unsigned short int descriptor;
+// addon key (if this is not addon file key MUST be equal zero)
+  unsigned int *key;
 // pointer to the next file in folder
 TREE_FILE *tree_file;
 };

@@ -3,10 +3,13 @@
 
 #ifndef UNIX
 #include <windows.h>
-#endif
+#endif  // UNIX
 #include <string.h>
 #include <stdio.h>
 #include <ctime>
+#ifdef UNIX
+#include <sys/stat.h>
+#endif  // UNIX
 
 #define localtime_r(timep, result)  (localtime (timep) ? memcpy  ((result), \
 localtime (timep), sizeof (*(result))) : 0)
@@ -66,5 +69,6 @@ class AtomLog {
 #define ERROR_MOUNT_FS                                               0x00000005
 #define ERROR_OPEN_FOLDER                                            0x00000006
 #define ERROR_WRITE_FILE                                             0x00000007
+#define ERROR_INCORRECT_FILE                                         0x00000008
 
 #endif  // _CORE_ERROR_H_

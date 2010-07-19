@@ -236,12 +236,145 @@ int AtomFS::Mount(char* filename) {
 }
 // Mount single file
 int AtomFS::Mount(char* filename, char* mountfolder) {
-  const unsigned short s = 1000;
+// Ok, let's do it!
+// Check mount point
+  if (mountfolder == 0) {
+// we will mount to root directory
+  mountfolder = "/\0";
+  }
+// Print some info...
+  const unsigned short s = strlen(filename) + strlen(mountfolder) + 15;
   char *pbuf = new char[s];
   snprintf(pbuf, s, "Mounting %s to %s",
            filename, mountfolder);
   atomlog->DebugMessage(pbuf);
   delete [] pbuf;
+// create name of the file
+  unsigned short int namelen = strlen(filename) + 5;
+  char *binfile = new char[namelen];
+  char *datfile = new char[namelen];
+  snprintf(binfile, s, "%s.bin", filename);
+  snprintf(datfile, s, "%s.dat", filename);
+// Try to open
+  FILE *dat, *bin;
+  dat = fopen(datfile, "rb");
+  if (dat == 0) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FILE);
+    delete [] binfile;
+    delete [] datfile;
+    return -1;
+  }
+  bin = fopen(binfile, "rb");
+  if (bin == 0) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FILE);
+    delete [] binfile;
+    delete [] datfile;
+    fclose(dat);
+    return -1;
+  }
+// Cleaning...
+  delete [] binfile;
+  delete [] datfile;
+// Lets get start info about opened files
+  HEADER header;
+// Get magic signature
+  if (fread(&header.magic, sizeof(header.magic), 1, dat) != 1) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+    fclose(dat);
+    fclose(bin);
+    return -1;
+  }
+// Check this magic
+  if (header.magic != magic) {
+// Oops, we opened smth wrong...
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
+    fclose(dat);
+    fclose(bin);
+    return -1;
+  }
+// Magic!!!! *YAHOO*
+// Get version
+  if (fread(&header.version, sizeof(header.version), 1, dat) != 1) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+    fclose(dat);
+    fclose(bin);
+    return -1;
+  }
+// Check version
+  if (header.version != version) {
+// Oops, version is wrong...
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
+    fclose(dat);
+    fclose(bin);
+    return -1;
+  }
+// Get archive type
+  if (fread(&header.type, sizeof(header.type), 1, dat) != 1) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+    fclose(dat);
+    fclose(bin);
+    return -1;
+  }
+// Check this type
+  if ((header.type != type_critical) && (header.type != type_standart) &&
+       (header.type != type_addon)) {
+// Hmm... Strange type...
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
+    fclose(dat);
+    fclose(bin);
+    return -1;
+  }
+// Get crypt size
+  if (fread(&header.crypt, sizeof(header.crypt), 1, dat) != 1) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+    fclose(dat);
+    fclose(bin);
+    return -1;
+  }  // Nothing to check
+// Get binary files count
+// TODO(Lawliet): Add support for various count of bin files
+  if (fread(&header.bincount, sizeof(header.bincount), 1, dat) != 1) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+    fclose(dat);
+    fclose(bin);
+    return -1;
+  }
+// Get binary size
+// TODO(Lawliet): Add support for checking the size various count of bin files
+  if (fread(&header.binsize, sizeof(header.binsize), 1, dat) != 1) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+    fclose(dat);
+    fclose(bin);
+    return -1;
+  }
+// Get data files count
+// TODO(Lawliet): Add support for various count of dat files
+  if (fread(&header.datcount, sizeof(header.datcount), 1, dat) != 1) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+    fclose(dat);
+    fclose(bin);
+    return -1;
+  }
+// Get data size
+// TODO(Lawliet): Add support for checking the size various count of dat files
+  if (fread(&header.datsize, sizeof(header.datsize), 1, dat) != 1) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+    fclose(dat);
+    fclose(bin);
+    return -1;
+  }
+// Check for key
+  if (header.type == type_addon) {
+// Ok, let's get the key...
+    if (fread(&header.addon_key, sizeof(header.addon_key), 1, dat) != 1) {
+      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+      fclose(dat);
+      fclose(bin);
+      return -1;
+    }
+  }
+// Header was parsed. Easiest part is done...
+
   return 0;
 }
 #ifdef _FSMAN_
@@ -592,7 +725,7 @@ int AtomFS::Create(char **input, unsigned int count, char *file,
   header.version = version;
   header.type = type;
 // is this an addon ?
-  if (type == 1) {
+  if (type == type_addon) {
     header.addon_key[0] = wake_key[0];
     header.addon_key[1] = wake_key[1];
     header.addon_key[2] = wake_key[2];
@@ -605,7 +738,7 @@ int AtomFS::Create(char **input, unsigned int count, char *file,
   header.datcount = 1;
   header.datsize = 0;
   datsize = sizeof(HEADER);
-  if (type != 1)
+  if (type != type_addon)
     datsize -= sizeof(header.addon_key);
 // write empty header to file
   if (fwrite("0", datsize, 1, datfile) != 1) {
@@ -760,7 +893,7 @@ int AtomFS::Create(char **input, unsigned int count, char *file,
     return -1;
   }
 // TODO(Lawliet): Check this
-  if (type == 1) {
+  if (type == type_addon) {
     if (fwrite(&header.addon_key, sizeof(header.addon_key), 1, datfile) != 1) {
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
       fclose(datfile);
