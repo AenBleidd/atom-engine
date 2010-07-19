@@ -138,13 +138,13 @@ int main(int arg, char *argc[]) {
           else if (flag_type == 1) {
             flag_type = -1;
             if (strcmp(argc[i], "critical") == 0) {
-              type = 0xFF;
+              type = type_critical;
             }
             else if (strcmp(argc[i], "standart") == 0) {
-              type = 0;
+              type = type_standart;
             }
             else if (strcmp(argc[i], "addon") == 0) {
-              type = 1;
+              type = type_addon;
             }
 // wrong type
             else {
