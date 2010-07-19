@@ -11,8 +11,10 @@
 #include <sys/stat.h>
 #endif  // UNIX
 
+#ifndef UNIX
 #define localtime_r(timep, result)  (localtime (timep) ? memcpy  ((result), \
 localtime (timep), sizeof (*(result))) : 0)
+#endif  // UNIX
 
 #include "../preproc.h"
 

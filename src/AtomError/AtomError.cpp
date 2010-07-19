@@ -49,7 +49,7 @@ AtomLog::AtomLog() {
     if (mkdir("log", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
       snprintf(temppath, t, "%s", "/tmp/");
 #else
-    if (CreateDirectory("log", NULL == 0) {
+    if (CreateDirectory("log", NULL) == 0) {
       GetTempPath(t, temppath);
 #endif  // UNIX
       fprintf(stderr, "Can't create log directory\n");
