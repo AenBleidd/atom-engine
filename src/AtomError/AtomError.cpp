@@ -9,7 +9,7 @@ char* CurDateTime() {
   timeinfo = (tm*) localtime_r(&seconds, timeinfo);
   const unsigned char s = 20;
   char *date = new char[s];
-  snprintf(date, s, "%i.%02i.%02i %02i.%02i.%02i",
+  snprintf(date, s, "%i.%02i.%02i_%02i.%02i.%02i",
           timeinfo->tm_year+1900, timeinfo->tm_mon,
           timeinfo->tm_mday, timeinfo->tm_hour,
           timeinfo->tm_min, timeinfo->tm_sec);
@@ -61,10 +61,10 @@ AtomLog::AtomLog() {
 #endif  // ATOM_DEBUG
 
 #ifdef _FSMAN_
-  snprintf(plogfilename, s, "%s%s %s%s",
+  snprintf(plogfilename, s, "%s%s_%s%s",
            temppath, "fsman", pbuffer, ".log");
 #else
-  snprintf(plogfilename, s, "%s%s %s%s",
+  snprintf(plogfilename, s, "%s%s_%s%s",
            temppath, "atom", pbuffer, ".log");
 #endif  // _FSMAN_
 
@@ -118,22 +118,27 @@ const char *errorcode[] = {
 "No Error.",
 "Core Error. File System Error."
 };
-const char *errorsubcode[] = {
+const char *errorsubcode[2][9] = {
+{
+"No Error."
+},
+{
 "No Error.",
 "Error while opening the file.",
 "Error while reading the file.",
 "Error while parsing the mount file. No closing quotes.",
-"Error while parsing the mount file. To big priority or it's something else.",
+"Error while parsing the mount file.",
 "Error while mounting the file system.",
 "Couldn't open the directory.",
 "Error while writing the file.",
 "Incorrect file."
+}
 };
 // Warning description
 const char *warningcode[] = {
 "No Warning."
 };
-const char *warningsubcode[] = {
+const char *warningsubcode[1][1] = {
 "No Warning."
 };
 void AtomLog::SetLastError(unsigned int code, unsigned int subcode,
@@ -144,7 +149,7 @@ void AtomLog::SetLastError(unsigned int code, unsigned int subcode,
     global_error.description = 0;
   }
   unsigned int errlen = 300 + strlen(errorcode[global_error.code]) +
-                        strlen(errorsubcode[global_error.sub_code]);
+               strlen(errorsubcode[global_error.code][global_error.sub_code]);
   global_error.description = new char[errlen];
   snprintf(global_error.description, errlen, "%s:%i\tERROR: %s\t%s",
            file, line, errorcode[global_error.code],
@@ -160,7 +165,7 @@ void AtomLog::SetLastWarning(unsigned int code, unsigned int subcode,
     global_warning.description = 0;
   }
   unsigned int warnlen = 300 + strlen(warningcode[global_warning.code]) +
-                        strlen(warningsubcode[global_warning.sub_code]);
+         strlen(warningsubcode[global_warning.code][global_warning.sub_code]);
   global_warning.description = new char[warnlen];
   snprintf(global_warning.description, warnlen, "%s:%i\tWARNING: %s\t%s",
            file, line, warningcode[global_warning.code],
