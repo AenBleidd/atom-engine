@@ -37,6 +37,29 @@ AtomLog::AtomLog() {
 #endif  // DEBUG
 #endif  // UNIX
 
+// Check log folder
+#ifdef ATOM_DEBUG
+  FILE *log;
+  if ((log = fopen("log", "r")) == NULL) {
+// One by one, We will fall, down down...
+// Wait a minute ! We have last hope!
+// Lets save logfile in the temp directory.
+// At least this directory MUST be exist...
+#ifdef UNIX
+    if (mkdir("log", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
+      snprintf(temppath, t, "%s", "/tmp/");
+#else
+    if (CreateDirectory("log", NULL == 0) {
+      GetTempPath(t, temppath);
+#endif  // UNIX
+      fprintf(stderr, "Can't create log directory\n");
+    }
+  }
+  else {
+    fclose(log);
+  }
+#endif  // ATOM_DEBUG
+
 #ifdef _FSMAN_
   snprintf(plogfilename, s, "%s%s %s%s",
            temppath, "fsman", pbuffer, ".log");
@@ -47,6 +70,7 @@ AtomLog::AtomLog() {
 
   delete [] temppath;
   delete [] pbuffer;
+
 // open log file
   logfile = fopen(plogfilename, "wt");
   delete [] plogfilename;
@@ -102,7 +126,8 @@ const char *errorsubcode[] = {
 "Error while parsing the mount file. To big priority or it's something else.",
 "Error while mounting the file system.",
 "Couldn't open the directory.",
-"Error while writing the file."
+"Error while writing the file.",
+"Incorrect file."
 };
 // Warning description
 const char *warningcode[] = {
