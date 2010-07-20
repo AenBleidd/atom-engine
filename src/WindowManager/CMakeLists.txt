@@ -1,21 +1,72 @@
-# Window manager project
+# WindowManager module
 # Creates a WindowManager static library 
 # Which is responsible for GUI windows creation and handling.
 
-# CMake compatibility issues: don't modify this, please!
-CMAKE_MINIMUM_REQUIRED ( VERSION  2.6 )
+# WindowManager module parameters
 
-# Perform some general initialization
-INCLUDE ( "${MODULE_PATH}/init.cmake" )
+# Configure modules path
+SET ( MODULE_PATH "${${PROJECT_NAME}_SOURCE_DIR}/../cmake_modules" )
+INCLUDE ( "${MODULE_PATH}/modules.cmake" )
 
-# Project information
-PROJECT ( AtomWM )
+# Command line options, their defaults and checks
 
-# Project version
-SET ( ${PROJECT_NAME}_MAJOR_VERSION "0" )
-SET ( ${PROJECT_NAME}_MINOR_VERSION "1" )
-SET ( ${PROJECT_NAME}_PATCH_LEVEL "0" )
-SET ( ${PROJECT_NAME}_REVISION "0" )
-SET ( ${PROJECT_NAME}_VERSION "${PROJECT_NAME}_MAJOR_VERSION.${PROJECT_NAME}_MINOR_VERSION.SET ( ${PROJECT_NAME}_PATCH_LEVEL Rev. ${PROJECT_NAME}_REVISION" )
+# Set the GUI parameter possible values
+SET ( GUI_TYPES SDL; Native )
 
-INCLUDE ( "${MODULE_PATH}/WindowManager_checks.cmake" )
+# set Window Manager to SDL by default
+IF ( NOT GUI )
+	SET ( GUI SDL )
+ENDIF()
+
+# Check for appropriate GUI parameter
+SET ( GUI_OK:BOOL OFF )
+IF ( DEFINED GUI AND NOT GUI STREQUAL "" )
+	FOREACH ( UI ${GUI_TYPES} )
+		IF ( GUI STREQUAL UI )
+			SET ( GUI_OK ON )
+			BREAK()
+		ENDIF()
+	ENDFOREACH()
+	IF( GUI_OK )
+		IF ( GUI STREQUAL "SDL" )
+			# Perform search on libSDL library
+			FIND_PACKAGE ( SDL REQUIRED )
+			IF ( SDL_FOUND )
+				SET ( SDL_BUILDING_LIBRARY TRUE )
+				INCLUDE_DIRECTORIES ( ${SDL_INCLUDE_DIR} "${${PROJECT_NAME}_SOURCE_DIR}/${ATOMERROR_MODULE}" )
+				ADD_LIBRARY ( ${WM_MODULE} STATIC OWindow SDL/WindowManager )
+				TARGET_LINK_LIBRARIES ( ${WM_MODULE} ${ATOMERROR_MODULE} ${SDL_LIBRARY} )
+			ELSE()
+				MESSAGE ( FATAL_ERROR "No libSDL library found." )
+			ENDIF ( SDL_FOUND )
+		ENDIF( GUI STREQUAL "SDL" )
+		# TODO: ADD MORE LIBRARIES HERE
+	ELSE()
+		MESSAGE ( FATAL_ERROR "No suitable GUI parameter value supplied. Possible values are: ${GUI_VARIANTS}. Please choose one among them." )
+	ENDIF()
+ELSE()
+	MESSAGE ( FATAL_ERROR "No GUI parameter value supplied. Possible values are: ${GUI_VARIANTS}. Please choose one among them." )
+ENDIF()
+
+# Send GUI to cache
+SET ( GUI "${GUI}" CACHE STRING "The library responsible for GUI windows events. Possible values are: ${GUI_VARIANTS}" FORCE )
+
+# Installation instructions for the WindowManager module
+# Please specify the installation instructions sprcific 
+# To the architecture the project is being built for.
+
+IF ( UNIX )
+	INSTALL (
+		TARGETS ${WM_MODULE}
+		RUNTIME DESTINATION bin/${ROOT_PROJECT_NAME}
+		LIBRARY DESTINATION lib/${ROOT_PROJECT_NAME}
+		ARCHIVE DESTINATION lib/static/${ROOT_PROJECT_NAME}
+	)
+ELSEIF ( WIN32 )
+	INSTALL (
+		TARGETS ${WM_MODULE}
+		RUNTIME DESTINATION bin/
+		LIBRARY DESTINATION lib/
+		ARCHIVE DESTINATION lib/static/
+	)
+ENDIF()

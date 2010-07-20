@@ -4,7 +4,7 @@
 #include "../preproc.h"
 
 #ifdef _CRC_CHECK_
-#include "../utils/GameFSManager/crc32.h"
+#include "../utils/FSManager/crc32.h"
 #endif  // _CRC_CHECK_
 
 #include "../AtomError/AtomError.h"

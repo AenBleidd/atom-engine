@@ -1,39 +1,41 @@
-# GameFS project
+# GameFS module
 # Creates a GameFS static library 
-# Which is responsible for file and path handling.
+# Which is responsible for file, path and archive handling.
 
-# CMake compatibility issues: don't modify this, please!
-CMAKE_MINIMUM_REQUIRED ( VERSION  2.6 )
+# GameFS module parameters
 
-# Perform some general initialization
-INCLUDE ( "${MODULE_PATH}/init.cmake" )
+# Configure modules path
+SET ( MODULE_PATH "${${PROJECT_NAME}_SOURCE_DIR}/../cmake_modules" )
+INCLUDE ( "${MODULE_PATH}/modules.cmake" )
 
-# Project information
-PROJECT ( GameFS )
-
-# Project version
-SET ( ${PROJECT_NAME}_MAJOR_VERSION "0" )
-SET ( ${PROJECT_NAME}_MINOR_VERSION "1" )
-SET ( ${PROJECT_NAME}_PATCH_LEVEL "0" )
-SET ( ${PROJECT_NAME}_REVISION "0" )
-SET ( ${PROJECT_NAME}_VERSION "${PROJECT_NAME}_MAJOR_VERSION.${PROJECT_NAME}_MINOR_VERSION.SET ( ${PROJECT_NAME}_PATCH_LEVEL Rev. ${PROJECT_NAME}_REVISION" )
-
-# Make a static library which will be used by the engine
-ADD_LIBRARY ( ${PROJECT_NAME} STATIC gamefs )
-
-# Make a static library which will be used by fsman utility
-ADD_LIBRARY ( ${PROJECT_NAME}_FSMan STATIC gamefs )
-SET_TARGET_PROPERTIES ( ${PROJECT_NAME}_FSMan
-	PROPERTIES COMPILE_FLAGS "-D_FSMANAGER_"
+# Create a static library which will be used by the engine
+# As well as static library to be linked to fsman utility
+ADD_LIBRARY ( ${GAMEFS_MODULE} STATIC gamefs )
+ADD_LIBRARY ( ${GAMEFS_FSMAN_MODULE} STATIC gamefs )
+SET_TARGET_PROPERTIES ( ${GAMEFS_FSMAN_MODULE} PROPERTIES 
+	COMPILE_FLAGS "-D_FSMANAGER_"
 )
 
-# Installation instructions for the window manager
-INSTALL (
-	TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_FSMan
-	RUNTIME DESTINATION bin/${ROOT_PROJECT_NAME}
-	LIBRARY DESTINATION lib/${ROOT_PROJECT_NAME}
-	ARCHIVE DESTINATION lib/static/${ROOT_PROJECT_NAME}
-)
+# Installation instructions for the GameFS module
+# Please specify the installation instructions sprcific 
+# To the architecture the project is being built for.
 
-# Add uninstall target
-ADD_CUSTOM_TARGET ( uninstall_GameFS "${CMAKE_COMMAND}" -P "${PROJECT_BINARY_DIR}/cmake_uninstall.cmake" )
+# TODO: ${GAMEFS_FSMAN_MODULE} should not be installed,
+# it is used only to build fsman utility
+
+IF ( UNIX )
+	INSTALL (
+		TARGETS ${GAMEFS_MODULE} 
+		RUNTIME DESTINATION bin/${ROOT_PROJECT_NAME}
+		LIBRARY DESTINATION lib/${ROOT_PROJECT_NAME}
+		ARCHIVE DESTINATION lib/static/${ROOT_PROJECT_NAME}
+	)
+ELSEIF ( WIN32 )
+	INSTALL (
+		TARGETS ${GAMEFS_MODULE} 
+		RUNTIME DESTINATION bin/
+		LIBRARY DESTINATION lib/
+		ARCHIVE DESTINATION lib/static/
+	)
+ENDIF()
+

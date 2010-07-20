@@ -1,35 +1,35 @@
-# AtomError project
+# AtomError module
 # Creates an AtomError static library 
 # Which is responsible for error handling and debug output.
 
-# CMake compatibility issues: don't modify this, please!
-CMAKE_MINIMUM_REQUIRED ( VERSION  2.6 )
+# AtomError module parameters
 
-# Perform some general initialization
-INCLUDE ( "${MODULE_PATH}/init.cmake" )
+# Configure modules path
+SET ( MODULE_PATH "${${PROJECT_NAME}_SOURCE_DIR}/../cmake_modules" )
+INCLUDE ( "${MODULE_PATH}/modules.cmake" )
 
-# Project information
-PROJECT ( AtomError )
-
-# Project version
-SET ( ${PROJECT_NAME}_MAJOR_VERSION "0" )
-SET ( ${PROJECT_NAME}_MINOR_VERSION "1" )
-SET ( ${PROJECT_NAME}_PATCH_LEVEL "0" )
-SET ( ${PROJECT_NAME}_REVISION "0" )
-SET ( ${PROJECT_NAME}_VERSION "${PROJECT_NAME}_MAJOR_VERSION.${PROJECT_NAME}_MINOR_VERSION.SET ( ${PROJECT_NAME}_PATCH_LEVEL Rev. ${PROJECT_NAME}_REVISION" )
-
+# Some nessessary definitions
 ADD_DEFINITIONS ( "-D_FSMANAGER_" )
 
-ADD_LIBRARY ( ${PROJECT_NAME} STATIC AtomError )
+# Create a static library
+ADD_LIBRARY ( ${ATOMERROR_MODULE} STATIC AtomError )
 
+# Installation instructions for the AtomError module
+# Please specify the installation instructions sprcific 
+# To the architecture the project is being built for.
 
-# Installation instructions for the error handler
-INSTALL (
-	TARGETS ${PROJECT_NAME}
-	RUNTIME DESTINATION bin/${ROOT_PROJECT_NAME}
-	LIBRARY DESTINATION lib/${ROOT_PROJECT_NAME}
-	ARCHIVE DESTINATION lib/static/${ROOT_PROJECT_NAME}
-)
-
-# Add uninstall target
-ADD_CUSTOM_TARGET ( uninstall_AtomError "${CMAKE_COMMAND}" -P "${PROJECT_BINARY_DIR}/cmake_uninstall.cmake" )
+IF ( UNIX )
+	INSTALL (
+		TARGETS ${ATOMERROR_MODULE}
+		RUNTIME DESTINATION bin/${ROOT_PROJECT_NAME}
+		LIBRARY DESTINATION lib/${ROOT_PROJECT_NAME}
+		ARCHIVE DESTINATION lib/static/${ROOT_PROJECT_NAME}
+	)
+ELSEIF ( WIN32 )
+	INSTALL (
+		TARGETS ${ATOMERROR_MODULE}
+		RUNTIME DESTINATION bin/
+		LIBRARY DESTINATION lib/
+		ARCHIVE DESTINATION lib/static/
+	)
+ENDIF()

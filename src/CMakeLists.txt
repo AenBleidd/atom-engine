@@ -3,13 +3,12 @@
 CMAKE_MINIMUM_REQUIRED ( VERSION  2.6 )
 
 # Project information and versioning
-PROJECT ( ATOM )
+PROJECT ( AtomEngine )
 
-# Configure modules path
-SET ( MODULE_PATH "${${PROJECT_NAME}_SOURCE_DIR}/../cmake_modules" )
-
-# Perform some general initialization
-INCLUDE ( "${MODULE_PATH}/init.cmake" )
+# CMake compatibility issues: don't modify this, please!
+MARK_AS_ADVANCED ( CMAKE_BACKWARDS_COMPATIBILITY )
+SET ( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS TRUE )
+SET ( CMAKE_VERBOSE_MAKEFILE ON )
 
 # Project version
 SET ( ${PROJECT_NAME}_MAJOR_VERSION "0" )
@@ -18,29 +17,49 @@ SET ( ${PROJECT_NAME}_PATCH_LEVEL "0" )
 SET ( ${PROJECT_NAME}_REVISION "0" )
 SET ( ${PROJECT_NAME}_VERSION "${PROJECT_NAME}_MAJOR_VERSION.${PROJECT_NAME}_MINOR_VERSION.SET ( ${PROJECT_NAME}_PATCH_LEVEL Rev. ${PROJECT_NAME}_REVISION" )
 
-# Configure this project as the root project
-SET ( ROOT_PROJECT_NAME "${PROJECT_NAME}" )
-SET ( ROOT_PROJECT_DIR "${PROJECT_SOURCE_DIR}/.." )
-SET ( ROOT_PROJECT_SOURCE_DIR "${PROJECT_SOURCE_DIR}" )
-SET ( ROOT_PROJECT_BUILD_DIR "${PROJECT_BINARY_DIR}/.." )
-SET ( ROOT_PROJECT_BINARY_DIR "${PROJECT_BINARY_DIR}/bin" )
-SET ( ROOT_PROJECT_LIBRARY_DIR "${PROJECT_BINARY_DIR}/lib" )
-SET ( OUTPUT_DIR "${ROOT_PROJECT_DIR}/Out" )
+# Command line options, their defaults and checks
 
 # Project configuration types
 SET ( CMAKE_CONFIGURATION_TYPES Release; Debug )
 
-INCLUDE ( "${MODULE_PATH}/ATOM_checks.cmake" )
+# set default cmake build type to Debug
+IF ( NOT CMAKE_BUILD_TYPE )
+    SET ( CMAKE_BUILD_TYPE Debug )
+ENDIF()
+
+# Check for appropriate build parameters
+# If ok BUILD_OK is set to ON
+SET ( BUILD_OK:BOOL OFF )
+IF ( DEFINED CMAKE_BUILD_TYPE )
+	FOREACH ( CFG ${CMAKE_CONFIGURATION_TYPES} )
+		IF ( CMAKE_BUILD_TYPE STREQUAL CFG )
+			SET ( BUILD_OK ON )
+			BREAK()
+		ENDIF()
+	ENDFOREACH()
+	IF ( NOT BUILD_OK )
+		MESSAGE ( FATAL_ERROR "Wrong build type parameter. Possible values for build type are: ${CMAKE_CONFIGURATION_TYPES}. Please choose one of those" )
+	ENDIF()
+ELSE()
+	MESSAGE ( FATAL_ERROR "Build type is not defined. Possible values are: ${CMAKE_CONFIGURATION_TYPES}. Please specify one" )
+ENDIF()
+
+# Nessessary definitions
+
+IF ( UNIX )
+	ADD_DEFINITIONS ( "-DUNIX" )
+ENDIF()
+
+IF ( CMAKE_BUILD_TYPE STREQUAL "Debug" )
+	ADD_DEFINITIONS ( "-DATOM_DEBUG" )
+ENDIF()
 
 # Recurse into subdirectory
 ADD_SUBDIRECTORY ( WindowManager )
 ADD_SUBDIRECTORY ( AtomError )
-ADD_SUBDIRECTORY ( utils )
 ADD_SUBDIRECTORY ( GameFS )
+ADD_SUBDIRECTORY ( utils )
 
 
 # Cache some of the command-line parameters
 SET ( CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING "The build type for the project" FORCE )
-
-# Add uninstall target
-ADD_CUSTOM_TARGET ( uninstall "${CMAKE_COMMAND}" -P "${PROJECT_BINARY_DIR}/cmake_uninstall.cmake" )
