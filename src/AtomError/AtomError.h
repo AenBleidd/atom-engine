@@ -62,8 +62,11 @@ class AtomLog {
 #define LogMessage(string) LogMsg(string,__FILE__,__LINE__);  /*NOLINT*/
 #define DebugMessage(string) DebugMsg(string,__FILE__,__LINE__);  /*NOLINT*/
 
+/* Module General Error Codes */
 #define ERROR_CORE_FS                                                0x00000001
+#define ERROR_ENGINE_WM                                              0x00000002 
 
+/* GameFS Error Codes */
 #define ERROR_OPEN_FILE                                              0x00000001
 #define ERROR_READ_FILE                                              0x00000002
 #define ERROR_PARSE_MOUNT_FILE_QUOTES                                0x00000003
@@ -73,4 +76,7 @@ class AtomLog {
 #define ERROR_WRITE_FILE                                             0x00000007
 #define ERROR_INCORRECT_FILE                                         0x00000008
 
+/* WindowManager Error Codes */
+#define ERROR_WM_SDL_INIT_FAILED                                     0x00000001
+#define ERROR_WM_SDL_WINDOW_CREATION_FAILED                          0x00000002
 #endif  // _CORE_ERROR_H_

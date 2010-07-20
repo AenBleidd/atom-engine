@@ -6,14 +6,14 @@
 class Window : public OWindow
 {
 public:
-	Window(){};
-	~Window(){};
-    void Print();
+    Window( AtomLog* Log );
+	~Window();
 	bool MakeWindow( void );
+	void ResizeWindow( int, int );
+	void Run( void );
 private:
 	bool Init( void );
-	SDL_Surface *screen;
-	SDL_Event event;
+	bool Initialized;
 };
 
 #endif

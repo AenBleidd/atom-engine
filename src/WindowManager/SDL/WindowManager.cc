@@ -1,43 +1,54 @@
+#include <AtomError.h>
 #include "WindowManager.h"
-#include <iostream>
 
-#define WIDTH 800
-#define HEIGHT 600
+#define WIDTH 50
+#define HEIGHT 50
 #define BPP 32
 
-using namespace std;
-
-void Window::Print()
+Window::Window( AtomLog* Log ) : OWindow( Log )
 {
-	char a;
-    cout<<"Hello, World!"<<endl;
-	cin>>&a;
+	if( Init() )
+		Initialized = true;
+	else
+		Initialized = false;
+}
+
+Window::~Window()
+{
+	if( Initialized )
+		SDL_Quit();
 }
 
 bool Window::Init( void )
 {
 	int SDL_INIT_FLAGS = SDL_INIT_VIDEO;
-	int SDL_FLAGS = SDL_HWSURFACE | SDL_DOUBLEBUF;
-	
+
 	if( SDL_Init ( SDL_INIT_FLAGS ) < 0 )
 		return false;
+	return true;
+}
+
+
+bool Window::MakeWindow ( void )
+{
+	if( !Initialized ) 
+	{
+		log->SetLastErr( ERROR_ENGINE_WM, ERROR_WM_SDL_INIT_FAILED );	
+		return false;   
+	}
 		
-	/* Set the video mode */
+	int SDL_FLAGS = SDL_HWSURFACE | SDL_DOUBLEBUF;
+	SDL_Surface *screen;		
+	
 	screen = SDL_SetVideoMode( WIDTH, HEIGHT, BPP, SDL_FLAGS);
 	if ( !screen ) 
 	{
+		log->SetLastErr( ERROR_ENGINE_WM, ERROR_WM_SDL_WINDOW_CREATION_FAILED );	
 		SDL_Quit();
-		return false;	
+		return false;   
 	}
 	
-	/* Paint the background white */
-	if( SDL_FillRect( screen, &screen->clip_rect, SDL_MapRGB( screen->format, 255, 255, 255) ) ) 
-	{
-		SDL_Quit();
-		return false;
-	}	
-	
-	/* Set window title */
+	/* Set a window caption */
 	SDL_WM_SetCaption( "SDL_Window", "SDL_Window" );
 	
 	/* send a video resize event to paint the screen */
@@ -47,15 +58,23 @@ bool Window::Init( void )
 	resizeEvent.resize.h = HEIGHT;
 	SDL_PushEvent(&resizeEvent);	
 	
-	return true;
+	return true; 
 }
 
-bool Window::MakeWindow ( void )
+void Window::ResizeWindow( int width, int height )
 {
-	// Initialize SDL
-	if( !Init() ) 
-		return false;	
-		
+	/* send a video resize event */
+	SDL_Event resizeEvent;
+	resizeEvent.type = SDL_VIDEORESIZE;
+	resizeEvent.resize.w = width;
+	resizeEvent.resize.h = height;
+	SDL_PushEvent(&resizeEvent);		
+}
+
+void Window::Run( void )
+{
+	SDL_Event event;
+	
 	/* Process window message queue */
 	while( true ) {
 		while( SDL_PollEvent( &event ) ) 
@@ -67,26 +86,18 @@ bool Window::MakeWindow ( void )
 
 				case SDL_QUIT:
 					SDL_Quit();
-					return true;
-				break;
+					return;
+					break;
 
 				case SDL_KEYDOWN:
 					if( event.key.keysym.sym == SDLK_ESCAPE )
 						SDL_Quit();
-					return true;
-				break;
+						return;
+					break;
 
 				default:
-				break;
+					break;
 			} /* switch( event.type ) */
-    }  /* while SQL_PollEvent */
-  }  /* while( 1 ) */
-
-  SDL_Quit();
-  return true;		
-}
-
-void Test( void )
-{
-	printf( "This is a test!\n" );
+		}  /* while SQL_PollEvent */
+	}  /* while( 1 ) */
 }
