@@ -116,9 +116,10 @@ return;
 // Errors description
 const char *errorcode[] = {
 "No Error.",
-"Core Error. File System Error."
+"Core Error. File System Error.",
+"Engine Error. WindowManager Error."
 };
-const char *errorsubcode[2][9] = {
+const char *errorsubcode[3][9] = {
 {
 "No Error."
 },
@@ -132,6 +133,11 @@ const char *errorsubcode[2][9] = {
 "Couldn't open the directory.",
 "Error while writing the file.",
 "Incorrect file."
+},
+{
+"No Error"
+"Error while trying to perform libSDL initialization. "
+"Error while creating SDL window"
 }
 };
 // Warning description
