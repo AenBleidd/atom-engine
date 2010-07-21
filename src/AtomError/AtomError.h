@@ -79,5 +79,7 @@ class AtomLog {
 #define ERROR_INCORRECT_FILE                                         0x00000008
 
 /* WindowManager Error Codes */
-#define ERROR_CLSREG_FAILED                                0x00000001
+#define ERROR_CLSREG_FAIL                                            0x00000001
+#define ERROR_WND_CR_FAIL                                            0x00000002
+#define ERROR_INVALID_INPUT_PARAMETER                                0x00000003
 #endif  // _CORE_ERROR_H_
