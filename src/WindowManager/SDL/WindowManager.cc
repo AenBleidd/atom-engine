@@ -1,4 +1,6 @@
 #include <AtomError.h>
+#include <SDL.h>
+#include <SDL_Video.h>
 #include "WindowManager.h"
 
 #define WIDTH 50
@@ -7,10 +9,14 @@
 
 Window::Window( AtomLog* Log ) : OWindow( Log )
 {
+	/* Perform libSDL initialization */
+	
+	Initialized = Created = false;
+	
 	if( Init() )
 		Initialized = true;
 	else
-		Initialized = false;
+		log->SetLastErr( ERROR_ENGINE_WM, ERROR_WM_SDL_INIT_FAILED );	
 }
 
 Window::~Window()
@@ -25,6 +31,11 @@ bool Window::Init( void )
 
 	if( SDL_Init ( SDL_INIT_FLAGS ) < 0 )
 		return false;
+	return true;
+}
+
+bool Window::Create( void )
+{
 	return true;
 }
 
