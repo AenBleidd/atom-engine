@@ -13,10 +13,14 @@ INCLUDE ( "${MODULE_PATH}/modules.cmake" )
 # Set the GUI parameter possible values
 SET ( GUI_TYPES SDL; Native )
 
-# set Window Manager to SDL by default
+# set Window Manager to Native by default
 IF ( NOT GUI )
-	SET ( GUI SDL )
+	SET ( GUI Native )
 ENDIF()
+
+# Add "OWindow.h" and "AtomError.h" directories to the include path
+INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${WM_MODULE}" )
+INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${ATOMERROR_MODULE}" )
 
 # Check for appropriate GUI parameter
 SET ( GUI_OK:BOOL OFF )
@@ -28,18 +32,25 @@ IF ( DEFINED GUI AND NOT GUI STREQUAL "" )
 		ENDIF()
 	ENDFOREACH()
 	IF( GUI_OK )
-		IF ( GUI STREQUAL "SDL" )
-			# Perform search on libSDL library
-			FIND_PACKAGE ( SDL REQUIRED )
-			IF ( SDL_FOUND )
-				SET ( SDL_BUILDING_LIBRARY TRUE )
-				INCLUDE_DIRECTORIES ( ${SDL_INCLUDE_DIR} "${${PROJECT_NAME}_SOURCE_DIR}/${ATOMERROR_MODULE}" )
-				ADD_LIBRARY ( ${WM_MODULE} STATIC OWindow SDL/WindowManager )
-				TARGET_LINK_LIBRARIES ( ${WM_MODULE} ${ATOMERROR_MODULE} ${SDL_LIBRARY} )
-			ELSE()
-				MESSAGE ( FATAL_ERROR "No libSDL library found." )
-			ENDIF ( SDL_FOUND )
-		ENDIF( GUI STREQUAL "SDL" )
+		IF ( GUI STREQUAL "Native" )
+			IF ( WIN32 )
+				SET ( WM_PREFIX "Native/Windows" )
+				ADD_LIBRARY ( ${WM_MODULE} STATIC OWindow ${WM_PREFIX}/WindowManager )
+				TARGET_LINK_LIBRARIES ( ${WM_MODULE} ${ATOMERROR_MODULE} )
+			ENDIF ( WIN32 )
+		ENDIF (GUI STREQUAL "Native")
+		#IF ( GUI STREQUAL "SDL" )
+		#	# Perform search on libSDL library
+		#	FIND_PACKAGE ( SDL REQUIRED )
+		#	IF ( SDL_FOUND )
+		#		SET ( SDL_BUILDING_LIBRARY TRUE )
+		#		INCLUDE_DIRECTORIES ( ${SDL_INCLUDE_DIR} "${${PROJECT_NAME}_SOURCE_DIR}/${ATOMERROR_MODULE}" )
+		#		ADD_LIBRARY ( ${WM_MODULE} STATIC OWindow SDL/WindowManager )
+		#		TARGET_LINK_LIBRARIES ( ${WM_MODULE} ${ATOMERROR_MODULE} ${SDL_LIBRARY} )
+		#	ELSE()
+		#		MESSAGE ( FATAL_ERROR "No libSDL library found." )
+		#	ENDIF ( SDL_FOUND )
+		#ENDIF( GUI STREQUAL "SDL" )
 		# TODO: ADD MORE LIBRARIES HERE
 	ELSE()
 		MESSAGE ( FATAL_ERROR "No suitable GUI parameter value supplied. Possible values are: ${GUI_VARIANTS}. Please choose one among them." )

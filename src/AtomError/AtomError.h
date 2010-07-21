@@ -17,6 +17,7 @@ localtime (timep), sizeof (*(result))) : 0)
 #endif  // UNIX
 
 #include "../preproc.h"
+#define MSG_BUFFER_SIZE 1024
 
 struct ERR {
   int code;
@@ -31,6 +32,7 @@ class AtomLog {
  public:
   AtomLog();
   ~AtomLog();
+  char const* MsgBuf;
  private:
 // global last error and warning
   ERR global_error;
@@ -77,6 +79,5 @@ class AtomLog {
 #define ERROR_INCORRECT_FILE                                         0x00000008
 
 /* WindowManager Error Codes */
-#define ERROR_WM_SDL_INIT_FAILED                                     0x00000001
-#define ERROR_WM_SDL_WINDOW_CREATION_FAILED                          0x00000002
+#define ERROR_CLSREG_FAILED                                0x00000001
 #endif  // _CORE_ERROR_H_

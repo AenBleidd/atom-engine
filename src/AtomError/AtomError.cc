@@ -17,6 +17,7 @@ char* CurDateTime() {
   return date;
 }
 AtomLog::AtomLog() {
+  MsgBuf = ( char* ) malloc( MSG_BUFFER_SIZE );
   const unsigned short s = 355;
   char *plogfilename  = new char[s];
 // get current date and time
@@ -84,6 +85,8 @@ AtomLog::AtomLog() {
 AtomLog::~AtomLog() {
 // close log file
   fclose(logfile);
+  if( MsgBuf )
+    free( ( void* ) MsgBuf );
 }
 void AtomLog::LogMsg(const char *string, const char *file, int line) {
 #ifdef ATOM_DEBUG
@@ -125,19 +128,18 @@ const char *errorsubcode[3][9] = {
 },
 {
 "No Error.",
-"Error while opening the file.",
-"Error while reading the file.",
-"Error while parsing the mount file. No closing quotes.",
-"Error while parsing the mount file.",
-"Error while mounting the file system.",
+"Error opening the file.",
+"Error reading the file.",
+"Error parsing the mount file. No closing quotes.",
+"Error parsing the mount file.",
+"Error mounting the file system.",
 "Couldn't open the directory.",
 "Error while writing the file.",
 "Incorrect file."
 },
 {
 "No Error"
-"Error while trying to perform libSDL initialization. "
-"Error while creating SDL window"
+"Fatal Error: Error registering the window class"
 }
 };
 // Warning description
