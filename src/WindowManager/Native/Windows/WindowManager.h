@@ -11,10 +11,14 @@ public:
     Window( AtomLog* );
     ~Window();
     bool Create( void );
-    void Run( void );
-	static LRESULT CALLBACK WindowProcedure( HWND, UINT, WPARAM, LPARAM );
+    int Run( void );
+    static LRESULT CALLBACK WindowProcedure( HWND, UINT, WPARAM, LPARAM ); // callback event handler
 private:
-	bool InitClass( void );
+    char clsname[0xFF]; // window classname
+    int retval;         // value returned by the function - use for debug purposes only.
+    bool InitClass( void );
+    HWND hWnd;
+    HINSTANCE hInstance;
 };
 
 #endif
