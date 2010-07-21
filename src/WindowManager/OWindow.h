@@ -26,15 +26,15 @@ enum BORDER
 class OWindow
 {
 public:
-	OWindow( AtomLog* );
-	struct properties
-	{
-		unsigned char title[0xFF];
-		int x, y, width, height;
-		VISIBILITY visibility;
-		EFFECT effect;
-		BORDER border;
-	} properties;	
+    OWindow( AtomLog* );
+    struct properties
+    {
+        char* title;
+        int x, y, width, height;
+        VISIBILITY visibility;
+        EFFECT effect;
+        BORDER border;
+    } properties;	
 	virtual bool Create( void ) = 0;
 protected:
 	AtomLog *log;

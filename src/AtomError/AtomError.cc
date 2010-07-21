@@ -138,8 +138,10 @@ const char *errorsubcode[3][9] = {
 "Incorrect file."
 },
 {
-"No Error"
-"Fatal Error: Error registering the window class"
+"No Error",
+"Fatal Error: Error registering the window class",
+"Fatal Errpr: Couldn't create a window",
+"Invalid input parameter"
 }
 };
 // Warning description
