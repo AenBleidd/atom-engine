@@ -17,7 +17,7 @@ char* CurDateTime() {
   return date;
 }
 AtomLog::AtomLog() {
-  MsgBuf = ( char* ) malloc( MSG_BUFFER_SIZE );
+  MsgBuf = new char[MSG_BUFFER_SIZE];
   const unsigned short s = 355;
   char *plogfilename  = new char[s];
 // get current date and time
@@ -86,7 +86,7 @@ AtomLog::~AtomLog() {
 // close log file
   fclose(logfile);
   if( MsgBuf )
-    free( ( void* ) MsgBuf );
+    delete [] MsgBuf;
 }
 void AtomLog::LogMsg(const char *string, const char *file, int line) {
 #ifdef ATOM_DEBUG
@@ -122,7 +122,7 @@ const char *errorcode[] = {
 "Core Error. File System Error.",
 "Engine Error. WindowManager Error."
 };
-const char *errorsubcode[3][9] = {
+const char *errorsubcode[3][10] = {
 {
 "No Error."
 },
@@ -135,7 +135,8 @@ const char *errorsubcode[3][9] = {
 "Error mounting the file system.",
 "Couldn't open the directory.",
 "Error while writing the file.",
-"Incorrect file."
+"Incorrect file.",
+"Incorrect mountpoint"
 },
 {
 "No Error",

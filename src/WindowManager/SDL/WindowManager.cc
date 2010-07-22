@@ -1,6 +1,6 @@
 #include <AtomError.h>
 #include <SDL.h>
-#include <SDL_Video.h>
+//#include <SDL_Video.h>
 #include "WindowManager.h"
 
 #define WIDTH 50
@@ -15,8 +15,8 @@ Window::Window( AtomLog* Log ) : OWindow( Log )
 	
 	if( Init() )
 		Initialized = true;
-	else
-		log->SetLastErr( ERROR_ENGINE_WM, ERROR_WM_SDL_INIT_FAILED );	
+/*	else
+		log->SetLastErr( ERROR_ENGINE_WM, ERROR_WM_SDL_INIT_FAILED );	*/
 }
 
 Window::~Window()
@@ -44,7 +44,7 @@ bool Window::MakeWindow ( void )
 {
 	if( !Initialized ) 
 	{
-		log->SetLastErr( ERROR_ENGINE_WM, ERROR_WM_SDL_INIT_FAILED );	
+//		log->SetLastErr( ERROR_ENGINE_WM, ERROR_WM_SDL_INIT_FAILED );	
 		return false;   
 	}
 		
@@ -54,7 +54,7 @@ bool Window::MakeWindow ( void )
 	screen = SDL_SetVideoMode( WIDTH, HEIGHT, BPP, SDL_FLAGS);
 	if ( !screen ) 
 	{
-		log->SetLastErr( ERROR_ENGINE_WM, ERROR_WM_SDL_WINDOW_CREATION_FAILED );	
+//		log->SetLastErr( ERROR_ENGINE_WM, ERROR_WM_SDL_WINDOW_CREATION_FAILED );	
 		SDL_Quit();
 		return false;   
 	}
