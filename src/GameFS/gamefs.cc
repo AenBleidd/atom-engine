@@ -1,15 +1,21 @@
 #include "gamefs.h"
 AtomFS::AtomFS(AtomLog *log, unsigned int *key) {
+  if (log == 0) {
+// What the ... ???
+    throw -1;
+  }
   atomlog = log;
   wake_key = 0;
-// If class being created without predefined key
+// If class being created with predefined key
   if (key != 0) {
     wake_key = key;
     GenKey(wake_key[0], wake_key[1], wake_key[2], wake_key[3]);
   }
 // create root directory
   root = new TREE_FOLDER;
-  char name[] = "/\0";
+  const unsigned char s = 2;
+  char *name = new char[s];
+  snprintf(name, s, "%s", "/");
   root->name = name;
 #ifdef _FSMAN_
   root->flag |= ff_rw;
@@ -18,6 +24,8 @@ AtomFS::AtomFS(AtomLog *log, unsigned int *key) {
 #endif  // _FSMAN_
   root->tree_folder = 0;
   root->tree_file = 0;
+  root->next_folder = 0;
+  root->parent_folder = 0;
 // Mounting...
 #ifndef _FSMAN_
   if (Mount("mount") == -1) {
@@ -28,7 +36,66 @@ AtomFS::AtomFS(AtomLog *log, unsigned int *key) {
 }
 AtomFS::~AtomFS() {
 // delete root directory
-  delete root;
+  TREE_FOLDER *nextfolder = 0, *tempfolder = 0, *nearfolder = 0;
+  TREE_FILE *nextfile = 0, *tempfile = 0;
+  nextfolder = root;
+  while (true) {
+// it may be the last element
+    if ((nextfolder != 0) && (nextfolder->tree_folder == 0) &&
+        (nextfolder->next_folder == 0) && (nextfolder->tree_file == 0) &&
+        (nextfolder->parent_folder == 0)) {
+// Delete folder
+      delete [] nextfolder->name;
+// deleting...
+      delete nextfolder;
+      nextfolder = 0;
+      break;
+    }
+// check if this folder can be deleted
+    if ((nextfolder != 0) && (nextfolder->tree_folder == 0) &&
+         (nextfolder->next_folder == 0)) {
+      nextfile = nextfolder->tree_file;
+// let's delete all files. it may be easy
+      while (nextfile != 0) {
+        tempfile = nextfile;
+        nextfile = tempfile->tree_file;
+// ok, let's free some memory
+// is the file is closed ?
+        if (tempfile->file != 0) {
+// Hm... it is still opened. Let's close it! He-he.
+          fclose(tempfile->file);
+        }
+// Delete filename
+        delete [] tempfile->name;
+// Delete file
+        delete tempfile;
+        tempfile = 0;
+      }
+// Delete folder
+      delete [] nextfolder->name;
+// one level up
+      tempfolder = nextfolder->parent_folder;
+// I believe it will be zero
+      tempfolder->tree_folder = 0;
+// deleting...
+      delete nextfolder;
+      nextfolder = 0;
+    }
+// we will delete folders from end to begin
+    while (nextfolder != 0) {
+      tempfolder = nextfolder;
+      nextfolder = nextfolder->tree_folder;
+    }
+    nearfolder = tempfolder->next_folder;
+// find last folder in current folder
+    while (nearfolder != 0) {
+      tempfolder = nearfolder;
+      nearfolder = nearfolder->next_folder;
+    }
+// this string must be very important
+    nextfolder = tempfolder;
+  }
+  root = 0;
 }
 // Table generation
 void AtomFS::GenKey(unsigned int k0, unsigned int k1,
@@ -374,6 +441,58 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
     }
   }
 // Header was parsed. Easiest part is done...
+
+// Let's look the mountpont
+// Slash flag
+  bool slash = true;
+// Length of the mountstring
+  unsigned int len = strlen(mountfolder);
+// Temp string (for new branches)
+  char *temp = new char[len];
+// current pointer position within the string
+// we begin the cycle from first element couse zero-element must be root
+  unsigned int pos = 1;
+// another counter
+  unsigned int i = 0;
+// Kyrie!
+// Check for the root directory
+  if (mountfolder[0] != '/') {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_MOUNTPOINT);
+    fclose(dat);
+    fclose(bin);
+    delete [] temp;
+    return -1;
+  }
+  TREE_FOLDER *current = root;
+  while (pos < len) {
+// we meet the slash. what we need to do?
+    if (mountfolder[pos] == '/') {
+// it can't be here...
+      if (slash == true) {
+        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_MOUNTPOINT);
+        fclose(dat);
+        fclose(bin);
+        delete [] temp;
+        return -1;
+      }
+// ok, we have smth here...
+      else {
+// put zero-symbol
+        temp[i] = '\0';
+// let's find this path
+        if (current->tree_folder == 0) {
+// Hm, the folder doesn't have any subfolder. Let's create it!
+          current->tree_folder = new TREE_FOLDER;
+        }
+      }
+    }
+// this is just a symbol
+    else {
+      slash = false;
+      temp[i++] = mountfolder[pos];
+    }
+    pos++;
+  }
 
   return 0;
 }
