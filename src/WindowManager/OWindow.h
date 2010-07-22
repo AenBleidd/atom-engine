@@ -26,6 +26,8 @@ enum BORDER
 	fixed
 };
 
+struct WNDINFO;
+
 class OWindow
 {
 public:
@@ -50,9 +52,38 @@ public:
     virtual bool Hide( void ) = 0;
     virtual bool Minimize( void ) = 0;
     virtual bool Maximize( void ) = 0;
-    virtual bool Restore( void ) = 0;	
+    virtual bool Restore( void ) = 0;
+	virtual bool SetCaption( const char* ) = 0;
+	virtual bool GetCaption( char const*, int ) = 0;
+	virtual bool SetWindowRect( const RECT* ) = 0;
+	virtual bool GetWindowRect( RECT const* ) = 0;
+	virtual bool GetWindowInfo( WNDINFO* ) = 0;
+	virtual bool SetWindowInfo( const WNDINFO* ) = 0;
+	virtual bool GetWindowRect( RECT* ) = 0;
+	virtual bool GetClientRect( RECT* ) = 0;
+	virtual bool Close( void ) = 0;
+	virtual bool Destroy( void ) = 0;
 protected:
 	AtomLog *log;
+};
+
+struct WNDINFO
+{
+	char const* title[0xFF];
+	int x, y, width, height,
+	    client_x, client_y, 
+		client_width, client_height;
+	int IsVisible : 1, 
+	    IsMinimized : 1, 
+		IsMaximized : 1, 
+		IsFullScreen : 1,
+	    IsBorderSizeable : 1, 
+		IsBorderFixed : 1,
+		IsTopMost : 1,
+		HasMinimizeButton : 1,
+		HasMaximizeButton : 1,
+		HasExitButton : 1,
+		HasHelpButton : 1;
 };
 
 #endif

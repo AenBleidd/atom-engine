@@ -142,7 +142,13 @@ const char *errorsubcode[3][10] = {
 "No Error",
 "Fatal Error: Error registering the window class",
 "Fatal Errpr: Couldn't create a window",
-"Invalid input parameter"
+"Invalid input parameter",
+"Error getting window title",
+"Error getting the window info block",
+"Error setting the window text while applying the window info block",
+"Error trying to change window size and dimentions",
+"Error adjusting the client area for a window",
+"Error trying to make window topmost"
 }
 };
 // Warning description
