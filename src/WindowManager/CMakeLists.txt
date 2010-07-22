@@ -34,10 +34,15 @@ IF ( DEFINED GUI AND NOT GUI STREQUAL "" )
 	IF( GUI_OK )
 		IF ( GUI STREQUAL "Native" )
 			IF ( WIN32 )
-				SET ( WM_PREFIX "Native/Windows" )
-				ADD_LIBRARY ( ${WM_MODULE} STATIC OWindow ${WM_PREFIX}/WindowManager )
-				TARGET_LINK_LIBRARIES ( ${WM_MODULE} ${ATOMERROR_MODULE} )
+				SET ( WM_PREFIX "${GUI}/Windows" )
 			ENDIF ( WIN32 )
+			IF ( UNIX )
+				SET ( WM_PREFIX "${GUI}/Unix" )
+			ENDIF ( UNIX )
+
+			# ACHTUNG!!! General build instructions! Do not modify them, please!
+			ADD_LIBRARY ( ${WM_MODULE} STATIC OWindow ${WM_PREFIX}/WindowManager )
+			TARGET_LINK_LIBRARIES ( ${WM_MODULE} ${ATOMERROR_MODULE} )
 		ENDIF (GUI STREQUAL "Native")
 		IF ( GUI STREQUAL "SDL" )
 			# Perform search on libSDL library
