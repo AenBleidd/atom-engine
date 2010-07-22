@@ -483,7 +483,69 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
         if (current->tree_folder == 0) {
 // Hm, the folder doesn't have any subfolder. Let's create it!
           current->tree_folder = new TREE_FOLDER;
+          current->tree_folder->parent_folder = current;
+          current = current->tree_folder;
+#ifdef _FSMAN_
+          current->flag |= ff_rw;
+#else
+          current->flag |= ff_ro;
+#endif  // _FSMAN_
+          current->tree_folder = 0;
+          current->tree_file = 0;
+          current->next_folder = 0;
+// set he name of the folder
+          unsigned int len = strlen(temp);
+          current->name = new char[len];
+          snprintf(current->name, len, "%s", temp);
+// clean
+          temp = 0;
+          i = 0;
         }
+        else if (strcmp(current->tree_folder->name, temp) == 0) {
+// this is a folder we search for
+          current = current->tree_folder;
+          temp = 0;
+          i = 0;
+        }
+        else {
+// my be we can find smth ?
+          current = current->tree_folder;
+          while(true) {
+            if (current->next_folder == 0) {
+// we have nothing
+// we can create it here
+              current->next_folder = new TREE_FOLDER;
+              current->next_folder->parent_folder = current->parent_folder;
+              current = current->next_folder;
+#ifdef _FSMAN_
+              current->flag |= ff_rw;
+#else
+              current->flag |= ff_ro;
+#endif  // _FSMAN_
+              current->tree_folder = 0;
+              current->tree_file = 0;
+              current->next_folder = 0;
+// set he name of the folder
+              unsigned int len = strlen(temp);
+              current->name = new char[len];
+              snprintf(current->name, len, "%s", temp);
+// clean
+              temp = 0;
+              i = 0;
+// nothing to do anymore
+              break;
+            }
+            else if (strcmp(current->name, temp) == 0) {
+// We find it!
+              break;
+            }
+            else {
+// may be next is the folder we search for ?
+              current = current->next_folder;
+            }
+          }
+        }
+// In theory parsing mountpoint is done...
       }
     }
 // this is just a symbol
