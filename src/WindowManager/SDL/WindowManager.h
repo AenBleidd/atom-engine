@@ -14,7 +14,7 @@ public:
 private:
 	bool Init( void );
 	bool Initialized, Created;
-	SDL_Window* window;
+//	SDL_Window* window;
 };
 
 #endif

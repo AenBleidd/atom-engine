@@ -143,6 +143,8 @@ struct RECORD {
 // control check sum (0 if it is a folder)
   unsigned long int crc;
 };
+struct TREE_FILE;
+struct TREE_FOLDER;
 // struct of the file in the file system
 struct TREE_FILE {
 // name of the file
@@ -170,7 +172,9 @@ struct TREE_FILE {
 // addon key (if this is not addon file key MUST be equal zero)
   unsigned int *key;
 // pointer to the next file in folder
-TREE_FILE *tree_file;
+  TREE_FILE *tree_file;
+// pointer to the parent folder
+  TREE_FOLDER *parent_folder;
 };
 // struct of the folder in the file system
 struct TREE_FOLDER {
@@ -178,10 +182,14 @@ struct TREE_FOLDER {
   char* name;
 // flags of the folder
   unsigned char flag;
-// pointer to the next folder
+// pointer to the next folder inside this folder
   TREE_FOLDER *tree_folder;
-// pointer to the next file
+// pointer to the first file inside this folder
   TREE_FILE *tree_file;
+// pointer to the next folder near this folder
+  TREE_FOLDER *next_folder;
+// pointer to the parent folder
+  TREE_FOLDER *parent_folder;
 };
 // FS Class
 class AtomFS {
