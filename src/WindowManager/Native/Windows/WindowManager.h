@@ -11,6 +11,11 @@ public:
     Window( AtomLog* );
     ~Window();
     bool Create( void );
+	bool Show( void );
+    bool Hide( void );
+    bool Minimize( void );
+    bool Maximize( void );
+    bool Restore( void );
     int Run( void );
     static LRESULT CALLBACK WindowProcedure( HWND, UINT, WPARAM, LPARAM ); // callback event handler
 private:
