@@ -2,6 +2,9 @@
 #define _OWINDOW_H
 #include <AtomError.h>
 
+#define OFF 0
+#define ON 1
+
 enum VISIBILITY
 {
 	visible,
@@ -35,7 +38,19 @@ public:
         EFFECT effect;
         BORDER border;
     } properties;	
+    struct buttons
+    {
+        int minimize : 1,
+            maximize : 1,
+            exit : 1,
+            help : 1;
+        } buttons;	
 	virtual bool Create( void ) = 0;
+    virtual bool Show( void ) = 0;
+    virtual bool Hide( void ) = 0;
+    virtual bool Minimize( void ) = 0;
+    virtual bool Maximize( void ) = 0;
+    virtual bool Restore( void ) = 0;	
 protected:
 	AtomLog *log;
 };

@@ -31,19 +31,39 @@ bool Window::Create( void )
 		return false;
     }
 
+	DWORD dwStyle = WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
+	
     /* Set the proper window styles */
-    DWORD dwStyle = WS_CLIPCHILDREN | WS_CLIPSIBLINGS; 
     if( properties.visibility == visible )
         dwStyle |= WS_VISIBLE;
-    if( properties.effect == minimized )
-        dwStyle |= WS_ICONIC;
-    if( properties.effect == maximized )
-        dwStyle |= WS_MAXIMIZE;
 	if( properties.border == sizeable )
-		dwStyle |= WS_BORDER | WS_SIZEBOX | WS_CAPTION | WS_SYSMENU;
+		dwStyle |= WS_BORDER | WS_SIZEBOX;
 	if( properties.border == fixed )
-		dwStyle |= WS_BORDER | WS_DLGFRAME | WS_CAPTION | WS_SYSMENU;
+		dwStyle |= WS_BORDER | WS_DLGFRAME;
 
+    /* TODO:     
+	 * Fix Noborder, Minimized and Maximized styles.
+	 * Add functions:
+	 *   SetWindowInfo()
+	 *   GetWindowInfo()
+	 *   SetCaption()
+	 *   GetCaption()
+	 *   SetPosition()
+	 *   GetPosition()
+	 *   SetDimentions()
+	 *   GetDimentions()
+	 *   Destroy()
+	 */
+
+    /* Set the window control button set */
+
+    if( buttons.minimize )
+        dwStyle |= WS_CAPTION | WS_MINIMIZEBOX;
+    if( buttons.maximize )
+        dwStyle |= WS_CAPTION | WS_MAXIMIZEBOX;	
+    if( buttons.exit )
+        dwStyle |= WS_CAPTION | WS_SYSMENU;
+	
     /* Try to create a native window */
     hWnd = CreateWindowEx (
         0,
@@ -70,9 +90,36 @@ bool Window::Create( void )
 		return false;
     }
 
-    ShowWindow( hWnd, SW_SHOWNORMAL );
-    UpdateWindow( hWnd );
+    if( buttons.minimize )
+	    ShowWindow( hWnd, SW_SHOWMINIMIZED );
+    else if( buttons.maximize )
+	    ShowWindow( hWnd, SW_SHOWMAXIMIZED );
     return true;
+}
+
+bool Window::Show( void )
+{
+    return ShowWindow( hWnd, SW_SHOW );
+}
+
+bool Window::Hide( void )
+{
+    return ShowWindow( hWnd, SW_HIDE );
+}
+
+bool Window::Minimize( void )
+{
+    return ShowWindow( hWnd, SW_MINIMIZE );
+}
+
+bool Window::Maximize( void )
+{
+    return ShowWindow( hWnd, SW_MAXIMIZE );
+}
+
+bool Window::Restore( void )
+{
+    return ShowWindow( hWnd, SW_RESTORE );
 }
 
 int Window::Run( void )
