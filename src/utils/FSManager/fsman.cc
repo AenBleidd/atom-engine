@@ -48,7 +48,7 @@ int main(int arg, char *argc[]) {
       strcmp(argc[1], "--help") == 0 || strcmp(argc[1], "-help") == 0 || \
       strcmp(argc[1], "/?") == 0) {
     atomlog->DebugMessage(help);
-    printf("%s", help);
+    fprintf(stderr, "%s", help);
   }
 // Testing filesystem
   else if (strcmp(argc[1], "-t") == 0 || strcmp(argc[1], "--test") == 0) {
@@ -60,7 +60,7 @@ int main(int arg, char *argc[]) {
       atomfs->Mount(argc[2]);
     } else {
       atomlog->DebugMessage(help);
-      printf("%s", help);
+      fprintf(stderr, "%s", help);
     }
   }
 // Create new file
@@ -183,6 +183,15 @@ int main(int arg, char *argc[]) {
       }
 // Make clean
       delete [] input;
+    } else {
+      atomlog->DebugMessage(help);
+      fprintf(stderr, "%s", help);
+    }
+  }
+  else if (strcmp(argc[1], "-o") == 0 || strcmp(argc[1], "--open") == 0) {
+    if (arg == 3) {
+      snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Open file %s", argc[2]);
+        atomfs->Mount(argc[2], "/");
     } else {
       atomlog->DebugMessage(help);
       fprintf(stderr, "%s", help);
