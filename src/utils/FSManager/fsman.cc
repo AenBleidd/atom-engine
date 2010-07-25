@@ -41,7 +41,7 @@ int main(int arg, char *argc[]) {
   snprintf(version, versionlen, "Start fsman version %s", _FSMAN_VERSION_);
   atomlog->LogMessage(version);
   delete [] version;
-/*NOLINT*/  char help[] = "File System Manager - utility to work with Atom File System\nOptions:\n\t-t, --test\t\tTest default file system with standart mount file\n\t-t, --test [mountfile]\tTest file system\n\t-n, --new\t\tCreate new file\n\t\t-o [output]\t\tOutput file name\n\t\t-i [input]\t\tInput file and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t [type]\t\tType of new file (critical, standart, addon)\n";
+/*NOLINT*/  char help[] = "File System Manager - utility to work with Atom File System\nOptions:\n\t-t, --test\t\tTest default file system with standart mount file\n\t-t, --test [mountfile]\tTest file system\n\t-n, --new\t\tCreate new file\n\t\t-o [output]\t\tOutput file name\n\t\t-i [input]\t\tInput file and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t [type]\t\tType of new file (critical, standart, addon)\n\t-o, --open [input]\tOpen file for reading\n";
   try { atomfs = new AtomFS(atomlog); }
   catch(int i) { }
   if (arg == 1 || strcmp(argc[1], "-h") == 0 || \
