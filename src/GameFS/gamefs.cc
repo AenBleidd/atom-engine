@@ -36,6 +36,7 @@ AtomFS::AtomFS(AtomLog *log, unsigned int *key) {
 }
 AtomFS::~AtomFS() {
 // delete root directory
+// TODO(Lawliet): Close all open bin files
   TREE_FOLDER *nextfolder = 0, *tempfolder = 0, *nearfolder = 0;
   TREE_FILE *nextfile = 0, *tempfile = 0;
   nextfolder = root;
@@ -62,7 +63,7 @@ AtomFS::~AtomFS() {
 // ok, let's free some memory
 // is the file is closed ?
         if (tempfile->file != 0) {
-// Hm... it is still opened. Let's close it! He-he.
+// Hm... it is stil opened. Let's close it! He-he.
           fclose(tempfile->file);
         }
 // Delete filename
@@ -342,6 +343,21 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
 // Cleaning...
   delete [] binfile;
   delete [] datfile;
+// check filesize
+  if (fseek(dat, 0, SEEK_END) != 0) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+    fclose(dat);
+    fclose(bin);
+    return -1;
+  }
+  unsigned long int datfilesize = ftell(dat) - 1;
+  if (datfilesize == -1L) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+    fclose(dat);
+    fclose(bin);
+    return -1;
+  }
+  rewind(dat);
 // Lets get start info about opened files
   HEADER header;
 // Get magic signature
@@ -592,9 +608,9 @@ temprecord = new RECORD;
     return -1;
   }
 // Get the name.
-  temprecord->name = new char[temprecord->namelen];
-  if (fread(temprecord->name, temprecord->namelen, sizeof(temprecord->namelen),
-      dat) != 1) {
+  temprecord->name = new char[temprecord->namelen + 1];
+  if (fread(temprecord->name, 1, temprecord->namelen, dat) !=
+      temprecord->namelen) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
     fclose(dat);
     fclose(bin);
@@ -613,31 +629,16 @@ temprecord = new RECORD;
   }
 // Clean
   delete [] temprecord->name;
-  delete [] temprecord;
-  temprecord = new RECORD;
-// Get the folder end flag
-    if (fread(&temprecord->flag, sizeof(temprecord->flag), 1, dat) != 1) {
-    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-    fclose(dat);
-    fclose(bin);
-    delete temprecord;
-    return -1;
-  }
-// Check it
-  if (temprecord->flag != flag_eoc) {
-    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
-    fclose(dat);
-    fclose(bin);
-    delete temprecord;
-    return -1;
-  }
-// Clean
   delete temprecord;
 // flag for elements that we fing somewhere
   bool bfound = false;
   TREE_FILE *tempfile = 0;
 // At least we will mount smth!
   while (true) {
+// check for file end
+    if (datfilesize == ftell(dat) - 1) {
+      break;
+    }
     temprecord = new RECORD;
 // Get the flag
     if (fread(&temprecord->flag, sizeof(temprecord->flag), 1, dat) != 1) {
@@ -658,7 +659,7 @@ temprecord = new RECORD;
         return -1;
       }
 // Get the name.
-      temprecord->name = new char[temprecord->namelen];
+      temprecord->name = new char[temprecord->namelen + 1];
       if (fread(temprecord->name, 1, temprecord->namelen, dat) !=
           temprecord->namelen) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
@@ -789,7 +790,7 @@ temprecord = new RECORD;
         return -1;
       }
 // Get the name.
-      temprecord->name = new char[temprecord->namelen];
+      temprecord->name = new char[temprecord->namelen + 1];
       if (fread(temprecord->name, 1, temprecord->namelen, dat) !=
           temprecord->namelen) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
@@ -847,7 +848,7 @@ temprecord = new RECORD;
     else if (temprecord->flag == flag_eoc) {
 // this is the end of folder
 // we will move to the one level up
-// TODO(Lawliet): Add check for the superfluous flag
+// TODO(Lawliet): Add check for the superfluous of the flag
       if (current->parent_folder != 0) {
         current = current->parent_folder;
       }
@@ -861,6 +862,8 @@ temprecord = new RECORD;
       return -1;
     }
   }
+// Close data file
+  fclose(dat);
   snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
            "%s was successfully mounted", filename);
   atomlog->DebugMessage(atomlog->MsgBuf);
@@ -906,7 +909,7 @@ int AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int level = 0) {
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
       return -1;
     }
-    if (fwrite(&record.name, 1, record.namelen, dat) != record.namelen) {
+    if (fwrite(record.name, 1, record.namelen, dat) != record.namelen) {
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
       return -1;
     }
@@ -1113,7 +1116,7 @@ int AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
     return -1;
   }
-  if (fwrite(&record.name, 1, record.namelen, dat) != record.namelen) {
+  if (fwrite(record.name, 1, record.namelen, dat) != record.namelen) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
     return -1;
   }
@@ -1259,7 +1262,7 @@ int AtomFS::Create(char **input, unsigned int count, char *file,
         delete [] record.name;
         return -1;
   }
-  if (fwrite(&record.name, 1, record.namelen, datfile) != record.namelen) {
+  if (fwrite(record.name, 1, record.namelen, datfile) != record.namelen) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
         fclose(datfile);
         fclose(binfile);

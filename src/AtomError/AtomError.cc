@@ -168,12 +168,14 @@ void AtomLog::SetLastError(unsigned int code, unsigned int subcode,
     delete [] global_error.description;
     global_error.description = 0;
   }
+  global_error.code = code;
+  global_error.sub_code = subcode;
   unsigned int errlen = 300 + strlen(errorcode[global_error.code]) +
                strlen(errorsubcode[global_error.code][global_error.sub_code]);
   global_error.description = new char[errlen];
   snprintf(global_error.description, errlen, "%s:%i\tERROR: %s\t%s",
            file, line, errorcode[global_error.code],
-           errorsubcode[global_error.sub_code]);
+           errorsubcode[global_error.code][global_error.sub_code]);
 // log the error
   LogMsg(global_error.description);
 }
@@ -184,12 +186,14 @@ void AtomLog::SetLastWarning(unsigned int code, unsigned int subcode,
     delete [] global_warning.description;
     global_warning.description = 0;
   }
+  global_warning.code = code;
+  global_warning.sub_code = subcode;
   unsigned int warnlen = 300 + strlen(warningcode[global_warning.code]) +
          strlen(warningsubcode[global_warning.code][global_warning.sub_code]);
   global_warning.description = new char[warnlen];
   snprintf(global_warning.description, warnlen, "%s:%i\tWARNING: %s\t%s",
            file, line, warningcode[global_warning.code],
-           warningsubcode[global_warning.sub_code]);
+           warningsubcode[global_warning.code][global_warning.sub_code]);
 // log the error
   LogMsg(global_warning.description);
 
