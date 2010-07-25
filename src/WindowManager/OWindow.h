@@ -5,6 +5,15 @@
 #define OFF 0
 #define ON 1
 
+#ifdef UNIX
+typedef struct _RECT {
+  long left;
+  long top;
+  long right;
+  long bottom;
+} RECT, *PRECT;
+#endif  // UNIX
+
 enum VISIBILITY
 {
 	visible,
