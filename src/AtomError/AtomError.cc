@@ -122,7 +122,7 @@ const char *errorcode[] = {
 "Core Error. File System Error.",
 "Engine Error. WindowManager Error."
 };
-const char *errorsubcode[3][10] = {
+const char *errorsubcode[3][11] = {
 {
 "No Error."
 },
@@ -136,7 +136,8 @@ const char *errorsubcode[3][10] = {
 "Couldn't open the directory.",
 "Error while writing the file.",
 "Incorrect file.",
-"Incorrect mountpoint"
+"Incorrect mountpoint",
+"Can't overwrite the file."
 },
 {
 "No Error",
@@ -153,10 +154,12 @@ const char *errorsubcode[3][10] = {
 };
 // Warning description
 const char *warningcode[] = {
-"No Warning."
+"No Warning.",
+"Core Warning. File System Warning."
 };
-const char *warningsubcode[1][1] = {
-"No Warning."
+const char *warningsubcode[1][2] = {
+"No Warning.",
+"File was overwritten."
 };
 void AtomLog::SetLastError(unsigned int code, unsigned int subcode,
                            const char* file, int line) {

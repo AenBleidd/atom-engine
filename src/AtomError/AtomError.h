@@ -78,6 +78,7 @@ class AtomLog {
 #define ERROR_WRITE_FILE                                             0x00000007
 #define ERROR_INCORRECT_FILE                                         0x00000008
 #define ERROR_INCORRECT_MOUNTPOINT                                   0x00000009
+#define ERROR_OVERWRITE_DENIED                                       0x0000000A
 
 /* WindowManager Error Codes */
 #define ERROR_CLSREG_FAIL                                            0x00000001
@@ -86,8 +87,15 @@ class AtomLog {
 #define ERROR_CLSUNREG_FAIL                                          0x00000004
 #define ERROR_TITLE                                                  0x00000005
 #define ERROR_WINDOWINFO_QUERY_FAIL                                  0x00000006
-#define ERROR_WINDOWINFO_SETTEXT                                     0x00000007  
+#define ERROR_WINDOWINFO_SETTEXT                                     0x00000007
 #define ERROR_MVWIN_FAIL                                             0x00000008
 #define ERROR_ADJUSTRECT_FAIL                                        0x00000009
 #define ERROR_BRING_TO_TOP                                           0x0000000A
+
+/* Module General Warning Codes */
+#define WARNING_CORE_FS                                              0x00000001
+
+/* GameFS Warning Codes */
+#define WARNING_OVERWRITE                                            0x00000001
+
 #endif  // _CORE_ERROR_H_

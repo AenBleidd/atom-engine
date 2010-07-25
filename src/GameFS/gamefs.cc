@@ -545,7 +545,7 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
             }
           }
         }
-// In theory parsing mountpoint is done...
+// In theory parsing the mountpoint is done...
       }
     }
 // this is just a symbol
@@ -555,7 +555,315 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
     }
     pos++;
   }
+// Mounting...
+// First must be root directory
+RECORD *temprecord;
+temprecord = new RECORD;
+// Get the flag
+  if (fread(&temprecord->flag, sizeof(temprecord->flag), 1, dat) != 1) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+    fclose(dat);
+    fclose(bin);
+    delete temprecord;
+    return -1;
+  }
+// Check it
+  if (temprecord->flag != flag_folder) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
+    fclose(dat);
+    fclose(bin);
+    delete temprecord;
+    return -1;
+  }
+// Get namelen
+  if (fread(&temprecord->namelen, sizeof(temprecord->namelen), 1, dat) != 1) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+    fclose(dat);
+    fclose(bin);
+    delete temprecord;
+    return -1;
+  }
+// Check namelen. It must be equal 1
+  if (temprecord->namelen != 1) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
+    fclose(dat);
+    fclose(bin);
+    delete temprecord;
+    return -1;
+  }
+// Get the name.
+  temprecord->name = new char[temprecord->namelen];
+  if (fread(temprecord->name, temprecord->namelen, sizeof(temprecord->namelen),
+      dat) != 1) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+    fclose(dat);
+    fclose(bin);
+    delete [] temprecord->name;
+    delete temprecord;
+    return -1;
+  }
+// Check the name. It must be root
+  if (strcmp(temprecord->name, "/") != 0) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
+    fclose(dat);
+    fclose(bin);
+    delete [] temprecord->name;
+    delete temprecord;
+    return -1;
+  }
+// Clean
+  delete [] temprecord->name;
+  delete [] temprecord;
+  temprecord = new RECORD;
+// Get the folder end flag
+    if (fread(&temprecord->flag, sizeof(temprecord->flag), 1, dat) != 1) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+    fclose(dat);
+    fclose(bin);
+    delete temprecord;
+    return -1;
+  }
+// Check it
+  if (temprecord->flag != flag_eoc) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
+    fclose(dat);
+    fclose(bin);
+    delete temprecord;
+    return -1;
+  }
+// Clean
+  delete temprecord;
+// flag for elements that we fing somewhere
+  bool bfound = false;
+  TREE_FILE *tempfile = 0;
+// At least we will mount smth!
+  while (true) {
+    temprecord = new RECORD;
+// Get the flag
+    if (fread(&temprecord->flag, sizeof(temprecord->flag), 1, dat) != 1) {
+      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+      fclose(dat);
+      fclose(bin);
+      delete temprecord;
+      return -1;
+    }
+// Check the flag
+    if (temprecord->flag == flag_file) {
+// Get namelen
+      if (fread(&temprecord->namelen, sizeof(temprecord->namelen), 1, dat) != 1) {
+        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+        fclose(dat);
+        fclose(bin);
+        delete temprecord;
+        return -1;
+      }
+// Get the name.
+      temprecord->name = new char[temprecord->namelen];
+      if (fread(temprecord->name, 1, temprecord->namelen, dat) !=
+          temprecord->namelen) {
+        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+        fclose(dat);
+        fclose(bin);
+        delete [] temprecord->name;
+        delete temprecord;
+        return -1;
+      }
+// Get the size
+      if (fread(&temprecord->size, sizeof(temprecord->size), 1, dat) != 1) {
+        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+        fclose(dat);
+        fclose(bin);
+        delete [] temprecord->name;
+        delete temprecord;
+        return -1;
+      }
+// Get the offset
+        if (fread(&temprecord->offset, sizeof(temprecord->offset), 1, dat) !=
+            1) {
+        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+        fclose(dat);
+        fclose(bin);
+        delete [] temprecord->name;
+        delete temprecord;
+        return -1;
+      }
+// Get crc
+        if (fread(&temprecord->crc, sizeof(temprecord->crc), 1, dat) != 1) {
+        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+        fclose(dat);
+        fclose(bin);
+        delete [] temprecord->name;
+        delete temprecord;
+        return -1;
+      }
+// Search fo the file
+      bfound = false;
+      if (current->tree_file == 0) {
+        current->tree_file = new TREE_FILE;
+        current->tree_file->parent_folder = current;
+        current->tree_file->tree_file = 0;
+        current->tree_file->name = temprecord->name;
+        current->tree_file->size = temprecord->size;
+        current->tree_file->offset = temprecord->offset;
+        current->tree_file->flag = root->flag;
+#ifdef _CRC_CHECK_
+        current->tree_file->crc = temprecord->crc;
+#endif  // _CRC_CHECK_
+        current->tree_file->id = bin;
+        current->tree_file->priority = header.type;
+        current->tree_file->file = 0;
+        current->tree_file->descriptor = 0;
+        if (header.type = type_addon) {
+          current->tree_file->key = header.addon_key;
+        }
+      } else {
+        if (strcmp(current->tree_file->name, temprecord->name) == 0) {
+          bfound = true;
+        } else {
+          tempfile = current->tree_file;
+          while (tempfile->tree_file != 0) {
+            if (strcmp(tempfile->name, temprecord->name) == 0) {
+              snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
+                       "Overwtiting the file %s", temprecord->name);
+              atomlog->LogMessage(atomlog->MsgBuf);
+              if ((tempfile->priority == type_critical) ||
+                  (header.type < tempfile->priority)) {
+                atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OVERWRITE_DENIED);
+                fclose(bin);
+                fclose(dat);
+                delete [] temprecord->name;
+                delete temprecord;
+                return -1;
+              } else {
+                atomlog->SetLastWrn(WARNING_CORE_FS, WARNING_OVERWRITE)
+                tempfile->name = temprecord->name;
+                tempfile->size = temprecord->size;
+                tempfile->offset = temprecord->offset;
+                tempfile->flag = root->flag;
+#ifdef _CRC_CHECK_
+                tempfile->crc = temprecord->crc;
+#endif  // _CRC_CHECK_
+                tempfile->id = bin;
+                tempfile->priority = header.type;
+                tempfile->file = 0;
+                tempfile->tree_file->descriptor = 0;
+                if (header.type = type_addon) {
+                  tempfile->tree_file->key = header.addon_key;
+                }
+              }
+              bfound = true;
+              break;
+            } else {
+              tempfile = tempfile->tree_file;
+            }
+          }
+        }
+        if (bfound == false) {
+          tempfile->tree_file = new TREE_FILE;
+          tempfile->tree_file->parent_folder = current;
+          tempfile->tree_file->tree_file = 0;
+          tempfile->tree_file->name = temprecord->name;
+          tempfile->tree_file->size = temprecord->size;
+          tempfile->tree_file->offset = temprecord->offset;
+          tempfile->tree_file->flag = root->flag;
+#ifdef _CRC_CHECK_
+          tempfile->tree_file->crc = temprecord->crc;
+#endif  // _CRC_CHECK_
+          tempfile->tree_file->id = bin;
+          tempfile->tree_file->priority = header.type;
+          tempfile->tree_file->file = 0;
+          tempfile->tree_file->descriptor = 0;
+          if (header.type = type_addon) {
+            tempfile->tree_file->key = header.addon_key;
+          }
+        }
+      }
+    }
+    else if (temprecord->flag == flag_folder) {
+// Get namelen
+      if (fread(&temprecord->namelen, sizeof(temprecord->namelen), 1, dat) != 1) {
+        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+        fclose(dat);
+        fclose(bin);
+        delete temprecord;
+        return -1;
+      }
+// Get the name.
+      temprecord->name = new char[temprecord->namelen];
+      if (fread(temprecord->name, 1, temprecord->namelen, dat) !=
+          temprecord->namelen) {
+        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+        fclose(dat);
+        fclose(bin);
+        delete [] temprecord->name;
+        delete temprecord;
+        return -1;
+      }
+// Search for this folder
+      bfound = false;
+      if (current->tree_folder == 0) {
+// Set info to file system
+      current->tree_folder = new TREE_FOLDER;
+      current->tree_folder->parent_folder = current;
+      current = current->tree_folder;
+      current->name = temprecord->name;
+      current->flag = root->flag;
+      current->tree_folder = 0;
+      current->tree_file = 0;
+      current->next_folder = 0;
+      delete temprecord;
+      } else {
+        if (strcmp(current->tree_folder->name, temprecord->name) == 0) {
+// we found it
+          bfound = true;
+          current = current->tree_folder;
+        } else {
+          current = current->tree_folder;
+          while (current->next_folder != 0) {
+            if (strcmp(current->next_folder->name, temprecord->name) == 0) {
+// we found it
+              bfound = true;
+              current = current->next_folder;
+              break;
+            }
+            current = current->next_folder;
+          }
+        }
+        if (bfound == false) {
+// Set info to file system
+          current->next_folder = new TREE_FOLDER;
+          current->next_folder->parent_folder = current->parent_folder;
+          current = current->next_folder;
+          current->name = temprecord->name;
+          current->flag = root->flag;
+          current->tree_folder = 0;
+          current->tree_file = 0;
+          current->next_folder = 0;
+          delete temprecord;
 
+        }
+      }
+    }
+    else if (temprecord->flag == flag_eoc) {
+// this is the end of folder
+// we will move to the one level up
+// TODO(Lawliet): Add check for the superfluous flag
+      if (current->parent_folder != 0) {
+        current = current->parent_folder;
+      }
+      delete temprecord;
+    }
+    else {
+      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
+      fclose(dat);
+      fclose(bin);
+      delete temprecord;
+      return -1;
+    }
+  }
+  snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
+           "%s was successfully mounted", filename);
+  atomlog->DebugMessage(atomlog->MsgBuf);
   return 0;
 }
 #ifdef _FSMAN_
