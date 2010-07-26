@@ -36,15 +36,58 @@ AtomFS::AtomFS(AtomLog *log, unsigned int *key) {
 }
 AtomFS::~AtomFS() {
 // delete root directory
-// TODO(Lawliet): Close all open bin files
   TREE_FOLDER *nextfolder = 0, *tempfolder = 0, *nearfolder = 0;
-  TREE_FILE *nextfile = 0, *tempfile = 0;
+  TREE_FILE *nextfile = 0, *tempfile = 0, *temphead = 0, *tempcurrent = 0;
   nextfolder = root;
   while (true) {
 // it may be the last element
     if ((nextfolder != 0) && (nextfolder->tree_folder == 0) &&
-        (nextfolder->next_folder == 0) && (nextfolder->tree_file == 0) &&
-        (nextfolder->parent_folder == 0)) {
+        (nextfolder->next_folder == 0) && (nextfolder->parent_folder == 0)) {
+      nextfile = nextfolder->tree_file;
+// let's delete all files. it may be easy
+      while (nextfile != 0) {
+        tempfile = nextfile;
+        nextfile = tempfile->tree_file;
+// ok, let's free some memory
+// is the file is closed ?
+        if (tempfile->file != 0) {
+// Hm... it is stil opened. Let's close it! He-he.
+          fclose(tempfile->file);
+        }
+// Save open file
+        if (temphead == 0) {
+          temphead = new TREE_FILE;
+          temphead->tree_file = 0;
+          tempcurrent = temphead;
+          tempcurrent->id = tempfile->id;
+          tempfile->id = 0;
+        } else {
+          tempcurrent = temphead;
+          if (tempcurrent->id == tempfile->id) {
+            tempfile->id = 0;
+          } else {
+            while (tempcurrent->tree_file != 0) {
+              tempcurrent = tempcurrent->tree_file;
+              if (tempcurrent->id == tempfile->id) {
+                tempfile->id = 0;
+                break;
+              }
+            }
+          }
+        }
+// If we don't find it
+        if (tempfile->id != 0) {
+          tempcurrent->tree_file = new TREE_FILE;
+          tempcurrent->id = tempfile->id;
+          tempfile->id = 0;
+          tempcurrent->tree_file = 0;
+        }
+// Delete filename
+        delete [] tempfile->name;
+// Delete file
+        delete tempfile;
+        tempfile = 0;
+      }
 // Delete folder
       delete [] nextfolder->name;
 // deleting...
@@ -54,7 +97,7 @@ AtomFS::~AtomFS() {
     }
 // check if this folder can be deleted
     if ((nextfolder != 0) && (nextfolder->tree_folder == 0) &&
-         (nextfolder->next_folder == 0)) {
+         (nextfolder->next_folder == 0) && (nextfolder->parent_folder != 0)) {
       nextfile = nextfolder->tree_file;
 // let's delete all files. it may be easy
       while (nextfile != 0) {
@@ -97,6 +140,26 @@ AtomFS::~AtomFS() {
     nextfolder = tempfolder;
   }
   root = 0;
+// Lets close all opened files!
+  if (temphead->tree_file == 0) {
+    if (temphead->id != 0) {
+      fclose (temphead->id);
+      temphead->id = 0;
+    }
+    delete temphead;
+    temphead = 0;
+  } else {
+    while (temphead->tree_file != 0) {
+      tempcurrent = temphead->tree_file;
+      temphead = tempcurrent->tree_file;
+      if (tempcurrent->id != 0) {
+        fclose(tempcurrent->id);
+        tempcurrent->id = 0;
+      }
+      delete tempcurrent;
+      tempcurrent = 0;
+    }
+  }
 }
 // Table generation
 void AtomFS::GenKey(unsigned int k0, unsigned int k1,
@@ -514,13 +577,16 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
           current->name = new char[len];
           snprintf(current->name, len, "%s", temp);
 // clean
-          temp = 0;
+          delete [] temp;
+          temp = new char[(len - pos) +1];
           i = 0;
         }
         else if (strcmp(current->tree_folder->name, temp) == 0) {
 // this is a folder we search for
           current = current->tree_folder;
-          temp = 0;
+// clean
+          delete [] temp;
+          temp = new char[(len - pos) +1];
           i = 0;
         }
         else {
@@ -546,7 +612,8 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
               current->name = new char[len];
               snprintf(current->name, len, "%s", temp);
 // clean
-              temp = 0;
+              delete [] temp;
+              temp = new char[(len - pos) +1];
               i = 0;
 // nothing to do anymore
               break;
@@ -571,6 +638,9 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
     }
     pos++;
   }
+// Some clean
+  delete [] temp;
+  temp = 0;
 // Mounting...
 // First must be root directory
 RECORD *temprecord;
@@ -717,9 +787,16 @@ temprecord = new RECORD;
         if (header.type = type_addon) {
           current->tree_file->key = header.addon_key;
         }
+// Clean
+        delete temprecord;
+        temprecord = 0;
       } else {
         if (strcmp(current->tree_file->name, temprecord->name) == 0) {
           bfound = true;
+// Clean
+          delete [] temprecord->name;
+          delete temprecord;
+          temprecord = 0;
         } else {
           tempfile = current->tree_file;
           while (tempfile->tree_file != 0) {
@@ -751,6 +828,9 @@ temprecord = new RECORD;
                 if (header.type = type_addon) {
                   tempfile->tree_file->key = header.addon_key;
                 }
+// Clean
+                delete temprecord;
+                temprecord = 0;
               }
               bfound = true;
               break;
@@ -777,6 +857,9 @@ temprecord = new RECORD;
           if (header.type = type_addon) {
             tempfile->tree_file->key = header.addon_key;
           }
+// Clean
+          delete temprecord;
+          temprecord = 0;
         }
       }
     }
@@ -813,10 +896,15 @@ temprecord = new RECORD;
       current->tree_file = 0;
       current->next_folder = 0;
       delete temprecord;
+      temprecord = 0;
       } else {
         if (strcmp(current->tree_folder->name, temprecord->name) == 0) {
 // we found it
           bfound = true;
+// Clean
+          delete [] temprecord->name;
+          delete temprecord;
+          temprecord = 0;
           current = current->tree_folder;
         } else {
           current = current->tree_folder;
@@ -824,6 +912,10 @@ temprecord = new RECORD;
             if (strcmp(current->next_folder->name, temprecord->name) == 0) {
 // we found it
               bfound = true;
+// Clean
+              delete [] temprecord->name;
+              delete temprecord;
+              temprecord = 0;
               current = current->next_folder;
               break;
             }
@@ -841,7 +933,7 @@ temprecord = new RECORD;
           current->tree_file = 0;
           current->next_folder = 0;
           delete temprecord;
-
+          temprecord = 0;
         }
       }
     }
@@ -853,6 +945,7 @@ temprecord = new RECORD;
         current = current->parent_folder;
       }
       delete temprecord;
+      temprecord = 0;
     }
     else {
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
