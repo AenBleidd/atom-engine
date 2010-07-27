@@ -248,6 +248,8 @@ class AtomFS {
   int FolderScan(char *ch, FILE *dat, FILE *bin, int level);
 // Write data from added files
   int Write(char *in,  FILE *dat, FILE *bin);
+// Navigate VirtualFS
+  int Navigate(void);
 #endif  // _FSMAN_
 };
 
