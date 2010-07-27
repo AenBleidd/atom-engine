@@ -113,7 +113,7 @@ int AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int level = 0) {
 #ifdef UNIX
         if (eps[cnt]->d_type == DT_REG) {  // it is a file
           stat64(eps[cnt]->d_name, &st);
-          curdir = eps[cnt]->d_name; // but it is a file not folder
+          curdir = eps[cnt]->d_name;  // but it is a file not folder
           const unsigned short sk = strlen(eps[cnt]->d_name) + 45;
           long int fsize = (long int)st.st_size;
 #else
@@ -282,7 +282,7 @@ int AtomFS::Create(char **input, unsigned int count, char *file,
   datsize = 0;
 // Generate crypt key
 // If crypt key is predefined new key is ignored
-  if(wake_key == 0) {
+  if (wake_key == 0) {
     wake_key = key;
     GenKey(wake_key[0], wake_key[1], wake_key[2], wake_key[3]);
   }
@@ -434,7 +434,7 @@ int AtomFS::Create(char **input, unsigned int count, char *file,
     else if (S_ISREG(st.st_mode) == true) {  // it is a file
       long int size = (long int)st.st_size;
 #else
-    else {
+    else {  /*NOLINT*/
       long int size = (st.nFileSizeHigh * (MAXDWORD+1)) + st.nFileSizeLow;
 #endif  // UNIX
       const unsigned short s = strlen(input[i]) + 45;

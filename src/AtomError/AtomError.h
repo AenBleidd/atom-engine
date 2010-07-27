@@ -13,7 +13,7 @@
 
 #ifndef UNIX
 #define localtime_r(timep, result)  (localtime (timep) ? memcpy  ((result), \
-localtime (timep), sizeof (*(result))) : 0)
+localtime (timep), sizeof (*(result))) : 0)  /*NOLINT*/
 #endif  // UNIX
 
 #include "../preproc.h"
@@ -97,5 +97,6 @@ class AtomLog {
 
 /* GameFS Warning Codes */
 #define WARNING_OVERWRITE                                            0x00000001
+#define WARNING_EMPTY_STRING                                         0x00000002
 
 #endif  // _CORE_ERROR_H_

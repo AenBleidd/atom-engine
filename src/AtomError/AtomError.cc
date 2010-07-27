@@ -55,8 +55,7 @@ AtomLog::AtomLog() {
 #endif  // UNIX
       fprintf(stderr, "Can't create log directory\n");
     }
-  }
-  else {
+  } else {
     fclose(log);
   }
 #endif  // ATOM_DEBUG
@@ -85,7 +84,7 @@ AtomLog::AtomLog() {
 AtomLog::~AtomLog() {
 // close log file
   fclose(logfile);
-  if( MsgBuf )
+  if (MsgBuf)
     delete [] MsgBuf;
 }
 void AtomLog::LogMsg(const char *string, const char *file, int line) {
@@ -125,8 +124,7 @@ const char *errorcode[] = {
 const char *errorsubcode[3][11] = {
 {
 "No Error."
-},
-{
+}, {
 "No Error.",
 "Error opening the file.",
 "Error reading the file.",
@@ -138,8 +136,7 @@ const char *errorsubcode[3][11] = {
 "Incorrect file.",
 "Incorrect mountpoint",
 "Can't overwrite the file."
-},
-{
+}, {
 "No Error",
 "Fatal Error: Error registering the window class",
 "Fatal Errpr: Couldn't create a window",
@@ -157,9 +154,10 @@ const char *warningcode[] = {
 "No Warning.",
 "Core Warning. File System Warning."
 };
-const char *warningsubcode[1][2] = {
+const char *warningsubcode[1][3] = {
 "No Warning.",
-"File was overwritten."
+"File was overwritten.",
+"Empty string. Nothing to parse."
 };
 void AtomLog::SetLastError(unsigned int code, unsigned int subcode,
                            const char* file, int line) {

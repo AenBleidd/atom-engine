@@ -298,9 +298,8 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
         fclose(bin);
         delete [] temp;
         return -1;
-      }
+      } else {
 // ok, we have smth here...
-      else {
 // put zero-symbol
         temp[i] = '\0';
 // let's find this path
@@ -333,11 +332,10 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
           delete [] temp;
           temp = new char[(len - pos) +1];
           i = 0;
-        }
-        else {
+        } else {
 // my be we can find smth ?
           current = current->tree_folder;
-          while(true) {
+          while (true) {
             if (current->next_folder == 0) {
 // we have nothing
 // we can create it here
@@ -366,8 +364,7 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
             else if (strcmp(current->name, temp) == 0) {
 // We find it!
               break;
-            }
-            else {
+            } else {
 // may be next is the folder we search for ?
               current = current->next_folder;
             }
@@ -375,9 +372,8 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
         }
 // In theory parsing the mountpoint is done...
       }
-    }
+    } else {
 // this is just a symbol
-    else {
       slash = false;
       temp[i++] = mountfolder[pos];
     }
@@ -466,7 +462,8 @@ temprecord = new RECORD;
 // Check the flag
     if (temprecord->flag == flag_file) {
 // Get namelen
-      if (fread(&temprecord->namelen, sizeof(temprecord->namelen), 1, dat) != 1) {
+      if (fread(&temprecord->namelen, sizeof(temprecord->namelen), 1, dat) !=
+          1) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
         fclose(dat);
         fclose(bin);
@@ -610,7 +607,8 @@ temprecord = new RECORD;
     }
     else if (temprecord->flag == flag_folder) {
 // Get namelen
-      if (fread(&temprecord->namelen, sizeof(temprecord->namelen), 1, dat) != 1) {
+      if (fread(&temprecord->namelen, sizeof(temprecord->namelen), 1, dat) !=
+          1) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
         fclose(dat);
         fclose(bin);
@@ -691,8 +689,7 @@ temprecord = new RECORD;
       }
       delete temprecord;
       temprecord = 0;
-    }
-    else {
+    } else {
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
       fclose(dat);
       fclose(bin);
