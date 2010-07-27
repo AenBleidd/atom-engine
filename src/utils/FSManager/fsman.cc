@@ -9,18 +9,17 @@ AtomLog *atomlog;
 AtomFS *atomfs;
 
 // 16-byte password input function
-unsigned int* PassPrint (void) {
-  unsigned int *key = new unsigned int[4]; // end key;
-  char *input = new char[17]; // input string
+unsigned int* PassPrint(void) {
+  unsigned int *key = new unsigned int[4];  // end key;
+  char *input = new char[17];  // input string
 // password input cycle
-  while(true) {
+  while (true) {
     printf("%s:\n", "Print 16-symbol password");
     scanf("%16s", input);
     if (strlen(input) == 16)
       break;
-    else {
+    else
       printf("Password is too short! Try again\n");
-    }
   }
   input[16] = '\0';
 // processing input string
@@ -41,7 +40,13 @@ int main(int arg, char *argc[]) {
   snprintf(version, versionlen, "Start fsman version %s", _FSMAN_VERSION_);
   atomlog->LogMessage(version);
   delete [] version;
-/*NOLINT*/  char help[] = "File System Manager - utility to work with Atom File System\nOptions:\n\t-t, --test\t\tTest default file system with standart mount file\n\t-t, --test [mountfile]\tTest file system\n\t-n, --new\t\tCreate new file\n\t\t-o [output]\t\tOutput file name\n\t\t-i [input]\t\tInput file and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t [type]\t\tType of new file (critical, standart, addon)\n\t-o, --open [input]\tOpen file for reading\n";
+  char help[] = "File System Manager - utility to work with Atom \
+File System\nOptions:\n\t-t, --test\t\tTest default file system with standart \
+mount file\n\t-t, --test [mountfile]\tTest file system\n\t-n, --new\t\tCreate \
+new file\n\t\t-o [output]\t\tOutput file name\n\t\t-i [input]\t\tInput file \
+and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
+[type]\t\tType of new file (critical, standart, addon)\n\t-o, --open \
+[input]\tOpen file for reading\n";
   try { atomfs = new AtomFS(atomlog); }
   catch(int i) { }
   if (arg == 1 || strcmp(argc[1], "-h") == 0 || \
@@ -145,19 +150,16 @@ int main(int arg, char *argc[]) {
             }
             else if (strcmp(argc[i], "addon") == 0) {
               type = type_addon;
-            }
+            } else {
 // wrong type
-            else {
               error = true;
             }
-          }
+          } else {
 // some error
-          else {
             error = true;
           }
-        }
+        } else {
 // if there is an error
-        else {
           atomlog->DebugMessage(help);
           fprintf(stderr, "%s", help);
         }
@@ -190,7 +192,8 @@ int main(int arg, char *argc[]) {
   }
   else if (strcmp(argc[1], "-o") == 0 || strcmp(argc[1], "--open") == 0) {
     if (arg == 3) {
-      snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Open file %s", argc[2]);
+      snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Open file %s",
+               argc[2]);
         atomfs->Mount(argc[2], "/");
     } else {
       atomlog->DebugMessage(help);

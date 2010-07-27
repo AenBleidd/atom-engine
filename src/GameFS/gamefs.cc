@@ -141,23 +141,25 @@ AtomFS::~AtomFS() {
   }
   root = 0;
 // Lets close all opened files!
-  if (temphead->tree_file == 0) {
-    if (temphead->id != 0) {
-      fclose (temphead->id);
-      temphead->id = 0;
-    }
-    delete temphead;
-    temphead = 0;
-  } else {
-    while (temphead->tree_file != 0) {
-      tempcurrent = temphead->tree_file;
-      temphead = tempcurrent->tree_file;
-      if (tempcurrent->id != 0) {
-        fclose(tempcurrent->id);
-        tempcurrent->id = 0;
+  if (temphead != 0) {
+    if (temphead->tree_file == 0) {
+      if (temphead->id != 0) {
+        fclose(temphead->id);
+        temphead->id = 0;
       }
-      delete tempcurrent;
-      tempcurrent = 0;
+      delete temphead;
+      temphead = 0;
+    } else {
+      while (temphead->tree_file != 0) {
+        tempcurrent = temphead->tree_file;
+        temphead = tempcurrent->tree_file;
+        if (tempcurrent->id != 0) {
+          fclose(tempcurrent->id);
+          tempcurrent->id = 0;
+        }
+        delete tempcurrent;
+        tempcurrent = 0;
+      }
     }
   }
 }
