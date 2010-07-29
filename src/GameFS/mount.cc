@@ -1,4 +1,5 @@
 #include "gamefs.h"
+#include "strings.h"
 int AtomFS::Mount(char* filename) {
   atomlog->DebugMessage("Begin mounting filesystem...");
   atomlog->DebugMessage("Reading mount file...");
@@ -269,45 +270,71 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
 // Let's look the mountpont
 // Slash flag
   bool slash = true;
-// Length of the mountstring
-  unsigned int len = strlen(mountfolder);
-// Temp string (for new branches)
-  char *temp = new char[len];
 // current pointer position within the string
 // we begin the cycle from first element couse zero-element must be root
   unsigned int pos = 1;
 // another counter
   unsigned int i = 0;
 // Kyrie!
-// Check for the root directory
-  if (mountfolder[0] != '/') {
+// Parse mountpoint
+  ARGUMENTS args = *ParsePath(atomlog, mountfolder);
+  if (args.count < 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_MOUNTPOINT);
     fclose(dat);
     fclose(bin);
-    delete [] temp;
+    for (int i = 0; i < args.count; i++)
+      if (args.output[i] != 0)
+        delete [] args.output[i];
+    delete [] args.output;
     return -1;
   }
+// Check for the root directory
+  if (strcmp(args.output[0], "/") != 0) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_MOUNTPOINT);
+    fclose(dat);
+    fclose(bin);
+    for (int i = 0; i < args.count; i++)
+      if (args.output[i] != 0)
+        delete [] args.output[i];
+    delete [] args.output;
+    return -1;
+  } else {
+    delete [] args.output[0];
+  }
   TREE_FOLDER *current = root;
-  while (pos < len) {
-// we meet the slash. what we need to do?
-    if (mountfolder[pos] == '/') {
-// it can't be here...
-      if (slash == true) {
-        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_MOUNTPOINT);
-        fclose(dat);
-        fclose(bin);
-        delete [] temp;
-        return -1;
-      } else {
+  for (pos; pos < args.count; pos++) {
 // ok, we have smth here...
-// put zero-symbol
-        temp[i] = '\0';
 // let's find this path
-        if (current->tree_folder == 0) {
+    if (current->tree_folder == 0) {
 // Hm, the folder doesn't have any subfolder. Let's create it!
-          current->tree_folder = new TREE_FOLDER;
-          current->tree_folder->parent_folder = current;
-          current = current->tree_folder;
+      current->tree_folder = new TREE_FOLDER;
+      current->tree_folder->parent_folder = current;
+      current = current->tree_folder;
+#ifdef _FSMAN_
+      current->flag |= ff_rw;
+#else
+      current->flag |= ff_ro;
+#endif  // _FSMAN_
+      current->tree_folder = 0;
+      current->tree_file = 0;
+      current->next_folder = 0;
+// set he name of the folder
+      unsigned int len = strlen(args.output[pos]);
+      current->name = new char[len];
+      snprintf(current->name, len, "%s", args.output[pos]);
+    } else if (strcmp(current->tree_folder->name, args.output[pos]) == 0) {
+// this is a folder we search for
+      current = current->tree_folder;
+    } else {
+// my be we can find smth ?
+      current = current->tree_folder;
+      while (true) {
+        if (current->next_folder == 0) {
+// we have nothing
+// we can create it here
+          current->next_folder = new TREE_FOLDER;
+          current->next_folder->parent_folder = current->parent_folder;
+          current = current->next_folder;
 #ifdef _FSMAN_
           current->flag |= ff_rw;
 #else
@@ -317,71 +344,28 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
           current->tree_file = 0;
           current->next_folder = 0;
 // set he name of the folder
-          unsigned int len = strlen(temp);
+          unsigned int len = strlen(args.output[pos]);
           current->name = new char[len];
-          snprintf(current->name, len, "%s", temp);
-// clean
-          delete [] temp;
-          temp = new char[(len - pos) +1];
-          i = 0;
-        }
-        else if (strcmp(current->tree_folder->name, temp) == 0) {
-// this is a folder we search for
-          current = current->tree_folder;
-// clean
-          delete [] temp;
-          temp = new char[(len - pos) +1];
-          i = 0;
-        } else {
-// my be we can find smth ?
-          current = current->tree_folder;
-          while (true) {
-            if (current->next_folder == 0) {
-// we have nothing
-// we can create it here
-              current->next_folder = new TREE_FOLDER;
-              current->next_folder->parent_folder = current->parent_folder;
-              current = current->next_folder;
-#ifdef _FSMAN_
-              current->flag |= ff_rw;
-#else
-              current->flag |= ff_ro;
-#endif  // _FSMAN_
-              current->tree_folder = 0;
-              current->tree_file = 0;
-              current->next_folder = 0;
-// set he name of the folder
-              unsigned int len = strlen(temp);
-              current->name = new char[len];
-              snprintf(current->name, len, "%s", temp);
-// clean
-              delete [] temp;
-              temp = new char[(len - pos) +1];
-              i = 0;
+          snprintf(current->name, len, "%s", args.output[pos]);
 // nothing to do anymore
-              break;
-            }
-            else if (strcmp(current->name, temp) == 0) {
+          break;
+        } else if (strcmp(current->name, args.output[pos]) == 0) {
 // We find it!
-              break;
-            } else {
+          break;
+        } else {
 // may be next is the folder we search for ?
-              current = current->next_folder;
-            }
-          }
+          current = current->next_folder;
         }
-// In theory parsing the mountpoint is done...
       }
-    } else {
-// this is just a symbol
-      slash = false;
-      temp[i++] = mountfolder[pos];
     }
-    pos++;
+// Clean
+    if (args.output[pos] != 0)
+      delete [] args.output[pos];
   }
+// In theory parsing the mountpoint is done...
 // Some clean
-  delete [] temp;
-  temp = 0;
+  delete [] args.output;
+  args.output = 0;
 // Mounting...
 // First must be root directory
 RECORD *temprecord;
