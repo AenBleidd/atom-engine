@@ -6,8 +6,13 @@
 #include "../preproc.h"
 #include "../AtomError/AtomError.h"
 
+struct ARGUMENTS {
+  char **output;
+  int count;
+};
+
 // Parse the *nix-style path
-int ParsePath(AtomLog *atomlog, char *input, char **output);
+ARGUMENTS* ParsePath(AtomLog *atomlog, char *input);
 // Parse the line of arguments
-int ParseArgs(AtomLog *atomlog, char *input, char **output);
+ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input);
 #endif  // _GAMEFS_STRINGS_H_
