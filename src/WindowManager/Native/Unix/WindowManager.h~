@@ -1,14 +1,19 @@
 #ifndef _WINDOWMANAGER_H_
 #define _WINDOWMANAGER_H_
-#include <windows.h>
-#include <windowsx.h>
 #include <OWindow.h>
 #include <AtomError.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/Xos.h>
+#include <X11/Xatom.h>
+#include <stdlib.h>
+#include <string.h>
 
 class AtomWindow : public OWindow
 {
 public:
     AtomWindow( AtomLog* );
+    AtomWindow( AtomLog*, const char* );
     ~AtomWindow();
     bool Create( void );
     bool Show( void );
@@ -27,13 +32,9 @@ public:
     bool Close( void );
     bool Destroy( void );	
     int Run( void );
-    static LRESULT CALLBACK WindowProcedure( HWND, UINT, WPARAM, LPARAM ); // callback event handler
 private:
-    char clsname[0xFF]; // window classname
-    int retval;         // value returned by the function - use for debug purposes only.
-    bool InitClass( void );
-    HWND hWnd;
-    HINSTANCE hInstance;
+    char* DisplayName;
+    Display *display;
 };
 
 #endif

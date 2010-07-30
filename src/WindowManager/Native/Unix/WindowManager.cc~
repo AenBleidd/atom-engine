@@ -45,9 +45,11 @@ AtomWindow::AtomWindow( AtomLog* Log, const char* DisplayString ) : OWindow( Log
 
 AtomWindow::~AtomWindow()
 {
+/*
     if( display )
         XCloseDisplay( display );
     delete[] DisplayName;
+*/
 }
 
 bool AtomWindow::Create( void )
