@@ -146,8 +146,7 @@ const char *errorsubcode[3][11] = {
 "Error setting the window text while applying the window info block",
 "Error trying to change window size and dimentions",
 "Error adjusting the client area for a window",
-"Error trying to make window topmost",
-"Error connecting to X server and opening display"
+"Error trying to make window topmost"
 }
 };
 // Warning description
