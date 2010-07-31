@@ -151,6 +151,7 @@ const char *errorsubcode[3][12] = {
 "Fatal Error: Error registering the window class",
 "Fatal Errpr: Couldn't create a window",
 "Invalid input parameter",
+"Error unregistering the window class",
 "Error getting window title",
 "Error getting the window info block",
 "Error setting the window text while applying the window info block",
