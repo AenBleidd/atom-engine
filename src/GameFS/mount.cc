@@ -10,7 +10,7 @@ int AtomFS::Mount(char* filename) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FILE);
     return -1;
   }
-  long size = 0;
+ long size = 0;
 // get file size
   if (fseek(conf, 0, SEEK_END) != 0) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
@@ -21,92 +21,76 @@ int AtomFS::Mount(char* filename) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
     return -1;
   }
-  rewind(conf);
-// reading the file
-  char *buf = new char[size];
-  if (fread(buf, 1, size, conf) != size) {
-    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-    delete [] buf;
+  fclose(conf);
+  conf = fopen(filename, "r");
+// error while opening the file
+  if (conf == 0) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FILE);
     return -1;
   }
-// close configuration file
-  fclose(conf);
-  atomlog->DebugMessage("Mount file was successfully readed.");
-// parsing...
-  long pos = 0;
-  unsigned int tsize = 0;
-// flags
-  bool end = false;
-  bool flag = false;
-  bool quotes = false;
-// reading configuration
-  while (end != true) {
-// this is end
-    if (pos == size || pos > size) {
-      end = true;
-      break;
+// reading the file
+  char *buf = new char[size];
+  ARGUMENTS *args;
+  char *file = 0, *mountpoint = 0;
+  while(fgets(buf, size, conf)) {
+    args = ParseArgs(atomlog, buf);
+    if (args == 0) {
+      atomlog->SetLastErr(ERROR_CORE_FS,ERROR_PARSE_MOUNT_FILE);
+      delete [] buf;
+      return -1;
     }
-// if it is space
-    else if ((buf[pos] == 0x20 || buf[pos] == 0x0A) && pos < size)  // NOLINT
-      pos++;
-// if it is a comment
-    if (buf[pos] == 0x23) {
-      while (buf[pos] != 0x0A) pos++;
-// last comment
-      if (pos == size || pos == (size-1)) {
-        end = true;
+// Lets look the arguments
+    for (int i = 0; i < args->count; i++) {
+      if (args->output[i][0] == '#') {
+// it is a comment
         break;
-      }
-      else pos++;  // NOLINT
-    }
-// if it is quotes
-    if (buf[pos] == 0x22) {
-        tsize = 0;
-        pos++;
-        while (buf[pos] != 0x22 && pos <= size) {
-          pos++;
-          tsize++;
-        }
-        quotes = true;
-        if (pos == size && buf[pos] != 0x22) {
-          atomlog->SetLastErr(ERROR_CORE_FS, ERROR_PARSE_MOUNT_FILE_QUOTES);
+      } else {
+        if (file == 0) {
+// it is a file... maybe...
+          file = args->output[i];
+        } else if (mountpoint == 0) {
+// it is a mountpoint
+          mountpoint = args->output[i];
+          if (Mount(file, mountpoint) != 0) {
+            atomlog->SetLastErr(ERROR_CORE_FS, ERROR_MOUNT_FS);
+            snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Error mount %s",
+                     file);
+            atomlog->LogMessage(atomlog->MsgBuf);
+// Release memory
+            for (int j = 0; j < args->count; j++)
+              if (args->output[j] != 0)
+                delete [] args->output[j];
+            delete [] args->output;
+            delete [] buf;
+            return -1;
+          }
+        } else {
+// some garbage
+          atomlog->SetLastErr(ERROR_CORE_FS, ERROR_PARSE_MOUNT_FILE);
+// Release memory
+          for (int j = 0; j < args->count; j++)
+            if (args->output[j] != 0)
+              delete [] args->output[j];
+          delete [] args->output;
           delete [] buf;
           return -1;
         }
-      } else {  // yeah! it's some symbol here!
-        tsize = 0;
-        while (buf[pos] != 0x20 && buf[pos] != 0x0A) {
-          pos++;
-          tsize++;
-        }
-      }
-// rewind to read the string
-      pos -= tsize;
-      char *file;
-      char *mountpoint;
-      char *prior;
-// it's file
-      if (flag == false) {
-        file = new char[tsize];
-        for (int i = 0; i < tsize+1; i++)
-          file[i] = buf[pos++];
-        file[tsize] = '\0';
-        flag = true;
-      }
-// it's mountpoint
-      else {  // NOLINT
-        mountpoint = new char[tsize];
-        for (int i = 0; i < tsize+1; i++)
-          mountpoint[i] = buf[pos++];
-        mountpoint[tsize] = '\0';
-        flag = false;
-// Try to mount
-        if (Mount(file, mountpoint) == -1) {
-          delete [] buf;
-          return -1;
       }
     }
+// Release memory
+    for (int i = 0; i < args->count; i++)
+      if (args->output[i] != 0)
+        delete [] args->output[i];
+    delete [] args->output;
+    args->count = 0;
+    delete args;
+    args = 0;
+// Set flags to zero
+    file = 0;
+    mountpoint = 0;
   }
+// closing file
+  fclose(conf);
 // cleaning
   delete [] buf;
   return 0;
@@ -277,32 +261,32 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
   unsigned int i = 0;
 // Kyrie!
 // Parse mountpoint
-  ARGUMENTS args = *ParsePath(atomlog, mountfolder);
-  if (args.count < 1) {
+  ARGUMENTS *args = ParsePath(atomlog, mountfolder);
+  if (args->count < 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_MOUNTPOINT);
     fclose(dat);
     fclose(bin);
-    for (int i = 0; i < args.count; i++)
-      if (args.output[i] != 0)
-        delete [] args.output[i];
-    delete [] args.output;
+    for (int i = 0; i < args->count; i++)
+      if (args->output[i] != 0)
+        delete [] args->output[i];
+    delete [] args->output;
     return -1;
   }
 // Check for the root directory
-  if (strcmp(args.output[0], "/") != 0) {
+  if (strcmp(args->output[0], "/") != 0) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_MOUNTPOINT);
     fclose(dat);
     fclose(bin);
-    for (int i = 0; i < args.count; i++)
-      if (args.output[i] != 0)
-        delete [] args.output[i];
-    delete [] args.output;
+    for (int i = 0; i < args->count; i++)
+      if (args->output[i] != 0)
+        delete [] args->output[i];
+    delete [] args->output;
     return -1;
   } else {
-    delete [] args.output[0];
+    delete [] args->output[0];
   }
   TREE_FOLDER *current = root;
-  for (pos; pos < args.count; pos++) {
+  for (pos; pos < args->count; pos++) {
 // ok, we have smth here...
 // let's find this path
     if (current->tree_folder == 0) {
@@ -319,10 +303,10 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
       current->tree_file = 0;
       current->next_folder = 0;
 // set he name of the folder
-      unsigned int len = strlen(args.output[pos]);
+      unsigned int len = strlen(args->output[pos]);
       current->name = new char[len];
-      snprintf(current->name, len, "%s", args.output[pos]);
-    } else if (strcmp(current->tree_folder->name, args.output[pos]) == 0) {
+      snprintf(current->name, len, "%s", args->output[pos]);
+    } else if (strcmp(current->tree_folder->name, args->output[pos]) == 0) {
 // this is a folder we search for
       current = current->tree_folder;
     } else {
@@ -344,12 +328,12 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
           current->tree_file = 0;
           current->next_folder = 0;
 // set he name of the folder
-          unsigned int len = strlen(args.output[pos]);
+          unsigned int len = strlen(args->output[pos]);
           current->name = new char[len];
-          snprintf(current->name, len, "%s", args.output[pos]);
+          snprintf(current->name, len, "%s", args->output[pos]);
 // nothing to do anymore
           break;
-        } else if (strcmp(current->name, args.output[pos]) == 0) {
+        } else if (strcmp(current->name, args->output[pos]) == 0) {
 // We find it!
           break;
         } else {
@@ -359,13 +343,15 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
       }
     }
 // Clean
-    if (args.output[pos] != 0)
-      delete [] args.output[pos];
+    if (args->output[pos] != 0)
+      delete [] args->output[pos];
   }
 // In theory parsing the mountpoint is done...
 // Some clean
-  delete [] args.output;
-  args.output = 0;
+  delete [] args->output;
+  args->output = 0;
+  delete args;
+  args = 0;
 // Mounting...
 // First must be root directory
 RECORD *temprecord;
@@ -688,4 +674,3 @@ temprecord = new RECORD;
   atomlog->DebugMessage(atomlog->MsgBuf);
   return 0;
 }
-
