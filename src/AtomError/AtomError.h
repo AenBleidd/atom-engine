@@ -72,13 +72,14 @@ class AtomLog {
 #define ERROR_OPEN_FILE                                              0x00000001
 #define ERROR_READ_FILE                                              0x00000002
 #define ERROR_PARSE_MOUNT_FILE_QUOTES                                0x00000003
-#define ERROR_PARSE_MOUNT_FILE_PRIORITY                              0x00000004
+#define ERROR_PARSE_MOUNT_FILE                                       0x00000004
 #define ERROR_MOUNT_FS                                               0x00000005
 #define ERROR_OPEN_FOLDER                                            0x00000006
 #define ERROR_WRITE_FILE                                             0x00000007
 #define ERROR_INCORRECT_FILE                                         0x00000008
 #define ERROR_INCORRECT_MOUNTPOINT                                   0x00000009
 #define ERROR_OVERWRITE_DENIED                                       0x0000000A
+#define ERROR_LOST_QUOTES                                            0x0000000B
 
 /* WindowManager Error Codes */
 #define ERROR_CLSREG_FAIL                                            0x00000001
