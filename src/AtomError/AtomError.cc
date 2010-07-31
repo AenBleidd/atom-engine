@@ -86,6 +86,15 @@ AtomLog::~AtomLog() {
   fclose(logfile);
   if (MsgBuf)
     delete [] MsgBuf;
+// do some clean
+  if (global_error.description != 0) {
+    delete [] global_error.description;
+    global_error.description = 0;
+  }
+  if (global_warning.description != 0) {
+    delete [] global_warning.description;
+    global_warning.description = 0;
+  }
 }
 void AtomLog::LogMsg(const char *string, const char *file, int line) {
 #ifdef ATOM_DEBUG
@@ -121,7 +130,7 @@ const char *errorcode[] = {
 "Core Error. File System Error.",
 "Engine Error. WindowManager Error."
 };
-const char *errorsubcode[3][11] = {
+const char *errorsubcode[3][12] = {
 {
 "No Error."
 }, {
@@ -135,7 +144,8 @@ const char *errorsubcode[3][11] = {
 "Error while writing the file.",
 "Incorrect file.",
 "Incorrect mountpoint",
-"Can't overwrite the file."
+"Can't overwrite the file.",
+"Lost quotes."
 }, {
 "No Error",
 "Fatal Error: Error registering the window class",
