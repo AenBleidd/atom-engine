@@ -80,6 +80,7 @@ class AtomLog {
 #define ERROR_INCORRECT_MOUNTPOINT                                   0x00000009
 #define ERROR_OVERWRITE_DENIED                                       0x0000000A
 #define ERROR_LOST_QUOTES                                            0x0000000B
+#define ERROR_PARSE_STRING                                           0x0000000C
 
 /* WindowManager Error Codes */
 #define ERROR_CLSREG_FAIL                                            0x00000001
@@ -100,5 +101,6 @@ class AtomLog {
 /* GameFS Warning Codes */
 #define WARNING_OVERWRITE                                            0x00000001
 #define WARNING_EMPTY_STRING                                         0x00000002
+#define WARNING_WRONG_COMMAND                                        0x00000003
 
 #endif  // _CORE_ERROR_H_
