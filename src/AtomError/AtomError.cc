@@ -130,7 +130,7 @@ const char *errorcode[] = {
 "Core Error. File System Error.",
 "Engine Error. WindowManager Error."
 };
-const char *errorsubcode[3][12] = {
+const char *errorsubcode[3][13] = {
 {
 "No Error."
 }, {
@@ -145,7 +145,8 @@ const char *errorsubcode[3][12] = {
 "Incorrect file.",
 "Incorrect mountpoint",
 "Can't overwrite the file.",
-"Lost quotes."
+"Lost quotes.",
+"Error parsing the string."
 }, {
 "No Error",
 "Fatal Error: Error registering the window class",
@@ -166,10 +167,15 @@ const char *warningcode[] = {
 "No Warning.",
 "Core Warning. File System Warning."
 };
-const char *warningsubcode[1][3] = {
+const char *warningsubcode[2][4] = {
+{
+"No Warning."
+}, {
 "No Warning.",
 "File was overwritten.",
-"Empty string. Nothing to parse."
+"Empty string. Nothing to parse.",
+"Wrong syntax or unknown command."
+}
 };
 void AtomLog::SetLastError(unsigned int code, unsigned int subcode,
                            const char* file, int line) {
