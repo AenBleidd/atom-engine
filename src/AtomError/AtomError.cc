@@ -16,7 +16,7 @@ char* CurDateTime() {
   delete timeinfo;
   return date;
 }
-AtomLog::AtomLog() {
+AtomLog::AtomLog(char *name) {
   MsgBuf = new char[MSG_BUFFER_SIZE];
   const unsigned short s = 355;
   char *plogfilename  = new char[s];
@@ -60,13 +60,12 @@ AtomLog::AtomLog() {
   }
 #endif  // ATOM_DEBUG
 
-#ifdef _FSMAN_
-  snprintf(plogfilename, s, "%s%s_%s%s",
-           temppath, "fsman", pbuffer, ".log");
-#else
-  snprintf(plogfilename, s, "%s%s_%s%s",
-           temppath, "atom", pbuffer, ".log");
-#endif  // _FSMAN_
+  if (name != 0)
+    snprintf(plogfilename, s, "%s%s_%s%s",
+             temppath, name, pbuffer, ".log");
+  else
+    snprintf(plogfilename, s, "%s%s_%s%s",
+             temppath, "atom", pbuffer, ".log");
 
   delete [] temppath;
   delete [] pbuffer;
