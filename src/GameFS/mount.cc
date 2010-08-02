@@ -402,7 +402,6 @@ temprecord = new RECORD;
   temprecord->name[temprecord->namelen] = '\0';
 // Check the name. It must be root
   if (strcmp(temprecord->name, "/") != 0) {
-    atomlog->DebugMessage(temprecord->name);
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
     fclose(dat);
     fclose(bin);
