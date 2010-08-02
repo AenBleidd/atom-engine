@@ -399,8 +399,10 @@ temprecord = new RECORD;
     delete temprecord;
     return -1;
   }
+  temprecord->name[temprecord->namelen] = '\0';
 // Check the name. It must be root
   if (strcmp(temprecord->name, "/") != 0) {
+    atomlog->DebugMessage(temprecord->name);
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
     fclose(dat);
     fclose(bin);
@@ -451,6 +453,7 @@ temprecord = new RECORD;
         delete temprecord;
         return -1;
       }
+      temprecord->name[temprecord->namelen] = '\0';
 // Get the size
       if (fread(&temprecord->size, sizeof(temprecord->size), 1, dat) != 1) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
@@ -596,6 +599,7 @@ temprecord = new RECORD;
         delete temprecord;
         return -1;
       }
+      temprecord->name[temprecord->namelen] = '\0';
 // Search for this folder
       bfound = false;
       if (current->tree_folder == 0) {
