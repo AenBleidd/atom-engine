@@ -16,7 +16,18 @@ char* CurDateTime() {
   delete timeinfo;
   return date;
 }
-AtomLog::AtomLog(char *name) {
+char* CurTime() {
+  time_t seconds = time(NULL);
+  tm *timeinfo = new tm;
+  timeinfo = (tm*) localtime_r(&seconds, timeinfo);
+  const unsigned char s = 10;
+  char *time = new char[s];
+  snprintf(time, s, "%02i:%02i:%02i", timeinfo->tm_hour,
+          timeinfo->tm_min, timeinfo->tm_sec);
+  delete timeinfo;
+  return time;
+}
+AtomLog::AtomLog(char *name, bool alone) {
   MsgBuf = new char[MSG_BUFFER_SIZE];
   const unsigned short s = 355;
   char *plogfilename  = new char[s];
@@ -60,19 +71,50 @@ AtomLog::AtomLog(char *name) {
   }
 #endif  // ATOM_DEBUG
 
-  if (name != 0)
-    snprintf(plogfilename, s, "%s%s_%s%s",
-             temppath, name, pbuffer, ".log");
-  else
-    snprintf(plogfilename, s, "%s%s_%s%s",
-             temppath, "atom", pbuffer, ".log");
-
-  delete [] temppath;
-  delete [] pbuffer;
+  if (alone == false) {
+    if (name != 0) {
+      snprintf(plogfilename, s, "%s%s_%s%s",
+               temppath, name, pbuffer, ".log");
+    }    else {
+      snprintf(plogfilename, s, "%s%s_%s%s",
+               temppath, "atom", pbuffer, ".log");
+    }
+  } else {
+    if (name != 0) {
+      snprintf(plogfilename, s, "%s%s%s",
+               temppath, name, ".log");
+    }    else {
+      snprintf(plogfilename, s, "%s%s%s",
+               temppath, "atom", ".log");
+    }
+  }
 
 // open log file
   logfile = fopen(plogfilename, "wt");
+  if (logfile == 0) {
+// Another last hope...
+// Try to use standart name
+    snprintf(plogfilename, s, "%s%s_%s%s",
+             temppath, "atom", pbuffer, ".log");
+    logfile = fopen(plogfilename, "wt");
+    if (logfile == 0) {
+      delete [] temppath;
+      delete [] pbuffer;
+      delete [] plogfilename;
+// We can't do this...
+      throw -1;
+    }
+    snprintf((char*)MsgBuf, MSG_BUFFER_SIZE, "Given filename '%s' is wrong",
+             name);
+    LogMessage(MsgBuf);
+  }
+  delete [] temppath;
+  delete [] pbuffer;
   delete [] plogfilename;
+  if (logfile == 0) {
+// We can't do this...
+    throw -1;
+  }
   global_error.code = 0;
   global_error.sub_code = 0;
   global_error.description = 0;
@@ -96,19 +138,25 @@ AtomLog::~AtomLog() {
   }
 }
 void AtomLog::LogMsg(const char *string, const char *file, int line) {
+  char *time = CurTime();
 #ifdef ATOM_DEBUG
-  fprintf(stderr, "%s %s:%i\t%s\n", __TIME__, file, line, string);
+  fprintf(stderr, "%s %s:%i\t%s\n", time, file, line, string);
 #endif
-  fprintf(logfile, "%s %s:%i\t%s\n", __TIME__, file, line, string);
+  fprintf(logfile, "%s %s:%i\t%s\n", time, file, line, string);
   fflush(logfile);
+  delete [] time;
+  time = 0;
   return;
 }
 void AtomLog::LogMsg(const char *string) {
+  char *time = CurTime();
 #ifdef ATOM_DEBUG
-  fprintf(stderr, "%s %s\n", __TIME__, string);
+  fprintf(stderr, "%s %s\n", time, string);
 #endif
-  fprintf(logfile, "%s %s\n", __TIME__, string);
+  fprintf(logfile, "%s %s\n", time, string);
   fflush(logfile);
+  delete [] time;
+  time = 0;
   return;
 }
 void AtomLog::DebugMsg(const char *string, const char *file, int line) {
