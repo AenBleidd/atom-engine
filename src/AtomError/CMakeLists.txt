@@ -8,9 +8,6 @@
 SET ( MODULE_PATH "${${PROJECT_NAME}_SOURCE_DIR}/../cmake_modules" )
 INCLUDE ( "${MODULE_PATH}/modules.cmake" )
 
-# Some nessessary definitions
-ADD_DEFINITIONS ( "-D_FSMANAGER_" )
-
 # Create a static library
 ADD_LIBRARY ( ${ATOMERROR_MODULE} STATIC AtomError )
 
