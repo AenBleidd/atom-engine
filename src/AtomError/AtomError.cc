@@ -130,7 +130,7 @@ const char *errorcode[] = {
 "Core Error. File System Error.",
 "Engine Error. WindowManager Error."
 };
-const char *errorsubcode[3][13] = {
+const char *errorsubcode[3][14] = {
 {
 "No Error."
 }, {
@@ -146,7 +146,8 @@ const char *errorsubcode[3][13] = {
 "Incorrect mountpoint",
 "Can't overwrite the file.",
 "Lost quotes.",
-"Error parsing the string."
+"Error parsing the string.",
+"Wrong byteorder. Program can't read files with unknown byteorder."
 }, {
 "No Error",
 "Fatal Error: Error registering the window class",

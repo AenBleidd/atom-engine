@@ -81,6 +81,7 @@ class AtomLog {
 #define ERROR_OVERWRITE_DENIED                                       0x0000000A
 #define ERROR_LOST_QUOTES                                            0x0000000B
 #define ERROR_PARSE_STRING                                           0x0000000C
+#define ERROR_WRONG_BYTEORDER                                        0x0000000D
 
 /* WindowManager Error Codes */
 #define ERROR_CLSREG_FAIL                                            0x00000001
