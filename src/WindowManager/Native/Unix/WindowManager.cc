@@ -20,27 +20,8 @@
 
 AtomWindow::AtomWindow( AtomLog* Log ) : OWindow( Log )
 {
-    AtomWindow( Log, NULL );
-}
-
-AtomWindow::AtomWindow( AtomLog* Log, const char* DisplayString ) : OWindow( Log )
-{
-
     DisplayName = new char[0xFF];
     memset( &DisplayName[0], 0, sizeof( DisplayName ) );
-    if( DisplayString )
-        strncpy( &DisplayName[0], ( char* ) DisplayString, sizeof( DisplayName ) );
-
-
-    /* Connect to X server */
-    
-    if( ( display = XOpenDisplay( DisplayName ) ) == NULL )
-    {
-        log->SetLastErr( ERROR_ENGINE_WM, ERROR_X11_OPENDISPLAY );
-        log->DebugMessage( "AtomWindow ctor : XOpenDisplay returned NULL" );
-    }
-    else
-        log->LogMessage( "Connection to X server opened" );
 }
 
 AtomWindow::~AtomWindow()
@@ -48,6 +29,23 @@ AtomWindow::~AtomWindow()
     if( display )
         XCloseDisplay( display );
     delete[] DisplayName;
+}
+
+bool AtomWindow::XConnect( const char* DisplayName )
+{
+    /* Connect to X server */
+
+    display = XOpenDisplay( DisplayName );
+    
+    if( !display )
+    {
+        log->SetLastErr( ERROR_ENGINE_WM, ERROR_X11_OPENDISPLAY );
+        log->DebugMessage( "AtomWindow ctor : XOpenDisplay returned NULL" );
+        return false;
+    }
+    else
+        log->LogMessage( "Connection to X server opened" );
+    return true;
 }
 
 bool AtomWindow::Create( void )
