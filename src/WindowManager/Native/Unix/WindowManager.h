@@ -13,8 +13,8 @@ class AtomWindow : public OWindow
 {
 public:
     AtomWindow( AtomLog* );
-    AtomWindow( AtomLog*, const char* );
     ~AtomWindow();
+    bool XConnect( const char* );
     bool Create( void );
     bool Show( void );
     bool Hide( void );
