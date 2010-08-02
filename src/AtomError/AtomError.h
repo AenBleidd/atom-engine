@@ -30,7 +30,7 @@ char* CurDateTime(void);
 
 class AtomLog {
  public:
-  explicit AtomLog(char *name = 0);
+  explicit AtomLog(char *name = 0, bool alone = false);
   ~AtomLog();
   char const* MsgBuf;
  private:
