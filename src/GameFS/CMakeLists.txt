@@ -10,8 +10,8 @@ INCLUDE ( "${MODULE_PATH}/modules.cmake" )
 
 # Create a static library which will be used by the engine
 # As well as static library to be linked to fsman utility
-ADD_LIBRARY ( ${GAMEFS_MODULE} STATIC gamefs crypt mount strings)
-ADD_LIBRARY ( ${GAMEFS_FSMAN_MODULE} STATIC gamefs crypt mount create navigate strings)
+ADD_LIBRARY ( ${GAMEFS_MODULE} STATIC gamefs crypt mount strings byteorderdetect)
+ADD_LIBRARY ( ${GAMEFS_FSMAN_MODULE} STATIC gamefs crypt mount create navigate strings byteorderdetect)
 SET_TARGET_PROPERTIES ( ${GAMEFS_FSMAN_MODULE} PROPERTIES 
 	COMPILE_FLAGS "-D_FSMANAGER_"
 )
