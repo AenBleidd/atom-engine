@@ -316,11 +316,6 @@ bool AtomWindow::HasHelpButton( void )
     return false;
 }
    
-void AtomWindow::Test( void )
-{
-    MessageBox( NULL, "A Test", "OK", MB_OK );
-}
-
 void __fastcall AtomWindow::OnCreate( void ){}
 void __fastcall AtomWindow::OnClose( void )
 {
