@@ -1,0 +1,9 @@
+syntax: glob
+*.o
+atom-engine-test
+Atom-Engine
+build
+test
+obj
+fsman
+atom
