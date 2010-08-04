@@ -226,6 +226,8 @@ class AtomFS {
   int Create(char** input, unsigned int count, char* file,
              unsigned short int encrypt, unsigned int *key,
              unsigned char type);
+// Navigate VirtualFS
+  int Navigate(void);
 #endif  // _FSMAN_
 // destructor
   ~AtomFS();
@@ -234,6 +236,12 @@ class AtomFS {
   TREE_FOLDER *root;
   AtomLog *atomlog;
   unsigned short int bytescrypt;  // count of first bytes to encrypt
+// byteorder:
+// 0 - BE: 0123
+// 1 - LE: 3210
+// 2 - MBE: 1032
+// 3 - MLE: 2301
+  unsigned char byteorder;
 // WAKE crypt algorithm
   unsigned int wake_table[257];
   unsigned int *wake_key;
@@ -248,8 +256,6 @@ class AtomFS {
   int FolderScan(char *ch, FILE *dat, FILE *bin, int level);
 // Write data from added files
   int Write(char *in,  FILE *dat, FILE *bin);
-// Navigate VirtualFS
-  int Navigate(void);
 #endif  // _FSMAN_
 };
 

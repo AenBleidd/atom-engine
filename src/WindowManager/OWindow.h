@@ -1,9 +1,39 @@
 #ifndef _OWINDOW_H
 #define _OWINDOW_H
 #include <AtomError.h>
-#include <WM_Types.h>
 
-typedef DWORD FLAGS;
+// To compile in UNIX
+#ifndef UNIX
+#include <WM_Types.h>
+#endif  // UNIX
+#ifdef UNIX
+typedef struct _RECT {
+  long left;
+  long top;
+  long right;
+  long bottom;
+} RECT, *PRECT, ATOMRECT, *PATOMRECT;
+struct WNDINFO
+{
+        char const* title[0xFF];
+        int x, y, width, height,
+            client_x, client_y,
+                client_width, client_height;
+        int IsVisible : 1,
+            IsMinimized : 1,
+                IsMaximized : 1,
+                IsFullScreen : 1,
+            IsBorderSizeable : 1,
+                IsBorderFixed : 1,
+                IsTopMost : 1,
+                HasMinimizeButton : 1,
+                HasMaximizeButton : 1,
+                HasExitButton : 1,
+                HasHelpButton : 1;
+};
+#endif  // UNIX
+
+typedef unsigned int FLAGS;
 
 enum VISIBILITY_FLAGS
 {

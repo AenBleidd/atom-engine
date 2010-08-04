@@ -36,6 +36,7 @@ ARGUMENTS* ParsePath(AtomLog *atomlog, char *input) {
   for (int i = args.count; i < len; i++) {
     if ((input[i] == '/') || (i == len - 1)) {
 // check for error
+      tempoutput[args.count][j++] = input[i];
       if (input[i - 1] == '/') {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_MOUNTPOINT);
 // Release allocated memory
@@ -266,6 +267,11 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input) {
           return 0;
         }
       } else {
+// first symbol ?
+        if (tempoutput[args.count] == 0) {
+          tempoutput[args.count] = new char[len - i + 2];
+          j = 0;
+        }
 // it is just a symbol
         tempoutput[args.count][j++] = input[i];
       }
