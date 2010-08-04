@@ -30,7 +30,8 @@ char* CurDateTime(void);
 
 class AtomLog {
  public:
-  explicit AtomLog(char *name = 0, bool alone = false);
+  explicit AtomLog(char *name = "atom", bool alone = false,
+                    unsigned char lvl = 0xFF);
   ~AtomLog();
   char const* MsgBuf;
  private:
@@ -41,18 +42,26 @@ class AtomLog {
   FILE *logfile;
  public:
 // get last error and warning
-  ERR GetLastErr() { return global_error; }
-  ERR GetLastWrn() { return global_warning; }
+  inline ERR GetLastErr() { return global_error; }
+  inline ERR GetLastWrn() { return global_warning; }
+// set verbose level
+  inline void SetLogVerbosity(unsigned char lvl) { verbose_level = lvl; }
+// get verbose level
+  inline unsigned char GetLogVerbosity() { return verbose_level; }
 // write last error and warning into the log
   void SetLastError(unsigned int code, unsigned int subcode,
                     const char* file, int line);
   void SetLastWarning(unsigned int code, unsigned int subcode,
                       const char* file, int line);
 // write log message
-  void LogMsg(const char *string, const char *file, int line);
+  void LogMsg(const char *string, unsigned char lvl, const char *file,
+              int line);
 // write debug log message
-  void DebugMsg(const char *string, const char *file, int line);
+  void DebugMsg(const char *string, unsigned char lvl, const char *file,
+                int line);
  private:
+// verbose level
+  unsigned char verbose_level;
 // write log message
   void LogMsg(const char *string);
 // write debug log message
@@ -61,8 +70,10 @@ class AtomLog {
 
 #define SetLastErr(code,subcode) SetLastError(code,subcode,__FILE__,__LINE__);  /*NOLINT*/
 #define SetLastWrn(code,subcode) SetLastWarning(code,subcode,__FILE__,__LINE__);  /*NOLINT*/
-#define LogMessage(string) LogMsg(string,__FILE__,__LINE__);  /*NOLINT*/
-#define DebugMessage(string) DebugMsg(string,__FILE__,__LINE__);  /*NOLINT*/
+#define LogMessage(string) LogMsg(string,0,__FILE__,__LINE__);  /*NOLINT*/
+#define DebugMessage(string) DebugMsg(string,0,__FILE__,__LINE__);  /*NOLINT*/
+#define LogMessageV(string,lvl) LogMsg(string,lvl,__FILE__,__LINE__);  /*NOLINT*/
+#define DebugMessageV(string,lvl) DebugMsg(string,lvl,__FILE__,__LINE__);  /*NOLINT*/
 
 /* Module General Error Codes */
 #define ERROR_CORE_FS                                                0x00000001
