@@ -1,98 +1,64 @@
 #ifndef _OWINDOW_H
 #define _OWINDOW_H
 #include <AtomError.h>
+#include <WM_Types.h>
 
-#define OFF 0
-#define ON 1
+typedef DWORD FLAGS;
 
-#ifdef UNIX
-typedef struct _RECT {
-  long left;
-  long top;
-  long right;
-  long bottom;
-} RECT, *PRECT;
-#endif  // UNIX
-
-enum VISIBILITY
+enum VISIBILITY_FLAGS
 {
-	visible,
-	hidden
+    ATOMWND_VISIBLE               = 0x00000001
 };
 
-enum EFFECT
+enum BORDER_FLAGS
 {
-	normal,
-	minimized,
-	maximized,
-	fullscreen
+    ATOMWND_BORDER_SIZEABLE       = 0x00000002,
+    ATOMWND_BORDER_FIXED          = 0x00000004
 };
 
-enum BORDER
+enum WND_BUTTON_FLAGS
 {
-	noborder,
-	sizeable,
-	fixed
+    ATOMWND_BTN_MINIMIZE          = 0x00000008,
+    ATOMWND_BTN_MAXIMIZE          = 0x00000010,
+    ATOMWND_BTN_EXIT              = 0x00000020,
+    ATOMWND_BTN_HELP              = 0x00000040
 };
-
-struct WNDINFO;
 
 class OWindow
 {
 public:
     OWindow( AtomLog* );
-    struct properties
-    {
-        char* title;
-        int x, y, width, height;
-        VISIBILITY visibility;
-        EFFECT effect;
-        BORDER border;
-    } properties;	
-    struct buttons
-    {
-        int minimize : 1,
-            maximize : 1,
-            exit : 1,
-            help : 1;
-        } buttons;	
-	virtual bool Create( void ) = 0;
+    FLAGS SetWindowFlags( VISIBILITY_FLAGS, BORDER_FLAGS, WND_BUTTON_FLAGS );
+    virtual bool Create( const char*, int, int, int, int, FLAGS ) = 0;
     virtual bool Show( void ) = 0;
     virtual bool Hide( void ) = 0;
+    virtual bool ShowMinimized( void ) = 0;
+    virtual bool ShowMaximized( void ) = 0;
+    virtual bool ShowNormal( void ) = 0;
+    virtual bool Update( void ) = 0;
     virtual bool Minimize( void ) = 0;
     virtual bool Maximize( void ) = 0;
     virtual bool Restore( void ) = 0;
-	virtual bool SetCaption( const char* ) = 0;
-	virtual bool GetCaption( char const*, int ) = 0;
-	virtual bool SetWindowRect( const RECT* ) = 0;
-	virtual bool GetWindowRect( RECT const* ) = 0;
-	virtual bool GetWindowInfo( WNDINFO* ) = 0;
-	virtual bool SetWindowInfo( const WNDINFO* ) = 0;
-	virtual bool GetWindowRect( RECT* ) = 0;
-	virtual bool GetClientRect( RECT* ) = 0;
-	virtual bool Close( void ) = 0;
-	virtual bool Destroy( void ) = 0;
+    virtual bool SetCaption( const char* ) = 0;
+    virtual bool GetCaption( const char*, int ) = 0;
+    virtual bool SetWindowRect( const PATOMRECT ) = 0;
+    virtual bool GetWindowRect( PATOMRECT const ) = 0;
+    virtual bool GetClientRect( PATOMRECT const ) = 0;
+    virtual bool Close( void ) = 0;
+    virtual bool Destroy( void ) = 0;
+    virtual bool IsVisible( void ) = 0;
+    virtual bool IsMinimized( void ) = 0;
+    virtual bool IsMaximized( void ) = 0;
+    virtual bool IsFullScreen( void ) = 0;
+    virtual bool IsBorderSizeable( void ) = 0;
+    virtual bool IsBorderFixed( void ) = 0;
+    virtual bool IsTopMost( void ) = 0;
+    virtual bool HasMinimizeButton( void ) = 0;
+    virtual bool HasMaximizeButton( void ) = 0;
+    virtual bool HasExitButton( void ) = 0;
+    virtual bool HasHelpButton( void ) = 0;
 protected:
 	AtomLog *log;
-};
-
-struct WNDINFO
-{
-	char const* title[0xFF];
-	int x, y, width, height,
-	    client_x, client_y, 
-		client_width, client_height;
-	int IsVisible : 1, 
-	    IsMinimized : 1, 
-		IsMaximized : 1, 
-		IsFullScreen : 1,
-	    IsBorderSizeable : 1, 
-		IsBorderFixed : 1,
-		IsTopMost : 1,
-		HasMinimizeButton : 1,
-		HasMaximizeButton : 1,
-		HasExitButton : 1,
-		HasHelpButton : 1;
 };
 
 #endif
