@@ -114,5 +114,6 @@ class AtomLog {
 #define WARNING_OVERWRITE                                            0x00000001
 #define WARNING_EMPTY_STRING                                         0x00000002
 #define WARNING_WRONG_COMMAND                                        0x00000003
+#define WARNING_INCORRECT_PATH                                       0x00000004
 
 #endif  // _CORE_ERROR_H_

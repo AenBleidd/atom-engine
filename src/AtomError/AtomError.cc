@@ -228,14 +228,15 @@ const char *warningcode[] = {
 "No Warning.",
 "Core Warning. File System Warning."
 };
-const char *warningsubcode[2][4] = {
+const char *warningsubcode[2][5] = {
 {
 "No Warning."
 }, {
 "No Warning.",
 "File was overwritten.",
 "Empty string. Nothing to parse.",
-"Wrong syntax or unknown command."
+"Wrong syntax or unknown command.",
+"Path incorrect or directory doesn't exist."
 }
 };
 void AtomLog::SetLastError(unsigned int code, unsigned int subcode,
