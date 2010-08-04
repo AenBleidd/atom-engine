@@ -1,4 +1,5 @@
 #include "WindowManager.h"
+#include <unistd.h>
 
 /* SYNOPSYS 
  * This is the template for implementation of the OWindow interface
@@ -48,15 +49,23 @@ bool AtomWindow::XConnect( const char* DisplayName )
     return true;
 }
 
-bool AtomWindow::Create( void )
+bool AtomWindow::Create( const char* TitleText, int x, int y, int width, int height, FLAGS flags )
 {
-    XWindowAttributes windowattr;
-    int screen_num = DefaultScreen( display );
-    if( XGetWindowAttributes( display, RootWindow(display, screen_num), &windowattr ) )
+    if( !display )
     {
-        window = XCreateSimpleWindow( display, RootWindow( display, screen_num ), 0, 0, windowattr.width/3, windowattr.height/4, 
-             4, BlackPixel( display, screen_num ), WhitePixel( display, screen_num ) );
+        /* SetLastErr */
+        return false;
     }
+
+    int screen_num = DefaultScreen( display );
+        window = XCreateSimpleWindow( display, RootWindow( display, screen_num ), 
+        x, y, width, height, 4, BlackPixel( display, screen_num ), WhitePixel( display, screen_num ) );
+
+//    XSelectInput( display, window, ExposureMask | KeyPressMask );
+
+    XMapWindow( display, window );
+    XFlush( display );
+    sleep(10);
     return true;
 }
 
@@ -66,6 +75,26 @@ bool AtomWindow::Show( void )
 }
 
 bool AtomWindow::Hide( void )
+{
+    return true;
+}
+
+bool AtomWindow::ShowMinimized( void )
+{
+    return true;
+}
+
+bool AtomWindow::ShowMaximized( void )
+{
+    return true;
+}
+
+bool AtomWindow::ShowNormal( void )
+{
+    return true;
+}
+
+bool AtomWindow::Update( void )
 {
     return true;
 }
@@ -90,37 +119,22 @@ bool AtomWindow::SetCaption( const char* Caption )
     return true;
 }
 
-bool AtomWindow::GetCaption( char const* Caption, int nMaxCount )
+bool AtomWindow::GetCaption( const char* Caption, int nMaxCount )
 {
     return true;
 }
 
-bool AtomWindow::SetWindowRect( const RECT* Rect )
+bool AtomWindow::SetWindowRect( const PATOMRECT Rect )
 {
     return true;
 }
 
-bool AtomWindow::GetWindowRect( RECT const* Rect )
+bool AtomWindow::GetWindowRect( PATOMRECT const WindowRect )
 {
     return true;
 }
 
-bool AtomWindow::GetWindowInfo( WNDINFO* Info )
-{
-	return true;
-}
-
-bool AtomWindow::SetWindowInfo( const WNDINFO* Info )
-{
-	return true;
-}
-
-bool AtomWindow::GetWindowRect( RECT* WindowRect )
-{
-	return true;
-}
-
-bool AtomWindow::GetClientRect( RECT* ClientRect )
+bool AtomWindow::GetClientRect( PATOMRECT const ClientRect )
 {
 	return true;
 }
@@ -134,8 +148,63 @@ bool AtomWindow::Destroy( void )
 {
 	return true;
 }
-	
-int AtomWindow::Run( void )
+
+bool AtomWindow::IsVisible( void )
 {
-	return 0;
+	return true;
 }
+
+bool AtomWindow::IsMinimized( void )
+{
+	return true;
+}
+
+bool AtomWindow::IsMaximized( void )
+{
+	return true;
+}
+
+bool AtomWindow::IsFullScreen( void )
+{
+	return true;
+}
+
+bool AtomWindow::IsBorderSizeable( void )
+{
+	return true;
+}
+
+bool AtomWindow::IsBorderFixed( void )
+{
+	return true;
+}
+
+bool AtomWindow::IsTopMost( void )
+{
+	return true;
+}
+
+bool AtomWindow::HasMinimizeButton( void )
+{
+	return true;
+}
+
+bool AtomWindow::HasMaximizeButton( void )
+{
+	return true;
+}
+
+bool AtomWindow::HasExitButton( void )
+{
+	return true;
+}
+
+bool AtomWindow::HasHelpButton( void )
+{
+	return true;
+}
+
+void AtomWindow::OnCreate( void ){}
+void AtomWindow::OnClose( void ){}
+void AtomWindow::OnDestroy( void ){}
+void AtomWindow::OnQuit( void ){}
