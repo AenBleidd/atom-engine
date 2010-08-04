@@ -27,93 +27,97 @@ char* CurTime() {
   delete timeinfo;
   return time;
 }
-AtomLog::AtomLog(char *name, bool alone) {
+AtomLog::AtomLog(char *name, bool alone, unsigned char lvl) {
   MsgBuf = new char[MSG_BUFFER_SIZE];
-  const unsigned short s = 355;
-  char *plogfilename  = new char[s];
+  logfile = 0;
+  verbose_level = lvl;
+  if (name != 0) {
+    const unsigned short s = 355;
+    char *plogfilename  = new char[s];
 // get current date and time
-  char *pbuffer = CurDateTime();
-  const unsigned char t = 255;
-  char *temppath = new char[t];
+    char *pbuffer = CurDateTime();
+    const unsigned char t = 255;
+    char *temppath = new char[t];
 #ifdef UNIX
 #ifndef ATOM_DEBUG
-  snprintf(temppath, t, "%s", "/tmp/");
+    snprintf(temppath, t, "%s", "/tmp/");
 #else
-  snprintf(temppath, t, "%s", "log/");
+    snprintf(temppath, t, "%s", "log/");
 #endif  // DEBUG
 #else
 #ifndef ATOM_DEBUG
-  GetTempPath(t, temppath);
+    GetTempPath(t, temppath);
 #else
-  snprintf(temppath, t, "%s", "log\\");
+    snprintf(temppath, t, "%s", "log\\");
 #endif  // DEBUG
 #endif  // UNIX
 
 // Check log folder
 #ifdef ATOM_DEBUG
-  FILE *log;
-  if ((log = fopen("log", "r")) == NULL) {
+    FILE *log;
+    if ((log = fopen("log", "r")) == NULL) {
 // One by one, We will fall, down down...
 // Wait a minute ! We have last hope!
 // Lets save logfile in the temp directory.
 // At least this directory MUST be exist...
 #ifdef UNIX
-    if (mkdir("log", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
-      snprintf(temppath, t, "%s", "/tmp/");
+      if (mkdir("log", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
+        snprintf(temppath, t, "%s", "/tmp/");
 #else
-    if (CreateDirectory("log", NULL) == 0) {
-      GetTempPath(t, temppath);
+      if (CreateDirectory("log", NULL) == 0) {
+        GetTempPath(t, temppath);
 #endif  // UNIX
-      fprintf(stderr, "Can't create log directory\n");
+        fprintf(stderr, "Can't create log directory\n");
+      }
+    } else {
+      fclose(log);
     }
-  } else {
-    fclose(log);
-  }
 #endif  // ATOM_DEBUG
 
-  if (alone == false) {
-    if (name != 0) {
-      snprintf(plogfilename, s, "%s%s_%s%s",
-               temppath, name, pbuffer, ".log");
-    }    else {
-      snprintf(plogfilename, s, "%s%s_%s%s",
-               temppath, "atom", pbuffer, ".log");
+    if (alone == false) {
+      if (strcmp(name, "atom") != 0) {
+        snprintf(plogfilename, s, "%s%s_%s%s",
+                 temppath, name, pbuffer, ".log");
+      } else {
+        snprintf(plogfilename, s, "%s%s_%s%s",
+                 temppath, "atom", pbuffer, ".log");
+      }
+    } else {
+      if (strcmp(name, "atom") != 0) {
+        snprintf(plogfilename, s, "%s%s%s",
+                 temppath, name, ".log");
+      } else {
+        snprintf(plogfilename, s, "%s%s%s",
+                 temppath, "atom", ".log");
+      }
     }
-  } else {
-    if (name != 0) {
-      snprintf(plogfilename, s, "%s%s%s",
-               temppath, name, ".log");
-    }    else {
-      snprintf(plogfilename, s, "%s%s%s",
-               temppath, "atom", ".log");
-    }
-  }
 
 // open log file
-  logfile = fopen(plogfilename, "wt");
-  if (logfile == 0) {
-// Another last hope...
-// Try to use standart name
-    snprintf(plogfilename, s, "%s%s_%s%s",
-             temppath, "atom", pbuffer, ".log");
     logfile = fopen(plogfilename, "wt");
     if (logfile == 0) {
-      delete [] temppath;
-      delete [] pbuffer;
-      delete [] plogfilename;
+// Another last hope...
+// Try to use standart name
+      snprintf(plogfilename, s, "%s%s_%s%s",
+               temppath, "atom", pbuffer, ".log");
+      logfile = fopen(plogfilename, "wt");
+      if (logfile == 0) {
+        delete [] temppath;
+        delete [] pbuffer;
+        delete [] plogfilename;
+// We can't do this...
+        throw -1;
+      }
+      snprintf((char*)MsgBuf, MSG_BUFFER_SIZE, "Given filename '%s' is wrong",
+               name);
+      LogMessage(MsgBuf);
+    }
+    delete [] temppath;
+    delete [] pbuffer;
+    delete [] plogfilename;
+    if (logfile == 0) {
 // We can't do this...
       throw -1;
     }
-    snprintf((char*)MsgBuf, MSG_BUFFER_SIZE, "Given filename '%s' is wrong",
-             name);
-    LogMessage(MsgBuf);
-  }
-  delete [] temppath;
-  delete [] pbuffer;
-  delete [] plogfilename;
-  if (logfile == 0) {
-// We can't do this...
-    throw -1;
   }
   global_error.code = 0;
   global_error.sub_code = 0;
@@ -124,7 +128,8 @@ AtomLog::AtomLog(char *name, bool alone) {
 }
 AtomLog::~AtomLog() {
 // close log file
-  fclose(logfile);
+  if (logfile != 0)
+    fclose(logfile);
   if (MsgBuf)
     delete [] MsgBuf;
 // do some clean
@@ -137,15 +142,20 @@ AtomLog::~AtomLog() {
     global_warning.description = 0;
   }
 }
-void AtomLog::LogMsg(const char *string, const char *file, int line) {
-  char *time = CurTime();
+void AtomLog::LogMsg(const char *string, unsigned char lvl, const char *file,
+                     int line) {
+  if (lvl <= verbose_level) {
+    char *time = CurTime();
 #ifdef ATOM_DEBUG
-  fprintf(stderr, "%s %s:%i\t%s\n", time, file, line, string);
+    fprintf(stderr, "%s %s:%i\t%s\n", time, file, line, string);
 #endif
-  fprintf(logfile, "%s %s:%i\t%s\n", time, file, line, string);
-  fflush(logfile);
-  delete [] time;
-  time = 0;
+    if (logfile != 0) {
+      fprintf(logfile, "%s %s:%i\t%s\n", time, file, line, string);
+      fflush(logfile);
+    }
+    delete [] time;
+    time = 0;
+  }
   return;
 }
 void AtomLog::LogMsg(const char *string) {
@@ -153,15 +163,18 @@ void AtomLog::LogMsg(const char *string) {
 #ifdef ATOM_DEBUG
   fprintf(stderr, "%s %s\n", time, string);
 #endif
-  fprintf(logfile, "%s %s\n", time, string);
-  fflush(logfile);
+  if (logfile != 0) {
+    fprintf(logfile, "%s %s\n", time, string);
+    fflush(logfile);
+  }
   delete [] time;
   time = 0;
   return;
 }
-void AtomLog::DebugMsg(const char *string, const char *file, int line) {
+void AtomLog::DebugMsg(const char *string, unsigned char lvl, const char *file,
+                       int line) {
 #ifdef ATOM_DEBUG
-  LogMsg(string, file, line);
+  LogMsg(string, lvl, file, line);
 #endif
 return;
 }
