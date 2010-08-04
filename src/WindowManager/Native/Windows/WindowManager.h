@@ -43,13 +43,12 @@ public:
     bool HasMaximizeButton( void );
     bool HasExitButton( void );
     bool HasHelpButton( void );
-    void Test( void );
     
     /* inherited events */
-    void __fastcall OnCreate( void );
-    void __fastcall OnClose( void );
-    void __fastcall OnDestroy( void );
-    void __fastcall OnQuit( void );    
+    void OnCreate( void );
+    void OnClose( void );
+    void OnDestroy( void );
+    void OnQuit( void );    
 private:
     char clsname[0xFF]; //window classname
     HWND hWnd;

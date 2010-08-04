@@ -1,7 +1,6 @@
 #ifndef EVENT_HANDLER
 #define EVENT_HANDLER
 #include <OEventHandler.h>
-//#include <windows.h>
 #include "WindowManager.h"
 
 class EventHandler : public OEventHandler
