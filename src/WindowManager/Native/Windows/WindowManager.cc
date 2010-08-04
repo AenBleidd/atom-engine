@@ -1,4 +1,5 @@
 #include "WindowManager.h"
+#include "EventHandler.h"
 
     /* TODO:          * Fix Noborder and FullScreen styles.
     */
@@ -23,7 +24,7 @@ AtomWindow::AtomWindow( AtomLog* Log ) : OWindow( Log )
     memset( &wcl, 0, sizeof( wcl ) );
     wcl.cbSize = sizeof ( wcl );
     wcl.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-    wcl.lpfnWndProc = AtomWindow::WindowProcedure;
+    wcl.lpfnWndProc = EventHandler::WindowProcedure;
     wcl.hInstance = hInstance = GetModuleHandle( NULL );
     wcl.hIcon = LoadIcon( NULL, IDI_APPLICATION );
     wcl.hIconSm = LoadIcon( NULL, IDI_APPLICATION );
@@ -84,6 +85,9 @@ bool AtomWindow::Create( const char* TitleText, int x, int y, int width, int hei
         log->LogMessage( "Engine Fatal Error: Window cannot be created." );
         return false;
     }
+    
+    SetWindowLong( hWnd, GWLP_USERDATA, ( LONG_PTR ) this );
+    OnCreate();
     
     return true;
 }
@@ -312,25 +316,15 @@ bool AtomWindow::HasHelpButton( void )
     return false;
 }
    
-int AtomWindow::Run( void )
+void AtomWindow::Test( void )
 {
-    MSG msg;
-    while( GetMessage( &msg, NULL, 0, 0 ) )
-    {
-        TranslateMessage( &msg );
-        DispatchMessage( &msg );
-    }
-    return msg.wParam;
+    MessageBox( NULL, "A Test", "OK", MB_OK );
 }
 
-LRESULT CALLBACK AtomWindow::WindowProcedure( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
+void __fastcall AtomWindow::OnCreate( void ){}
+void __fastcall AtomWindow::OnClose( void )
 {
-    switch( uMsg )
-    {
-        case WM_CLOSE:
-        case WM_DESTROY:
-            PostQuitMessage( EXIT_SUCCESS );
-            break;
-    }
-    return DefWindowProc( hWnd, uMsg, wParam, lParam );
+    PostQuitMessage( EXIT_SUCCESS );
 }
+void __fastcall AtomWindow::OnDestroy( void ){}
+void __fastcall AtomWindow::OnQuit( void ){}

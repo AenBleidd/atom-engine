@@ -13,6 +13,7 @@ class AtomWindow : public OWindow
 public:
     AtomWindow( AtomLog* );
     ~AtomWindow();
+    
     /* inherited functions */
     bool Create( const char*, int, int, int, int, FLAGS );
     bool Show( void );
@@ -42,8 +43,13 @@ public:
     bool HasMaximizeButton( void );
     bool HasExitButton( void );
     bool HasHelpButton( void );
-    int Run( void );
-    static LRESULT CALLBACK WindowProcedure( HWND, UINT, WPARAM, LPARAM ); // callback event handler
+    void Test( void );
+    
+    /* inherited events */
+    void __fastcall OnCreate( void );
+    void __fastcall OnClose( void );
+    void __fastcall OnDestroy( void );
+    void __fastcall OnQuit( void );    
 private:
     char clsname[0xFF]; //window classname
     HWND hWnd;

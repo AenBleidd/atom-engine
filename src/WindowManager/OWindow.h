@@ -29,6 +29,8 @@ class OWindow
 public:
     OWindow( AtomLog* );
     FLAGS SetWindowFlags( VISIBILITY_FLAGS, BORDER_FLAGS, WND_BUTTON_FLAGS );
+    
+    /* functions that affect window */
     virtual bool Create( const char*, int, int, int, int, FLAGS ) = 0;
     virtual bool Show( void ) = 0;
     virtual bool Hide( void ) = 0;
@@ -57,6 +59,12 @@ public:
     virtual bool HasMaximizeButton( void ) = 0;
     virtual bool HasExitButton( void ) = 0;
     virtual bool HasHelpButton( void ) = 0;
+    
+    /* events handled by the window */
+    virtual void __fastcall OnClose( void );
+    virtual void __fastcall OnCreate( void );
+    virtual void __fastcall OnDestroy( void );
+    virtual void __fastcall OnQuit( void );
 protected:
 	AtomLog *log;
 };

@@ -41,7 +41,7 @@ IF ( DEFINED GUI AND NOT GUI STREQUAL "" )
 			ENDIF ( UNIX )
 
 			# ACHTUNG!!! General build instructions! Do not modify them, please!
-			ADD_LIBRARY ( ${WM_MODULE} STATIC OWindow ${WM_PREFIX}/WindowManager )
+			ADD_LIBRARY ( ${WM_MODULE} STATIC OWindow ${WM_PREFIX}/WindowManager ${WM_PREFIX}/EventHandler )
 			TARGET_LINK_LIBRARIES ( ${WM_MODULE} ${ATOMERROR_MODULE} X11 )
 		ENDIF (GUI STREQUAL "Native")
 		IF ( GUI STREQUAL "SDL" )
