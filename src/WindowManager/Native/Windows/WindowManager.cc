@@ -316,10 +316,10 @@ bool AtomWindow::HasHelpButton( void )
     return false;
 }
    
-void __fastcall AtomWindow::OnCreate( void ){}
-void __fastcall AtomWindow::OnClose( void )
+void AtomWindow::OnCreate( void ){}
+void AtomWindow::OnClose( void )
 {
     PostQuitMessage( EXIT_SUCCESS );
 }
-void __fastcall AtomWindow::OnDestroy( void ){}
-void __fastcall AtomWindow::OnQuit( void ){}
+void AtomWindow::OnDestroy( void ){}
+void AtomWindow::OnQuit( void ){}
