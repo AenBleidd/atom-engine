@@ -15,11 +15,11 @@ unsigned int* PassPrint(void) {
 // password input cycle
   while (true) {
     printf("%s:\n", "Print 16-symbol password");
-    scanf("%16s", input);
+    fgets(input, 17, stdin);
     if (strlen(input) == 16)
       break;
     else
-      printf("Password is too short! Try again\n");
+      fprintf(stderr, "%s\n", "Password is too short! Try again");
   }
   input[16] = '\0';
 // processing input string
@@ -34,7 +34,7 @@ unsigned int* PassPrint(void) {
 int main(int arg, char *argc[]) {
 // input parameters processing
   unsigned int *key = 0;
-  atomlog = new AtomLog;
+  atomlog = new AtomLog("fsman");
   const unsigned char versionlen = 30;
   char *version = new char[versionlen];
   snprintf(version, versionlen, "Start fsman version %s", _FSMAN_VERSION_);
@@ -195,6 +195,7 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
       snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Open file %s",
                argc[2]);
         atomfs->Mount(argc[2], "/");
+        atomfs->Navigate();
     } else {
       atomlog->DebugMessage(help);
       fprintf(stderr, "%s", help);
