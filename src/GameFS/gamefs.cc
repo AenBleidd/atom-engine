@@ -1,10 +1,18 @@
 #include "gamefs.h"
+#include "byteorderdetect.h"
 AtomFS::AtomFS(AtomLog *log, unsigned int *key) {
   if (log == 0) {
 // What the ... ???
     throw -1;
   }
   atomlog = log;
+// Check byteorder
+  char t = ByteOrderDetect();
+  if (t == -1) {
+   atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRONG_BYTEORDER);
+   throw ERROR_WRONG_BYTEORDER;
+  }
+  byteorder = t;
   wake_key = 0;
 // If class being created with predefined key
   if (key != 0) {
