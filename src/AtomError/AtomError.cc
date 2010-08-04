@@ -1,0 +1,278 @@
+#include "AtomError.h"
+// returns current system date & time in text format
+#ifndef UNIX
+#define localtime_r(timep, result)  (localtime (timep) ? memcpy  ((result), localtime (timep), sizeof (*(result))) : 0) /*NOLINT*/
+#endif  // UNIX
+char* CurDateTime() {
+  time_t seconds = time(NULL);
+  tm *timeinfo = new tm;
+  timeinfo = (tm*) localtime_r(&seconds, timeinfo);
+  const unsigned char s = 20;
+  char *date = new char[s];
+  snprintf(date, s, "%i.%02i.%02i_%02i.%02i.%02i",
+          timeinfo->tm_year+1900, timeinfo->tm_mon,
+          timeinfo->tm_mday, timeinfo->tm_hour,
+          timeinfo->tm_min, timeinfo->tm_sec);
+  delete timeinfo;
+  return date;
+}
+char* CurTime() {
+  time_t seconds = time(NULL);
+  tm *timeinfo = new tm;
+  timeinfo = (tm*) localtime_r(&seconds, timeinfo);
+  const unsigned char s = 10;
+  char *time = new char[s];
+  snprintf(time, s, "%02i:%02i:%02i", timeinfo->tm_hour,
+          timeinfo->tm_min, timeinfo->tm_sec);
+  delete timeinfo;
+  return time;
+}
+AtomLog::AtomLog(char *name, bool alone, unsigned char lvl) {
+  MsgBuf = new char[MSG_BUFFER_SIZE];
+  logfile = 0;
+  verbose_level = lvl;
+  if (name != 0) {
+    const unsigned short s = 355;
+    char *plogfilename  = new char[s];
+// get current date and time
+    char *pbuffer = CurDateTime();
+    const unsigned char t = 255;
+    char *temppath = new char[t];
+#ifdef UNIX
+#ifndef ATOM_DEBUG
+    snprintf(temppath, t, "%s", "/tmp/");
+#else
+    snprintf(temppath, t, "%s", "log/");
+#endif  // DEBUG
+#else
+#ifndef ATOM_DEBUG
+    GetTempPath(t, temppath);
+#else
+    snprintf(temppath, t, "%s", "log\\");
+#endif  // DEBUG
+#endif  // UNIX
+
+// Check log folder
+#ifdef ATOM_DEBUG
+    FILE *log;
+    if ((log = fopen("log", "r")) == NULL) {
+// One by one, We will fall, down down...
+// Wait a minute ! We have last hope!
+// Lets save logfile in the temp directory.
+// At least this directory MUST be exist...
+#ifdef UNIX
+      if (mkdir("log", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
+        snprintf(temppath, t, "%s", "/tmp/");
+#else
+      if (CreateDirectory("log", NULL) == 0) {
+        GetTempPath(t, temppath);
+#endif  // UNIX
+        fprintf(stderr, "Can't create log directory\n");
+      }
+    } else {
+      fclose(log);
+    }
+#endif  // ATOM_DEBUG
+
+    if (alone == false) {
+      if (strcmp(name, "atom") != 0) {
+        snprintf(plogfilename, s, "%s%s_%s%s",
+                 temppath, name, pbuffer, ".log");
+      } else {
+        snprintf(plogfilename, s, "%s%s_%s%s",
+                 temppath, "atom", pbuffer, ".log");
+      }
+    } else {
+      if (strcmp(name, "atom") != 0) {
+        snprintf(plogfilename, s, "%s%s%s",
+                 temppath, name, ".log");
+      } else {
+        snprintf(plogfilename, s, "%s%s%s",
+                 temppath, "atom", ".log");
+      }
+    }
+
+// open log file
+    logfile = fopen(plogfilename, "wt");
+    if (logfile == 0) {
+// Another last hope...
+// Try to use standart name
+      snprintf(plogfilename, s, "%s%s_%s%s",
+               temppath, "atom", pbuffer, ".log");
+      logfile = fopen(plogfilename, "wt");
+      if (logfile == 0) {
+        delete [] temppath;
+        delete [] pbuffer;
+        delete [] plogfilename;
+// We can't do this...
+        throw -1;
+      }
+      snprintf((char*)MsgBuf, MSG_BUFFER_SIZE, "Given filename '%s' is wrong",
+               name);
+      LogMessage(MsgBuf);
+    }
+    delete [] temppath;
+    delete [] pbuffer;
+    delete [] plogfilename;
+    if (logfile == 0) {
+// We can't do this...
+      throw -1;
+    }
+  }
+  global_error.code = 0;
+  global_error.sub_code = 0;
+  global_error.description = 0;
+  global_warning.code = 0;
+  global_warning.sub_code = 0;
+  global_warning.description = 0;
+}
+AtomLog::~AtomLog() {
+// close log file
+  if (logfile != 0)
+    fclose(logfile);
+  if (MsgBuf)
+    delete [] MsgBuf;
+// do some clean
+  if (global_error.description != 0) {
+    delete [] global_error.description;
+    global_error.description = 0;
+  }
+  if (global_warning.description != 0) {
+    delete [] global_warning.description;
+    global_warning.description = 0;
+  }
+}
+void AtomLog::LogMsg(const char *string, unsigned char lvl, const char *file,
+                     int line) {
+  if (lvl <= verbose_level) {
+    char *time = CurTime();
+#ifdef ATOM_DEBUG
+    fprintf(stderr, "%s %s:%i\t%s\n", time, file, line, string);
+#endif
+    if (logfile != 0) {
+      fprintf(logfile, "%s %s:%i\t%s\n", time, file, line, string);
+      fflush(logfile);
+    }
+    delete [] time;
+    time = 0;
+  }
+  return;
+}
+void AtomLog::LogMsg(const char *string) {
+  char *time = CurTime();
+#ifdef ATOM_DEBUG
+  fprintf(stderr, "%s %s\n", time, string);
+#endif
+  if (logfile != 0) {
+    fprintf(logfile, "%s %s\n", time, string);
+    fflush(logfile);
+  }
+  delete [] time;
+  time = 0;
+  return;
+}
+void AtomLog::DebugMsg(const char *string, unsigned char lvl, const char *file,
+                       int line) {
+#ifdef ATOM_DEBUG
+  LogMsg(string, lvl, file, line);
+#endif
+return;
+}
+void AtomLog::DebugMsg(const char *string) {
+#ifdef ATOM_DEBUG
+  LogMsg(string);
+#endif
+return;
+}
+// Errors description
+const char *errorcode[] = {
+"No Error.",
+"Core Error. File System Error.",
+"Engine Error. WindowManager Error."
+};
+const char *errorsubcode[3][14] = {
+{
+"No Error."
+}, {
+"No Error.",
+"Error opening the file.",
+"Error reading the file.",
+"Error parsing the mount file. No closing quotes.",
+"Error parsing the mount file.",
+"Error mounting the file system.",
+"Couldn't open the directory.",
+"Error while writing the file.",
+"Incorrect file.",
+"Incorrect mountpoint",
+"Can't overwrite the file.",
+"Lost quotes.",
+"Error parsing the string.",
+"Wrong byteorder. Program can't read files with unknown byteorder."
+}, {
+"No Error",
+"Fatal Error: Error registering the window class",
+"Fatal Errpr: Couldn't create a window",
+"Invalid input parameter",
+"Error unregistering the window class",
+"Error getting window title",
+"Error getting the window info block",
+"Error setting the window text while applying the window info block",
+"Error trying to change window size and dimentions",
+"Error adjusting the client area for a window",
+"Error trying to make window topmost",
+"Error connecting to X server and opening display"
+}
+};
+// Warning description
+const char *warningcode[] = {
+"No Warning.",
+"Core Warning. File System Warning."
+};
+const char *warningsubcode[2][4] = {
+{
+"No Warning."
+}, {
+"No Warning.",
+"File was overwritten.",
+"Empty string. Nothing to parse.",
+"Wrong syntax or unknown command."
+}
+};
+void AtomLog::SetLastError(unsigned int code, unsigned int subcode,
+                           const char* file, int line) {
+// do some clean
+  if (global_error.description != 0) {
+    delete [] global_error.description;
+    global_error.description = 0;
+  }
+  global_error.code = code;
+  global_error.sub_code = subcode;
+  unsigned int errlen = 300 + strlen(errorcode[global_error.code]) +
+               strlen(errorsubcode[global_error.code][global_error.sub_code]);
+  global_error.description = new char[errlen];
+  snprintf(global_error.description, errlen, "%s:%i\tERROR: %s\t%s",
+           file, line, errorcode[global_error.code],
+           errorsubcode[global_error.code][global_error.sub_code]);
+// log the error
+  LogMsg(global_error.description);
+}
+void AtomLog::SetLastWarning(unsigned int code, unsigned int subcode,
+                             const char* file, int line) {
+// do some clean
+  if (global_warning.description != 0) {
+    delete [] global_warning.description;
+    global_warning.description = 0;
+  }
+  global_warning.code = code;
+  global_warning.sub_code = subcode;
+  unsigned int warnlen = 300 + strlen(warningcode[global_warning.code]) +
+         strlen(warningsubcode[global_warning.code][global_warning.sub_code]);
+  global_warning.description = new char[warnlen];
+  snprintf(global_warning.description, warnlen, "%s:%i\tWARNING: %s\t%s",
+           file, line, warningcode[global_warning.code],
+           warningsubcode[global_warning.code][global_warning.sub_code]);
+// log the error
+  LogMsg(global_warning.description);
+
+  return;
+}
