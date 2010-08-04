@@ -498,7 +498,7 @@ temprecord = new RECORD;
         current->tree_file->priority = header.type;
         current->tree_file->file = 0;
         current->tree_file->descriptor = 0;
-        if (header.type = type_addon) {
+        if (header.type == type_addon) {
           current->tree_file->key = header.addon_key;
         }
 // Clean
@@ -506,11 +506,38 @@ temprecord = new RECORD;
         temprecord = 0;
       } else {
         if (strcmp(current->tree_file->name, temprecord->name) == 0) {
-          bfound = true;
+          snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
+                   "Overwtiting the file %s", temprecord->name);
+          atomlog->LogMessage(atomlog->MsgBuf);
+          if ((tempfile->priority == type_critical) ||
+              (header.type < tempfile->priority)) {
+            atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OVERWRITE_DENIED);
+            fclose(bin);
+            fclose(dat);
+            delete [] temprecord->name;
+            delete temprecord;
+            return -1;
+          } else {
+            atomlog->SetLastWrn(WARNING_CORE_FS, WARNING_OVERWRITE)
+            tempfile->name = temprecord->name;
+            tempfile->size = temprecord->size;
+            tempfile->offset = temprecord->offset;
+            tempfile->flag = root->flag;
+#ifdef _CRC_CHECK_
+            tempfile->crc = temprecord->crc;
+#endif  // _CRC_CHECK_
+            tempfile->id = bin;
+            tempfile->priority = header.type;
+            tempfile->file = 0;
+            tempfile->tree_file->descriptor = 0;
+            if (header.type == type_addon) {
+              tempfile->tree_file->key = header.addon_key;
+            }
 // Clean
-          delete [] temprecord->name;
-          delete temprecord;
-          temprecord = 0;
+            delete temprecord;
+            temprecord = 0;
+          }
+          bfound = true;
         } else {
           tempfile = current->tree_file;
           while (tempfile->tree_file != 0) {
@@ -539,7 +566,7 @@ temprecord = new RECORD;
                 tempfile->priority = header.type;
                 tempfile->file = 0;
                 tempfile->tree_file->descriptor = 0;
-                if (header.type = type_addon) {
+                if (header.type == type_addon) {
                   tempfile->tree_file->key = header.addon_key;
                 }
 // Clean
@@ -568,7 +595,7 @@ temprecord = new RECORD;
           tempfile->tree_file->priority = header.type;
           tempfile->tree_file->file = 0;
           tempfile->tree_file->descriptor = 0;
-          if (header.type = type_addon) {
+          if (header.type == type_addon) {
             tempfile->tree_file->key = header.addon_key;
           }
 // Clean
