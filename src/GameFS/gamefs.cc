@@ -1,6 +1,7 @@
 #include "gamefs.h"
 #include "byteorderdetect.h"
 AtomFS::AtomFS(AtomLog *log, unsigned int *key) {
+  openalloc = 0;
   if (log == 0) {
 // What the ... ???
     throw -1;
@@ -17,7 +18,7 @@ AtomFS::AtomFS(AtomLog *log, unsigned int *key) {
 // If class being created with predefined key
   if (key != 0) {
     wake_key = key;
-    GenKey(wake_key[0], wake_key[1], wake_key[2], wake_key[3]);
+    wake_table = GenKey(wake_key[0], wake_key[1], wake_key[2], wake_key[3]);
   }
 // create root directory
   root = new TREE_FOLDER;
@@ -61,34 +62,6 @@ AtomFS::~AtomFS() {
         if (tempfile->file != 0) {
 // Hm... it is stil opened. Let's close it! He-he.
           fclose(tempfile->file);
-        }
-// Save open file
-        if (temphead == 0) {
-          temphead = new TREE_FILE;
-          temphead->tree_file = 0;
-          tempcurrent = temphead;
-          tempcurrent->id = tempfile->id;
-          tempfile->id = 0;
-        } else {
-          tempcurrent = temphead;
-          if (tempcurrent->id == tempfile->id) {
-            tempfile->id = 0;
-          } else {
-            while (tempcurrent->tree_file != 0) {
-              tempcurrent = tempcurrent->tree_file;
-              if (tempcurrent->id == tempfile->id) {
-                tempfile->id = 0;
-                break;
-              }
-            }
-          }
-        }
-// If we don't find it
-        if (tempfile->id != 0) {
-          tempcurrent->tree_file = new TREE_FILE;
-          tempcurrent->id = tempfile->id;
-          tempfile->id = 0;
-          tempcurrent->tree_file = 0;
         }
 // Delete filename
         delete [] tempfile->name;
@@ -148,26 +121,24 @@ AtomFS::~AtomFS() {
     nextfolder = tempfolder;
   }
   root = 0;
-// Lets close all opened files!
-  if (temphead != 0) {
-    if (temphead->tree_file == 0) {
-      if (temphead->id != 0) {
-        fclose(temphead->id);
-        temphead->id = 0;
-      }
-      delete temphead;
-      temphead = 0;
-    } else {
-      while (temphead->tree_file != 0) {
-        tempcurrent = temphead->tree_file;
-        temphead = tempcurrent->tree_file;
-        if (tempcurrent->id != 0) {
-          fclose(tempcurrent->id);
-          tempcurrent->id = 0;
-        }
-        delete tempcurrent;
-        tempcurrent = 0;
-      }
-    }
+// Free all memory and close all files
+  OPENALLOC *tempalloc = 0;
+  if (openalloc != 0) {
+    do {
+      if (tempalloc != 0)
+        openalloc = tempalloc;
+      tempalloc = 0;
+      if (openalloc->file != 0)
+        fclose(openalloc->file);
+      if (openalloc->memory != 0)
+        delete [] openalloc->memory;
+      tempalloc = openalloc->next;
+      delete openalloc;
+    } while (tempalloc != 0);
+    openalloc = 0;
+  }
+  if (wake_table != 0) {
+    delete [] wake_table;
+    wake_table = 0;
   }
 }

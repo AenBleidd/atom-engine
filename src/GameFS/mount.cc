@@ -97,6 +97,24 @@ int AtomFS::Mount(char* filename) {
 }
 // Mount single file
 int AtomFS::Mount(char* filename, char* mountfolder) {
+  OPENALLOC *tempalloc = 0, *prev = 0;
+  if (openalloc != 0) {
+    tempalloc = openalloc;
+    while(tempalloc->next != 0) {
+      tempalloc = tempalloc->next;
+    }
+    prev = tempalloc;
+  }
+  tempalloc = new OPENALLOC;
+  tempalloc->file = 0;
+  tempalloc->memory = 0;
+  tempalloc->next = 0;
+  if (openalloc == 0)
+    openalloc = tempalloc;
+  if (prev != 0)
+    prev->next = tempalloc;
+// pointer to wake_table
+  unsigned int *table;
 // Ok, let's do it!
 // Check mount point
   if (mountfolder == 0) {
@@ -133,6 +151,7 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
     fclose(dat);
     return -1;
   }
+  tempalloc->file = bin;
 // Cleaning...
   delete [] binfile;
   delete [] datfile;
@@ -247,6 +266,17 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
       fclose(dat);
       fclose(bin);
       return -1;
+    }
+// Check wake_table
+    if ((header.addon_key[0] == wake_key[0]) &&
+        (header.addon_key[1] == wake_key[1]) &&
+        (header.addon_key[2] == wake_key[2]) &&
+        (header.addon_key[3] == wake_key[3])) {
+      table = wake_table;
+    } else {
+      table = GenKey(header.addon_key[0], header.addon_key[1],
+                     header.addon_key[2], header.addon_key[3]);
+      tempalloc->memory = table;
     }
   }
 // Header was parsed. Easiest part is done...
@@ -491,6 +521,7 @@ temprecord = new RECORD;
         current->tree_file->size = temprecord->size;
         current->tree_file->offset = temprecord->offset;
         current->tree_file->flag = root->flag;
+        current->tree_file->bytescrypt = header.crypt;
 #ifdef _CRC_CHECK_
         current->tree_file->crc = temprecord->crc;
 #endif  // _CRC_CHECK_
@@ -498,9 +529,11 @@ temprecord = new RECORD;
         current->tree_file->priority = header.type;
         current->tree_file->file = 0;
         current->tree_file->descriptor = 0;
+        current->tree_file->key = 0;
         if (header.type == type_addon) {
           current->tree_file->key = header.addon_key;
         }
+        current->tree_file->table = table;
 // Clean
         delete temprecord;
         temprecord = 0;
@@ -523,6 +556,7 @@ temprecord = new RECORD;
             tempfile->size = temprecord->size;
             tempfile->offset = temprecord->offset;
             tempfile->flag = root->flag;
+            tempfile->bytescrypt = header.crypt;
 #ifdef _CRC_CHECK_
             tempfile->crc = temprecord->crc;
 #endif  // _CRC_CHECK_
@@ -530,9 +564,11 @@ temprecord = new RECORD;
             tempfile->priority = header.type;
             tempfile->file = 0;
             tempfile->tree_file->descriptor = 0;
+            tempfile->tree_file->key = 0;
             if (header.type == type_addon) {
               tempfile->tree_file->key = header.addon_key;
             }
+            tempfile->tree_file->table = table;
 // Clean
             delete temprecord;
             temprecord = 0;
@@ -559,6 +595,7 @@ temprecord = new RECORD;
                 tempfile->size = temprecord->size;
                 tempfile->offset = temprecord->offset;
                 tempfile->flag = root->flag;
+                tempfile->bytescrypt = header.crypt;
 #ifdef _CRC_CHECK_
                 tempfile->crc = temprecord->crc;
 #endif  // _CRC_CHECK_
@@ -566,9 +603,11 @@ temprecord = new RECORD;
                 tempfile->priority = header.type;
                 tempfile->file = 0;
                 tempfile->tree_file->descriptor = 0;
+                tempfile->tree_file->key = 0;
                 if (header.type == type_addon) {
                   tempfile->tree_file->key = header.addon_key;
                 }
+                tempfile->tree_file->table = table;
 // Clean
                 delete temprecord;
                 temprecord = 0;
@@ -588,6 +627,7 @@ temprecord = new RECORD;
           tempfile->tree_file->size = temprecord->size;
           tempfile->tree_file->offset = temprecord->offset;
           tempfile->tree_file->flag = root->flag;
+          tempfile->tree_file->bytescrypt = header.crypt;
 #ifdef _CRC_CHECK_
           tempfile->tree_file->crc = temprecord->crc;
 #endif  // _CRC_CHECK_
@@ -595,9 +635,11 @@ temprecord = new RECORD;
           tempfile->tree_file->priority = header.type;
           tempfile->tree_file->file = 0;
           tempfile->tree_file->descriptor = 0;
+          tempfile->tree_file->key = 0;
           if (header.type == type_addon) {
             tempfile->tree_file->key = header.addon_key;
           }
+          tempfile->tree_file->table = table;
 // Clean
           delete temprecord;
           temprecord = 0;
