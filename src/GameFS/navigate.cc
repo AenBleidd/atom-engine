@@ -181,7 +181,8 @@ TREE_FOLDER* ChDir(AtomLog *atomlog, TREE_FOLDER *root,
   bool found = false;
 // check for the root
   if (strcmp(path->output[0], "/") == 0) {
-    return root;
+    cur = root;
+    i = 1;
   }
   for (i; i < path->count; i++) {
     if (strcmp(path->output[i], "..") == 0) {

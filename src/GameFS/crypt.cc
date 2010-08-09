@@ -1,9 +1,10 @@
 #include "gamefs.h"
 // Table generation
-void AtomFS::GenKey(unsigned int k0, unsigned int k1,
+unsigned int* AtomFS::GenKey(unsigned int k0, unsigned int k1,
                     unsigned int k2, unsigned int k3) {
   long x, z;
   int p;
+  unsigned int *table = new unsigned int[257];
   static long tt[10]= {
                        0x726a8f3bL,  // table
                        0xe69a3b5cL,
@@ -13,30 +14,31 @@ void AtomFS::GenKey(unsigned int k0, unsigned int k1,
                        0x0396d6e8L,
                        0x3d4c2f7aL,
                        0x9ee27cf3L, };
-  wake_table[0] = k0;
-  wake_table[1] = k1;
-  wake_table[2] = k2;
-  wake_table[3] = k3;
+  table[0] = k0;
+  table[1] = k1;
+  table[2] = k2;
+  table[3] = k3;
   for (p = 4; p < 256; p++) {
-    x = wake_table[p-4] + wake_table[p-1];  // fill t
-    wake_table[p] = (x>>3) ^ tt[(unsigned char)(x&7)];
+    x = table[p-4] + table[p-1];  // fill t
+    table[p] = (x>>3) ^ tt[(unsigned char)(x&7)];
   }
   for (p = 0; p < 23; p++)
-    wake_table[p] += wake_table[p+89];  // mix first entries
-  x = wake_table[33];
-  z = wake_table[59] | 0x01000001L;
+    table[p] += table[p+89];  // mix first entries
+  x = table[33];
+  z = table[59] | 0x01000001L;
   z = z&0xff7fffffL;
   for (p = 0; p < 256; p++) {  // change top byte to
     x = (x&0xff7fffffL) + z;  // a permutation etc
-    wake_table[p] = (wake_table[p] & 0x00ffffffL) ^ x;
+    table[p] = (table[p] & 0x00ffffffL) ^ x;
   }
-  wake_table[256] = wake_table[0];
+  table[256] = table[0];
   unsigned char y = (unsigned char)(x);
   for (p = 0; p < 256; p++) {  // further change perm.
 // and other digits
-    wake_table[p] = wake_table[y = (unsigned char)(wake_table[p^y]^y)];
-    wake_table[y] = wake_table[p+1];
+    table[p] = table[y = (unsigned char)(table[p^y]^y)];
+    table[y] = table[p+1];
   }
+  return table;
 }
 #ifdef _FSMAN_
 void AtomFS::Crypt(unsigned int *data, int lenght,

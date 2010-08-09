@@ -93,6 +93,8 @@ class AtomLog {
 #define ERROR_LOST_QUOTES                                            0x0000000B
 #define ERROR_PARSE_STRING                                           0x0000000C
 #define ERROR_WRONG_BYTEORDER                                        0x0000000D
+#define ERROR_INCORRECT_PATH                                         0x0000000E
+#define ERROR_INCORRECT_CRC32                                        0x0000000F
 
 /* WindowManager Error Codes */
 #define ERROR_CLSREG_FAIL                                            0x00000001
