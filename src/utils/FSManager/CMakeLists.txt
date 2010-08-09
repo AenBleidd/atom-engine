@@ -1,5 +1,5 @@
 # FSManager utility
-# Creates an FS Manager program 
+# Creates an FS Manager program
 # Which is responsible for managing the GameFS.
 
 # FSManager module parameters
@@ -15,20 +15,20 @@ ADD_DEFINITIONS ( "-D_FSMANAGER_" )
 # Ensure that those targets are built before current one
 SET ( ${FSMAN_MODULE}_DEPENDS "AtomError GameFS_FSMan" )
 
-# Make fsman utility 
-ADD_EXECUTABLE ( ${FSMAN_MODULE} fsman crc32 )
+# Make fsman utility
+ADD_EXECUTABLE ( ${FSMAN_MODULE} fsman )
 
 # Link against libAtomError and libGameFS_FSMan
 # TODO: Library names should be taken from variables
 TARGET_LINK_LIBRARIES ( ${FSMAN_MODULE} ${ATOMERROR_MODULE} ${GAMEFS_FSMAN_MODULE} )
 
 # Add apptopriate library search paths to linker
-#SET_DIRECTORY_PROPERTIES ( PROPERTIES 
+#SET_DIRECTORY_PROPERTIES ( PROPERTIES
 #	LINK_DIRECTORIES "${AtomError_BINARY_DIR} ${GameFS_BINARY_DIR}"
 #)
- 
+
 # Installation instructions for the FSMan module
-# Please specify the installation instructions sprcific 
+# Please specify the installation instructions sprcific
 # To the architecture the project is being built for.
 
 IF ( UNIX )

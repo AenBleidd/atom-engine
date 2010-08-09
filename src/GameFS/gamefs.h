@@ -4,7 +4,7 @@
 #include "../preproc.h"
 
 #ifdef _CRC_CHECK_
-#include "../utils/FSManager/crc32.h"
+#include "crc32.h"
 #endif  // _CRC_CHECK_
 
 #include "../AtomError/AtomError.h"
@@ -155,6 +155,8 @@ struct TREE_FILE {
   unsigned long int offset;
 // file flags (mode of the opened file)
   unsigned char flag;
+// crypted bytes
+  unsigned short int bytescrypt;
 // SIC! only for file manager! not for engine!
 #ifdef _CRC_CHECK_
 // control check sum
@@ -171,6 +173,8 @@ struct TREE_FILE {
   unsigned short int descriptor;
 // addon key (if this is not addon file key MUST be equal zero)
   unsigned int *key;
+// wake table
+  unsigned int *table;
 // pointer to the next file in folder
   TREE_FILE *tree_file;
 // pointer to the parent folder
@@ -190,6 +194,12 @@ struct TREE_FOLDER {
   TREE_FOLDER *next_folder;
 // pointer to the parent folder
   TREE_FOLDER *parent_folder;
+};
+// structure to store opened files and allocated global blocks of memory
+struct  OPENALLOC {
+  FILE *file;
+  unsigned int *memory;
+  OPENALLOC *next;
 };
 // FS Class
 class AtomFS {
@@ -212,6 +222,10 @@ class AtomFS {
                 another value - some kind of error, look error code
 */
   int Mount(char* filename);
+// open file from FS
+  FILE* Open(char* name);
+// close opened file from FS
+  int Close(FILE *file);
 #ifdef _FSMAN_
 /* Create new file
    input - name of the folders or files or './' for current folder
@@ -243,9 +257,9 @@ class AtomFS {
 // 3 - MLE: 2301
   unsigned char byteorder;
 // WAKE crypt algorithm
-  unsigned int wake_table[257];
+  unsigned int *wake_table;
   unsigned int *wake_key;
-  void GenKey(unsigned int k0, unsigned int k1,
+  unsigned int* GenKey(unsigned int k0, unsigned int k1,
               unsigned int k2, unsigned int k3);
   void Decrypt(unsigned int *data, int lenght, unsigned int k[4],
                unsigned int r[4], unsigned int *t);
@@ -257,6 +271,7 @@ class AtomFS {
 // Write data from added files
   int Write(char *in,  FILE *dat, FILE *bin);
 #endif  // _FSMAN_
+  OPENALLOC *openalloc;
 };
 
 #endif  // _CORE_GAMEFS_H_
