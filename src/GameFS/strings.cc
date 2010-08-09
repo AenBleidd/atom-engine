@@ -306,3 +306,122 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input) {
   *pargs = args;
   return pargs;
 }
+TREE_FILE* FindFileFromPath(AtomLog *atomlog, TREE_FOLDER *root,
+                            TREE_FOLDER *current, ARGUMENTS *path) {
+  TREE_FOLDER *curfolder = 0, *tempfolder = 0;
+  TREE_FILE *curfile = 0;
+  bool found = false;
+  if (root == 0) {
+// if root not exist
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_FUNCTION_ARGUMENTS);
+    snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s",
+             "Root folder must exist!");
+    atomlog->LogMessage(atomlog->MsgBuf);
+    for (int i = 0; i < path->count; i++)
+      if (path->output[i] != 0)
+        delete [] path->output[i];
+    delete [] path->output;
+    delete path;
+    path = 0;
+    return 0;
+  }
+  if (current == 0)
+    curfolder = root;
+  else
+    curfolder = current;
+  int k = 0;
+  if ((path != 0) && (path->count != 0)) {
+    if (strcmp(path->output[0], "/") == 0) {
+// if it is root
+      curfolder = root;
+      k = 1;
+    } else {
+      for (int i = k; i < path->count; i++) {
+        found = false;
+        if (i == path->count - 1) {
+// it must be the file
+          if (curfolder->tree_file == 0) {
+            atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_PATH);
+              for (int i = 0; i < path->count; i++)
+                if (path->output[i] != 0)
+                  delete [] path->output[i];
+              delete [] path->output;
+              delete path;
+              path = 0;
+              return 0;
+          } else {
+            curfile = curfolder->tree_file;
+            if (strcmp(curfile->name, path->output[i]) == 0) {
+              found = true;
+            }
+            while ((curfile->tree_file != 0) && (found == false)) {
+              curfile = curfile->tree_file;
+              if (strcmp(curfile->name, path->output[i]) == 0) {
+                found = true;
+              }
+            }
+            if (found == false) {
+              atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_PATH);
+              for (int i = 0; i < path->count; i++)
+                if (path->output[i] != 0)
+                  delete [] path->output[i];
+              delete [] path->output;
+              delete path;
+              path = 0;
+              return 0;
+            }
+          }
+        } else {
+// it is a folder
+          if (curfolder->tree_folder != 0) {
+            tempfolder = curfolder->tree_folder;
+            if (strcmp(tempfolder->name, path->output[i]) == 0) {
+              found = true;
+              curfolder = tempfolder;
+            }
+          } else {
+            atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_PATH);
+            for (int i = 0; i < path->count; i++)
+              if (path->output[i] != 0)
+                delete [] path->output[i];
+            delete [] path->output;
+            delete path;
+            path = 0;
+            return 0;
+          }
+          while ((tempfolder->next_folder != 0) && (found == false)) {
+            tempfolder = tempfolder->next_folder;
+            if (strcmp(tempfolder->name, path->output[i]) == 0) {
+              found = true;
+              curfolder = tempfolder;
+            }
+          }
+          if (found == false) {
+            atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_PATH);
+            for (int i = 0; i < path->count; i++)
+              if (path->output[i] != 0)
+                delete [] path->output[i];
+            delete [] path->output;
+            delete path;
+            path = 0;
+            return 0;
+          }
+        }
+      }
+    }
+  } else {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_PATH);
+    if (path != 0)
+      delete path;
+    return 0;
+  }
+  if (path != 0) {
+    for (int i = 0; i < path->count; i++)
+      if (path->output[i] != 0)
+        delete [] path->output[i];
+    delete [] path->output;
+    delete path;
+    path = 0;
+  }
+  return curfile;
+}

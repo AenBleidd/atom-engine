@@ -190,7 +190,7 @@ const char *errorcode[] = {
 "Core Error. File System Error.",
 "Engine Error. WindowManager Error."
 };
-const char *errorsubcode[3][16] = {
+const char *errorsubcode[3][17] = {
 {
 "No Error."
 }, {
@@ -209,7 +209,8 @@ const char *errorsubcode[3][16] = {
 "Error parsing the string.",
 "Wrong byteorder. Program can't read files with unknown byteorder.",
 "Path incorrect or directory or file don't exist.",
-"Crc check is failed. File is broken."
+"Crc check is failed. File is broken.",
+"Function was called with wrong arguments."
 }, {
 "No Error",
 "Fatal Error: Error registering the window class",
