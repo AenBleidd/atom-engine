@@ -178,7 +178,7 @@ int AtomFS::Save(FILE *input, char *output) {
       } else if (result > pathlen) {
 // set new buffer size
         delete [] curworkdir;
-        pathlen = result
+        pathlen = result;
       } else {
         bflag = true;
       }
