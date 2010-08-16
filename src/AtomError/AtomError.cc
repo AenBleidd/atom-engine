@@ -3,29 +3,27 @@
 #ifndef UNIX
 #define localtime_r(timep, result)  (localtime (timep) ? memcpy  ((result), localtime (timep), sizeof (*(result))) : 0) /*NOLINT*/
 #endif  // UNIX
-char* CurDateTime() {
+char datetimebuf[20];
+char timebuf[10];
+char* AtomLog::CurDateTime() {
   time_t seconds = time(NULL);
   tm *timeinfo = new tm;
   timeinfo = (tm*) localtime_r(&seconds, timeinfo);
-  const unsigned char s = 20;
-  char *date = new char[s];
-  snprintf(date, s, "%i.%02i.%02i_%02i.%02i.%02i",
+  snprintf(datetimebuf, 20, "%i.%02i.%02i_%02i.%02i.%02i",
           timeinfo->tm_year+1900, timeinfo->tm_mon,
           timeinfo->tm_mday, timeinfo->tm_hour,
           timeinfo->tm_min, timeinfo->tm_sec);
   delete timeinfo;
-  return date;
+  return datetimebuf;
 }
-char* CurTime() {
+char* AtomLog::CurTime() {
   time_t seconds = time(NULL);
   tm *timeinfo = new tm;
   timeinfo = (tm*) localtime_r(&seconds, timeinfo);
-  const unsigned char s = 10;
-  char *time = new char[s];
-  snprintf(time, s, "%02i:%02i:%02i", timeinfo->tm_hour,
+  snprintf(timebuf, 10, "%02i:%02i:%02i", timeinfo->tm_hour,
           timeinfo->tm_min, timeinfo->tm_sec);
   delete timeinfo;
-  return time;
+  return timebuf;
 }
 AtomLog::AtomLog(char *name, bool alone, unsigned char lvl) {
   MsgBuf = new char[MSG_BUFFER_SIZE];
@@ -35,7 +33,6 @@ AtomLog::AtomLog(char *name, bool alone, unsigned char lvl) {
     const unsigned short s = 355;
     char *plogfilename  = new char[s];
 // get current date and time
-    char *pbuffer = CurDateTime();
     const unsigned char t = 255;
     char *temppath = new char[t];
 #ifdef UNIX
@@ -77,10 +74,10 @@ AtomLog::AtomLog(char *name, bool alone, unsigned char lvl) {
     if (alone == false) {
       if (strcmp(name, "atom") != 0) {
         snprintf(plogfilename, s, "%s%s_%s%s",
-                 temppath, name, pbuffer, ".log");
+                 temppath, name, CurDateTime(), ".log");
       } else {
         snprintf(plogfilename, s, "%s%s_%s%s",
-                 temppath, "atom", pbuffer, ".log");
+                 temppath, "atom", CurDateTime(), ".log");
       }
     } else {
       if (strcmp(name, "atom") != 0) {
@@ -98,11 +95,10 @@ AtomLog::AtomLog(char *name, bool alone, unsigned char lvl) {
 // Another last hope...
 // Try to use standart name
       snprintf(plogfilename, s, "%s%s_%s%s",
-               temppath, "atom", pbuffer, ".log");
+               temppath, "atom", CurDateTime(), ".log");
       logfile = fopen(plogfilename, "wt");
       if (logfile == 0) {
         delete [] temppath;
-        delete [] pbuffer;
         delete [] plogfilename;
 // We can't do this...
         throw -1;
@@ -112,7 +108,6 @@ AtomLog::AtomLog(char *name, bool alone, unsigned char lvl) {
       LogMessage(MsgBuf);
     }
     delete [] temppath;
-    delete [] pbuffer;
     delete [] plogfilename;
     if (logfile == 0) {
 // We can't do this...
@@ -145,30 +140,24 @@ AtomLog::~AtomLog() {
 void AtomLog::LogMsg(const char *string, unsigned char lvl, const char *file,
                      int line) {
   if (lvl <= verbose_level) {
-    char *time = CurTime();
 #ifdef ATOM_DEBUG
-    fprintf(stderr, "%s %s:%i\t%s\n", time, file, line, string);
+    fprintf(stderr, "%s %s:%i\t%s\n", CurTime(), file, line, string);
 #endif
     if (logfile != 0) {
-      fprintf(logfile, "%s %s:%i\t%s\n", time, file, line, string);
+      fprintf(logfile, "%s %s:%i\t%s\n", CurTime(), file, line, string);
       fflush(logfile);
     }
-    delete [] time;
-    time = 0;
   }
   return;
 }
 void AtomLog::LogMsg(const char *string) {
-  char *time = CurTime();
 #ifdef ATOM_DEBUG
-  fprintf(stderr, "%s %s\n", time, string);
+  fprintf(stderr, "%s %s\n", CurTime(), string);
 #endif
   if (logfile != 0) {
-    fprintf(logfile, "%s %s\n", time, string);
+    fprintf(logfile, "%s %s\n", CurTime(), string);
     fflush(logfile);
   }
-  delete [] time;
-  time = 0;
   return;
 }
 void AtomLog::DebugMsg(const char *string, unsigned char lvl, const char *file,

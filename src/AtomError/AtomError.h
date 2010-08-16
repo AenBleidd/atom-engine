@@ -41,6 +41,10 @@ class AtomLog {
 // logfile
   FILE *logfile;
  public:
+// Current dtae and time
+  char* CurDateTime();
+// Current time
+  char* CurTime();
 // get last error and warning
   inline ERR GetLastErr() { return global_error; }
   inline ERR GetLastWrn() { return global_warning; }

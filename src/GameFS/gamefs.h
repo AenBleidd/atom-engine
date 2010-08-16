@@ -223,9 +223,9 @@ class AtomFS {
 */
   int Mount(char* filename);
 // open file from FS
-  FILE* Open(char* name);
+  FILE* Open(char* name, TREE_FOLDER *current = 0);
 // close opened file from FS
-  int Close(FILE *file);
+  void Close(FILE *file);
 #ifdef _FSMAN_
 /* Create new file
    input - name of the folders or files or './' for current folder
@@ -240,6 +240,8 @@ class AtomFS {
   int Create(char** input, unsigned int count, char* file,
              unsigned short int encrypt, unsigned int *key,
              unsigned char type);
+// save file from FS to disc
+  int Save(FILE *input, char *output);
 // Navigate VirtualFS
   int Navigate(void);
 #endif  // _FSMAN_
