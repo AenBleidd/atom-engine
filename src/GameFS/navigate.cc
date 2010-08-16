@@ -29,7 +29,7 @@ int AtomFS::Navigate(void) {
       List(atomlog, curfolder, 0);
     } else if ((strcmp(args->output[0], "dir") == 0) && (args->count == 1)) {
       List(atomlog, curfolder, 1);
-    } else if ((strcmp(args->output[0], "cd") == 0) && (args->count == 2)){
+    } else if ((strcmp(args->output[0], "cd") == 0) && (args->count == 2)) {
       ARGUMENTS *path = ParsePath(atomlog, args->output[1]);
       if (path == 0) {
         atomlog->SetLastWrn(WARNING_CORE_FS, WARNING_WRONG_COMMAND);
@@ -47,6 +47,8 @@ int AtomFS::Navigate(void) {
         delete path;
         path = 0;
       }
+    } else if ((strcmp(args->output[0], "cp") == 0) && (args->count == 3)) {
+      Copy(atomlog, this, curfolder, args->output[1], args->output[2]);
     } else {
       atomlog->SetLastWrn(WARNING_CORE_FS, WARNING_WRONG_COMMAND);
       snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s\n",
@@ -220,4 +222,26 @@ TREE_FOLDER* ChDir(AtomLog *atomlog, TREE_FOLDER *root,
     }
   }
   return cur;
+}
+int Copy(AtomLog *atomlog, AtomFS *atomfs, TREE_FOLDER *curfolder, char *in,
+         char *out) {
+// Open the file
+  FILE *src = atomfs->Open(in, curfolder);
+  if (src == 0) {
+    snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s",
+              "Source file can not be opened");
+    atomlog->DebugMessage(atomlog->MsgBuf);
+    return -1;
+  }
+// Save the file
+  if (atomfs->Save(src, out) != 0) {
+    snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s",
+              "File can not be written");
+    atomlog->DebugMessage(atomlog->MsgBuf);
+    atomfs->Close(src);
+    return -1;
+  }
+// Close the file
+  atomfs->Close(src);
+  return 0;
 }

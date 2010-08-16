@@ -167,7 +167,7 @@ int AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int level = 0) {
 #ifdef _FSMAN_
 int AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
   FILE *file = fopen(in, "rb");
-  if (in == NULL) {
+  if (file == 0) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FILE);
     return -1;  // nothing was written
   }
