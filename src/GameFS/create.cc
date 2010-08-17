@@ -284,7 +284,7 @@ int AtomFS::Create(char **input, unsigned int count, char *file,
 // If crypt key is predefined new key is ignored
   if (wake_key == 0) {
     wake_key = key;
-    GenKey(wake_key[0], wake_key[1], wake_key[2], wake_key[3]);
+    wake_table = GenKey(wake_key[0], wake_key[1], wake_key[2], wake_key[3]);
   }
 // set encrypt bytes count
   bytescrypt = encrypt;
