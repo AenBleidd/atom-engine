@@ -57,13 +57,13 @@ void AtomFS::Crypt(unsigned int *data, int lenght,
     *data = r2;  // Change into r1 for decoding.
     data += d;
     r3 = r3 + r2;
-    r3 = (r3>>8&m)^wake_table[r3&255];
+    r3 = (r3>>8&m)^t[r3&255];
     r4 = r4+r3;
-    r4 = (r4>>8&m)^wake_table[r4&255];
+    r4 = (r4>>8&m)^t[r4&255];
     r5 = r5+r4;
-    r5 = (r5>>8&m)^wake_table[r5&255];
+    r5 = (r5>>8&m)^t[r5&255];
     r6 = r6+r5;
-    r6 = (r6>>8&m)^wake_table[r6&255];
+    r6 = (r6>>8&m)^t[r6&255];
   }
   r[0] = r3, r[1] = r4, r[2] = r5, r[3] = r6;
 }
@@ -84,13 +84,13 @@ void AtomFS::Decrypt(unsigned int *data, int lenght, unsigned int k[4],
     *data = r2;
     data += d;
     r3 = r3+r1;
-    r3 = (r3>>8&m)^wake_table[r3&255];
+    r3 = (r3>>8&m)^t[r3&255];
     r4 = r4+r3;
-    r4 = (r4>>8&m)^wake_table[r4&255];
+    r4 = (r4>>8&m)^t[r4&255];
     r5 = r5+r4;
-    r5 = (r5>>8&m)^wake_table[r5&255];
+    r5 = (r5>>8&m)^t[r5&255];
     r6 = r6+r5;
-    r6 = (r6>>8&m)^wake_table[r6&255];
+    r6 = (r6>>8&m)^t[r6&255];
   }
     r[0] = r3, r[1] = r4, r[2] = r5, r[3] = r6;
 }
