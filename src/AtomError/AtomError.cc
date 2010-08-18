@@ -10,7 +10,7 @@ char* AtomLog::CurDateTime() {
   tm *timeinfo = new tm;
   timeinfo = (tm*) localtime_r(&seconds, timeinfo);
   snprintf(datetimebuf, 20, "%i.%02i.%02i_%02i.%02i.%02i",
-          timeinfo->tm_year+1900, timeinfo->tm_mon,
+          timeinfo->tm_year+1900, timeinfo->tm_mon+1,
           timeinfo->tm_mday, timeinfo->tm_hour,
           timeinfo->tm_min, timeinfo->tm_sec);
   delete timeinfo;
@@ -51,8 +51,11 @@ AtomLog::AtomLog(char *name, bool alone, unsigned char lvl) {
 
 // Check log folder
 #ifdef ATOM_DEBUG
-    FILE *log;
-    if ((log = fopen("log", "r")) == NULL) {
+#ifdef UNIX
+    if (chdir("log") != 0) {
+#else
+    if (SetCurrentDirectory("log") == 0) {
+#endif  // UNIX
 // One by one, We will fall, down down...
 // Wait a minute ! We have last hope!
 // Lets save logfile in the temp directory.
@@ -67,7 +70,11 @@ AtomLog::AtomLog(char *name, bool alone, unsigned char lvl) {
         fprintf(stderr, "Can't create log directory\n");
       }
     } else {
-      fclose(log);
+#ifdef UNIX
+      chdir("..");
+#else
+      SetCurrentDirectory("..");
+#endif  // UNIX
     }
 #endif  // ATOM_DEBUG
 

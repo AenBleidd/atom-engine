@@ -74,9 +74,12 @@ int AtomFS::Navigate(void) {
 
 void ShowHelp(AtomLog *atomlog) {
   char help[] = "Available commands:\n\
-\tls\t\tlist current directory's contents\n\
-\thelp\t\tshow this help\n\
-\texit\t\tquit navigation mode\n";
+\tcd [name]\t\tmove to the 'name' directory\n\
+\tcp [name1] [name2]\tcopy file 'name1' to 'name2' to disc\n\
+\tdir\t\t\tlist current directory's contents more verbose\n\
+\texit\t\t\tquit navigation mode\n\
+\thelp\t\t\tshow this help\n\
+\tls\t\t\tlist current directory's contents\n";
 
   atomlog->DebugMessage(help);
   fprintf(stderr, help);

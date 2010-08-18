@@ -8,7 +8,6 @@
 #endif  // UNIX
 FILE* AtomFS::Open(char *name, TREE_FOLDER *current) {
 // Parse the path
-  ARGUMENTS *args = ParsePath(atomlog, name);
   TREE_FILE *curfile = FindFileFromPath(atomlog, root, current,
                                         ParsePath(atomlog, name));
   if (curfile == 0) {

@@ -205,7 +205,8 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
     fprintf(stderr, "%s", help);
   }
 // cleaning
-  delete [] key;
+  if (key != 0)
+    delete [] key;
   delete atomfs;
   atomlog->LogMessage("End fsman...");
   delete atomlog;
