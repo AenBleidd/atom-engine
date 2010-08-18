@@ -8,12 +8,20 @@ AtomFS::AtomFS(AtomLog *log, unsigned int *key) {
   }
   atomlog = log;
 // Check byteorder
-  char t = ByteOrderDetect();
+  char t = ByteOrderDetect(atomlog);
   if (t == -1) {
    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRONG_BYTEORDER);
    throw ERROR_WRONG_BYTEORDER;
   }
   byteorder = t;
+// detect size of standart types
+  sizeofint = sizeof (int);
+  sizeoflong = sizeof (long int);
+  sizeoflonglong = sizeof (long long int);
+  snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s: %i; %s: %i; %s: %i",
+           "Size of int", sizeofint, "Size of long int", sizeoflong,
+           "Size of long long int", sizeoflonglong);
+  atomlog->DebugMessage(atomlog->MsgBuf);
   wake_key = 0;
 // If class being created with predefined key
   if (key != 0) {

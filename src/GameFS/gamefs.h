@@ -258,6 +258,10 @@ class AtomFS {
 // 2 - MBE: 1032
 // 3 - MLE: 2301
   unsigned char byteorder;
+// standart types size
+  unsigned short int sizeofint;
+  unsigned short int sizeoflong;
+  unsigned short int sizeoflonglong;
 // WAKE crypt algorithm
   unsigned int *wake_table;
   unsigned int *wake_key;
