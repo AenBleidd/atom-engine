@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <ctime>
 #ifdef UNIX
+#include <unistd.h>
 #include <sys/stat.h>
 #endif  // UNIX
 

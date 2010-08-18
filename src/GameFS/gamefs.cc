@@ -137,8 +137,8 @@ AtomFS::~AtomFS() {
     } while (tempalloc != 0);
     openalloc = 0;
   }
-  if (wake_table != 0) {
+/*  if (wake_table != 0) {
     delete [] wake_table;
     wake_table = 0;
-  }
+  }*/
 }
