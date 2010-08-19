@@ -26,7 +26,6 @@ char* AtomLog::CurTime() {
   return timebuf;
 }
 AtomLog::AtomLog(char *name, bool alone, unsigned char lvl) {
-  MsgBuf = new char[MSG_BUFFER_SIZE];
   logfile = 0;
   verbose_level = lvl;
   if (name != 0) {
@@ -132,8 +131,6 @@ AtomLog::~AtomLog() {
 // close log file
   if (logfile != 0)
     fclose(logfile);
-  if (MsgBuf)
-    delete [] MsgBuf;
 // do some clean
   if (global_error.description != 0) {
     delete [] global_error.description;

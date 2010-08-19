@@ -34,7 +34,7 @@ class AtomLog {
   explicit AtomLog(char *name = "atom", bool alone = false,
                     unsigned char lvl = 0xFF);
   ~AtomLog();
-  char const* MsgBuf;
+  char MsgBuf[MSG_BUFFER_SIZE];
  private:
 // global last error and warning
   ERR global_error;
