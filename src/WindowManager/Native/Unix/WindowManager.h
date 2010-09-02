@@ -12,9 +12,8 @@
 class AtomWindow : public OWindow
 {
 public:
-    AtomWindow( AtomLog* );
+    AtomWindow( AtomLog&, const char* = NULL, short = 0, short = 0 );
     ~AtomWindow();
-    bool XConnect( const char* );
 
     /* inherited functions */
     bool Create( const char*, int, int, int, int, FLAGS );
@@ -50,9 +49,10 @@ public:
     void OnCreate( void );
     void OnClose( void );
     void OnDestroy( void );
-    void OnQuit( void );    
+    void OnQuit( void );
+
 private:
-    char* DisplayName;
+
     Display *display;
     Window window;
 };
