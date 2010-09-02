@@ -268,16 +268,16 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
       return -1;
     }
 // Check wake_table
-    if ((header.addon_key[0] == wake_key[0]) &&
+/*    if ((header.addon_key[0] == wake_key[0]) &&
         (header.addon_key[1] == wake_key[1]) &&
         (header.addon_key[2] == wake_key[2]) &&
         (header.addon_key[3] == wake_key[3])) {
       table = wake_table;
-    } else {
+    } else {*/
       table = GenKey(header.addon_key[0], header.addon_key[1],
                      header.addon_key[2], header.addon_key[3]);
       tempalloc->memory = table;
-    }
+    /*}*/
   }
 // Header was parsed. Easiest part is done...
 

@@ -1,5 +1,5 @@
-#include "byteorderdetect.h"
-char ByteOrderDetect(AtomLog *atomlog) {
+#include "sysvars.h"
+char ByteOrderDetect(void) {
   char *ptest;
   char byteorder = -1;
   if (sizeof(long int) == 4) {
@@ -23,17 +23,6 @@ char ByteOrderDetect(AtomLog *atomlog) {
   } else {
 // WTF??? O_o
     return -1;
-  }
-  char *descr[] = {
-    "Big-Endian",
-    "Little-Endian",
-    "Mixed-Big-Endian",
-    "Mixed-Little-Endian"
-  };
-  if ((byteorder > 0) && (byteorder < 4)) {
-    snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s %s",
-             "Used byteorder is", descr[byteorder]);
-    atomlog->DebugMessage(atomlog->MsgBuf);
   }
   return byteorder;
 }
