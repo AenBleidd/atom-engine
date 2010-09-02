@@ -35,11 +35,22 @@ int main(int arg, char *argc[]) {
 // input parameters processing
   unsigned int *key = 0;
   atomlog = new AtomLog("fsman");
-  const unsigned char versionlen = 30;
-  char *version = new char[versionlen];
-  snprintf(version, versionlen, "Start fsman version %s", _FSMAN_VERSION_);
-  atomlog->LogMessage(version);
-  delete [] version;
+  snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Start fsman version %s",
+           _FSMAN_VERSION_);
+  atomlog->LogMessage(atomlog->MsgBuf);
+  char *descr[] = {
+    "Big-Endian",
+    "Little-Endian",
+    "Mixed-Big-Endian",
+    "Mixed-Little-Endian"
+  };
+  char byteorder = BYTEORDER;
+  if ((byteorder > 0) && (byteorder < 4)) {
+    snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s %s",
+             "Used byteorder is", descr[byteorder]);
+    atomlog->DebugMessage(atomlog->MsgBuf);
+  }
+
   char help[] = "File System Manager - utility to work with Atom \
 File System\nOptions:\n\t-t, --test\t\tTest default file system with standart \
 mount file\n\t-t, --test [mountfile]\tTest file system\n\t-n, --new\t\tCreate \
@@ -165,16 +176,16 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
         }
       }
       if (error == false) {
-        unsigned char s = strlen(output) + 25;
-        char *buf = new char[s];
         if (type == 0)
-          snprintf(buf, s, "Create new standart file %s", output);
+          snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
+                   "Create new standart file %s", output);
         else if (type == 1)
-          snprintf(buf, s, "Create new addon file %s", output);
+          snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
+                   "Create new addon file %s", output);
         else if (type == 0xFF)
-          snprintf(buf, s, "Create new critical file %s", output);
-        atomlog->DebugMessage(buf);
-        delete [] buf;
+          snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
+                   "Create new critical file %s", output);
+        atomlog->DebugMessage(atomlog->MsgBuf);
 // Key input
 // key is not predefined
         if (key == 0)

@@ -12,3 +12,7 @@ SET ( GAMEFS_FSMAN_MODULE "${GAMEFS_MODULE}_FSMan" )  # Module which will be use
 
 # FSMan module name
 SET ( FSMAN_MODULE "FSMan" )
+
+# SysVars module name
+# Needed to identify some system variables
+SET ( SYSVARS_MODULE "SysVars" )

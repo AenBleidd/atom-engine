@@ -13,14 +13,14 @@ ADD_DEFINITIONS ( "-D_FSMANAGER_" )
 
 # Module dependencies: libAtomError and libGameFS_FSMan
 # Ensure that those targets are built before current one
-SET ( ${FSMAN_MODULE}_DEPENDS "AtomError GameFS_FSMan" )
+SET ( ${FSMAN_MODULE}_DEPENDS "AtomError GameFS_FSMan SysVars" )
 
 # Make fsman utility
 ADD_EXECUTABLE ( ${FSMAN_MODULE} fsman )
 
 # Link against libAtomError and libGameFS_FSMan
 # TODO: Library names should be taken from variables
-TARGET_LINK_LIBRARIES ( ${FSMAN_MODULE} ${ATOMERROR_MODULE} ${GAMEFS_FSMAN_MODULE} )
+TARGET_LINK_LIBRARIES ( ${FSMAN_MODULE} ${ATOMERROR_MODULE} ${GAMEFS_FSMAN_MODULE} ${SYSVARS_MODULE})
 
 # Add apptopriate library search paths to linker
 #SET_DIRECTORY_PROPERTIES ( PROPERTIES
