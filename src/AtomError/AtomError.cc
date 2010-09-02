@@ -217,7 +217,9 @@ const char *errorsubcode[3][17] = {
 "Error trying to change window size and dimentions",
 "Error adjusting the client area for a window",
 "Error trying to make window topmost",
-"Error connecting to X server and opening display"
+"No connection to X server established",
+"Error getting WM hints: window size and position",
+"No memory for XLib string conversion"
 }
 };
 // Warning description

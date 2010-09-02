@@ -113,7 +113,9 @@ class AtomLog {
 #define ERROR_MVWIN_FAIL                                             0x00000008
 #define ERROR_ADJUSTRECT_FAIL                                        0x00000009
 #define ERROR_BRING_TO_TOP                                           0x0000000A
-#define ERROR_X11_OPENDISPLAY                                        0x0000000B
+#define ERROR_X11_CONNECTION                                         0x0000000B
+#define ERROR_X11_WM_HINTS                                           0x0000000C
+#define ERROR_X11_STRING_CONVERSION                                  0x0000000D
 
 /* Module General Warning Codes */
 #define WARNING_CORE_FS                                              0x00000001

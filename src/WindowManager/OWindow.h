@@ -7,29 +7,30 @@ typedef unsigned int FLAGS;
 
 enum VISIBILITY_FLAGS
 {
-    ATOMWND_VISIBLE               = 0x00000001
+    ATOMWND_VISIBLE             = 0x00000001
 };
 
 enum BORDER_FLAGS
 {
-    ATOMWND_BORDER_SIZEABLE       = 0x00000002,
-    ATOMWND_BORDER_FIXED          = 0x00000004
+    ATOMWND_BORDER_SIZEABLE     = 0x00000002,
+    ATOMWND_BORDER_FIXED        = 0x00000004,
+    ATOMWND_NOBORDER            = 0x00000008
 };
 
 enum WND_BUTTON_FLAGS
 {
-    ATOMWND_BTN_MINIMIZE          = 0x00000008,
-    ATOMWND_BTN_MAXIMIZE          = 0x00000010,
-    ATOMWND_BTN_EXIT              = 0x00000020,
-    ATOMWND_BTN_HELP              = 0x00000040
+    ATOMWND_BTN_MINIMIZE        = 0x00000010,
+    ATOMWND_BTN_MAXIMIZE        = 0x00000020,
+    ATOMWND_BTN_EXIT            = 0x00000040,
+    ATOMWND_BTN_HELP            = 0x00000080
 };
+
 
 class OWindow
 {
 public:
-    OWindow( AtomLog* );
     FLAGS SetWindowFlags( VISIBILITY_FLAGS, BORDER_FLAGS, WND_BUTTON_FLAGS );
-    
+
     /* functions that affect window */
     virtual bool Create( const char*, int, int, int, int, FLAGS ) = 0;
     virtual bool Show( void ) = 0;
@@ -59,14 +60,16 @@ public:
     virtual bool HasMaximizeButton( void ) = 0;
     virtual bool HasExitButton( void ) = 0;
     virtual bool HasHelpButton( void ) = 0;
-    
+
     /* events handled by the window */
     virtual void OnClose( void );
     virtual void OnCreate( void );
     virtual void OnDestroy( void );
     virtual void OnQuit( void );
+
 protected:
-	AtomLog *log;
+    OWindow( AtomLog& );
+	AtomLog& log;
 };
 
 #endif
