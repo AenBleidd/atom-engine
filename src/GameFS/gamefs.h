@@ -8,6 +8,7 @@
 #endif  // _CRC_CHECK_
 
 #include "../AtomError/AtomError.h"
+//#include "../SysVars/sysvars.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -252,16 +253,6 @@ class AtomFS {
   TREE_FOLDER *root;
   AtomLog *atomlog;
   unsigned short int bytescrypt;  // count of first bytes to encrypt
-// byteorder:
-// 0 - BE: 0123
-// 1 - LE: 3210
-// 2 - MBE: 1032
-// 3 - MLE: 2301
-  unsigned char byteorder;
-// standart types size
-  unsigned short int sizeofint;
-  unsigned short int sizeoflong;
-  unsigned short int sizeoflonglong;
 // WAKE crypt algorithm
   unsigned int *wake_table;
   unsigned int *wake_key;

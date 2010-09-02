@@ -1,9 +1,9 @@
 #ifndef _ATOM_ERROR_H_
 #define _ATOM_ERROR_H_
 
-#ifndef UNIX
+#ifdef WINDOWS
 #include <windows.h>
-#endif  // UNIX
+#endif  // WINDOWS
 #include <string.h>
 #include <stdio.h>
 #include <ctime>
@@ -12,10 +12,10 @@
 #include <sys/stat.h>
 #endif  // UNIX
 
-#ifndef UNIX
+#ifdef WINDOWS
 #define localtime_r(timep, result)  (localtime (timep) ? memcpy  ((result), \
 localtime (timep), sizeof (*(result))) : 0)  /*NOLINT*/
-#endif  // UNIX
+#endif  // WINDOWS
 
 #include "../preproc.h"
 #define MSG_BUFFER_SIZE 1024

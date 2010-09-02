@@ -37,12 +37,12 @@ FILE* AtomFS::Open(char *name, TREE_FOLDER *current) {
   }
 // Check the file
 #ifdef _CRC_CHECK_
-  if (curfile->crc != GenCRC32((unsigned char*)buffer, curfile->size)) {
+/*  if (curfile->crc != GenCRC32((unsigned char*)buffer, curfile->size)) {
 // Wrong crc
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_CRC32);
     delete [] buffer;
     return 0;
-  }
+  }*/
 #endif  // _CRC_CHECK_
 // Decrypt
   unsigned long int crypt = 0;
@@ -58,18 +58,27 @@ FILE* AtomFS::Open(char *name, TREE_FOLDER *current) {
     decryptbuf[i] = (unsigned int)buffer[i];
   unsigned int r[4];
 // TODO(Lawliet): Check this!
-  Decrypt(decryptbuf, crypt, ((curfile->key != 0)?curfile->key:wake_key),
-          r, curfile->table);
+  if (curfile->key != 0)
+    Decrypt(decryptbuf, crypt, curfile->key, r, curfile->table);
+  else
+    Decrypt(decryptbuf, crypt, wake_key, r, curfile->table);
   for (unsigned long int i = 0; i < crypt; i++)
     buffer[i] = (char)decryptbuf[i];
 // TODO(Lawliet): Check this!
 // Create the file
 #ifdef UNIX
 // defined in libio.h
-  file._flags = _IO_MAGIC |  _IO_NO_WRITES;
+  file._flags = _IO_MAGIC | _IO_IS_FILEBUF | _IO_TIED_PUT_GET | _IO_LINKED | _IO_NO_WRITES;
   file._IO_read_base = buffer;
   file._IO_read_ptr = file._IO_read_base;
   file._IO_read_end = buffer + curfile->size - 1;
+  file._IO_write_base = file._IO_read_base;
+  file._IO_write_ptr = file._IO_read_ptr;
+  file._IO_write_end = file._IO_read_end;
+  file._IO_buf_base = file._IO_read_base;
+  file._IO_buf_end = file._IO_read_end;
+  file._chain = 0;
+  file._fileno = 0;
 #else
   file._flag = _IOREAD | _IOSTRG;
   file._base = buffer;
@@ -78,6 +87,8 @@ FILE* AtomFS::Open(char *name, TREE_FOLDER *current) {
 #endif  // UNIX
   FILE *pfile = new FILE;
   *pfile = file;
+  snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%x", pfile->_IO_file_flags);
+  atomlog->DebugMessage(atomlog->MsgBuf);
   return pfile;
 }
 void AtomFS::Close(FILE *file) {

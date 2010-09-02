@@ -1,8 +1,5 @@
 #include "AtomError.h"
 // returns current system date & time in text format
-#ifndef UNIX
-#define localtime_r(timep, result)  (localtime (timep) ? memcpy  ((result), localtime (timep), sizeof (*(result))) : 0) /*NOLINT*/
-#endif  // UNIX
 char datetimebuf[20];
 char timebuf[10];
 char* AtomLog::CurDateTime() {
@@ -39,22 +36,24 @@ AtomLog::AtomLog(char *name, bool alone, unsigned char lvl) {
     snprintf(temppath, t, "%s", "/tmp/");
 #else
     snprintf(temppath, t, "%s", "log/");
-#endif  // DEBUG
-#else
+#endif  // ATOM_DEBUG
+#endif  // UNIX
+#ifdef WINDOWS
 #ifndef ATOM_DEBUG
     GetTempPath(t, temppath);
 #else
     snprintf(temppath, t, "%s", "log\\");
-#endif  // DEBUG
-#endif  // UNIX
+#endif  // ATOM_DEBUG
+#endif  // WINDOWS
 
 // Check log folder
 #ifdef ATOM_DEBUG
 #ifdef UNIX
     if (chdir("log") != 0) {
-#else
-    if (SetCurrentDirectory("log") == 0) {
 #endif  // UNIX
+#ifdef WINDOWS
+    if (SetCurrentDirectory("log") == 0) {
+#endif  // WINDOWS
 // One by one, We will fall, down down...
 // Wait a minute ! We have last hope!
 // Lets save logfile in the temp directory.
@@ -62,18 +61,20 @@ AtomLog::AtomLog(char *name, bool alone, unsigned char lvl) {
 #ifdef UNIX
       if (mkdir("log", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
         snprintf(temppath, t, "%s", "/tmp/");
-#else
+#endif  // UNIX
+#ifdef WINDOWS
       if (CreateDirectory("log", NULL) == 0) {
         GetTempPath(t, temppath);
-#endif  // UNIX
+#endif  // WINDOWS
         fprintf(stderr, "Can't create log directory\n");
       }
     } else {
 #ifdef UNIX
       chdir("..");
-#else
-      SetCurrentDirectory("..");
 #endif  // UNIX
+#ifdef WINDOWS
+      SetCurrentDirectory("..");
+#endif  // WINDOWS
     }
 #endif  // ATOM_DEBUG
 
@@ -146,7 +147,7 @@ void AtomLog::LogMsg(const char *string, unsigned char lvl, const char *file,
   if (lvl <= verbose_level) {
 #ifdef ATOM_DEBUG
     fprintf(stderr, "%s %s:%i\t%s\n", CurTime(), file, line, string);
-#endif
+#endif  // ATOM_DEBUG
     if (logfile != 0) {
       fprintf(logfile, "%s %s:%i\t%s\n", CurTime(), file, line, string);
       fflush(logfile);
@@ -157,7 +158,7 @@ void AtomLog::LogMsg(const char *string, unsigned char lvl, const char *file,
 void AtomLog::LogMsg(const char *string) {
 #ifdef ATOM_DEBUG
   fprintf(stderr, "%s %s\n", CurTime(), string);
-#endif
+#endif  // ATOM_DEBUG
   if (logfile != 0) {
     fprintf(logfile, "%s %s\n", CurTime(), string);
     fflush(logfile);
@@ -168,13 +169,13 @@ void AtomLog::DebugMsg(const char *string, unsigned char lvl, const char *file,
                        int line) {
 #ifdef ATOM_DEBUG
   LogMsg(string, lvl, file, line);
-#endif
+#endif  // ATOM_DEBUG
 return;
 }
 void AtomLog::DebugMsg(const char *string) {
 #ifdef ATOM_DEBUG
   LogMsg(string);
-#endif
+#endif  // ATOM_DEBUG
 return;
 }
 // Errors description
