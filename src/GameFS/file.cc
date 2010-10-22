@@ -37,6 +37,8 @@ FILE* AtomFS::Open(char *name, TREE_FOLDER *current) {
   }
 // Check the file
 #ifdef _CRC_CHECK_
+  snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Written CRC is: %x\t Calculated CRC is: %x", curfile->crc, GenCRC32((unsigned char*)buffer, curfile->size));
+  atomlog->DebugMessage(atomlog->MsgBuf);
 /*  if (curfile->crc != GenCRC32((unsigned char*)buffer, curfile->size)) {
 // Wrong crc
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_CRC32);
@@ -68,9 +70,9 @@ FILE* AtomFS::Open(char *name, TREE_FOLDER *current) {
 // Create the file
 #ifdef UNIX
 // defined in libio.h
-  file._flags = _IO_MAGIC | _IO_IS_FILEBUF | _IO_TIED_PUT_GET | _IO_LINKED | _IO_NO_WRITES;
+  file._flags = _IO_MAGIC | _IO_NO_WRITES;
   file._IO_read_base = buffer;
-  file._IO_read_ptr = file._IO_read_base;
+  /*file._IO_read_ptr = file._IO_read_base;
   file._IO_read_end = buffer + curfile->size - 1;
   file._IO_write_base = file._IO_read_base;
   file._IO_write_ptr = file._IO_read_ptr;
@@ -78,16 +80,18 @@ FILE* AtomFS::Open(char *name, TREE_FOLDER *current) {
   file._IO_buf_base = file._IO_read_base;
   file._IO_buf_end = file._IO_read_end;
   file._chain = 0;
-  file._fileno = 0;
-#else
+  file._fileno = 0;*/
+  file._mode = -1;
+#endif  // UNIX
+#ifdef WINDOWS
   file._flag = _IOREAD | _IOSTRG;
   file._base = buffer;
   file._ptr = file._base;
   file._cnt = curfile->size;
-#endif  // UNIX
+#endif  // WINDOWS
   FILE *pfile = new FILE;
   *pfile = file;
-  snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%x", pfile->_IO_file_flags);
+  snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s ENDTEXT %x %p %p %p", buffer, pfile, pfile, buffer, pfile->_IO_read_base);
   atomlog->DebugMessage(atomlog->MsgBuf);
   return pfile;
 }
@@ -109,6 +113,8 @@ int AtomFS::Save(FILE *input, char *output) {
     atomlog->DebugMessage(atomlog->MsgBuf);
     return -1;
   }
+  snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%x %p %p %p", input, input, input, input->_IO_read_base);
+  atomlog->DebugMessage(atomlog->MsgBuf);
   rewind(input);
 // check filesize
   if (fseek(input, 0, SEEK_END) != 0) {
@@ -169,7 +175,8 @@ int AtomFS::Save(FILE *input, char *output) {
       } else {
         bflag = true;
       }
-#else
+#endif  // UNIX
+#ifdef WINDOWS
       unsigned int result = GetCurrentDirectory(pathlen, curworkdir);
       if (result == 0) {
 // strange error
@@ -192,24 +199,26 @@ int AtomFS::Save(FILE *input, char *output) {
       } else {
         bflag = true;
       }
-#endif  // UNIX
+#endif  // WINDOWS
     }
     for (int i = 0; i < args->count - 1; i++) {
 #ifdef UNIX
 // check the directory
       if (chdir(args->output[i]) != 0) {
-#else
-      if (SetCurrentDirectory(args->output[i]) == 0) {
 #endif  // UNIX
+#ifdef WINDOWS
+      if (SetCurrentDirectory(args->output[i]) == 0) {
+#endif  // WINDOWS
 // there is no such directory.
 // try to make this directory
 #ifdef UNIX
         if ((mkdir(args->output[i], S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH )
             != 0) && (errno == EACCES)) {
-#else
+#endif  // UNIX
+#ifdef WINDOWS
         if ((CreateDirectory(args->output[i], NULL) == 0) &&
             (GetLastError() == ERROR_ALREADY_EXISTS)) {
-#endif  // UNIX
+#endif  // WINDOWS
 // we can'r create directory cause we have another file with this name
           atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FOLDER);
           snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s",
@@ -227,9 +236,10 @@ int AtomFS::Save(FILE *input, char *output) {
           return -1;
 #ifdef UNIX
         } else if (chdir(args->output[i]) != 0) {
-#else
-        } else if (SetCurrentDirectory(args->output[i]) == 0) {
 #endif  // UNIX
+#ifdef WINDOWS
+        } else if (SetCurrentDirectory(args->output[i]) == 0) {
+#endif  // WINDOWS
 // we create directory but can't set it as working... WTF??? O_o
           atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FOLDER);
 // release memory
@@ -247,9 +257,10 @@ int AtomFS::Save(FILE *input, char *output) {
 // restore work directory
 #ifdef UNIX
     if (chdir(curworkdir) != 0) {
-#else
+#endif  // UNIX
+#ifdef WINDOWS
     if (SetCurrentDirectory(curworkdir) == 0) {
-#endif // UNIX
+#endif  // WINDOWS
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FOLDER);
       delete [] curworkdir;
       for (int z = 0; z < args->count; z++)

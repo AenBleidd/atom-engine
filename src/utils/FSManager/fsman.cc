@@ -1,35 +1,13 @@
 #include "../../preproc.h"
 
 #include "../../GameFS/gamefs.h"
+#include "../../GameFS/strings.h"
 #include "../../AtomError/AtomError.h"
 
 #include <stdio.h>
 
 AtomLog *atomlog;
 AtomFS *atomfs;
-
-// 16-byte password input function
-unsigned int* PassPrint(void) {
-  unsigned int *key = new unsigned int[4];  // end key;
-  char *input = new char[17];  // input string
-// password input cycle
-  while (true) {
-    printf("%s:\n", "Print 16-symbol password");
-    fgets(input, 17, stdin);
-    if (strlen(input) == 16)
-      break;
-    else
-      fprintf(stderr, "%s\n", "Password is too short! Try again");
-  }
-  input[16] = '\0';
-// processing input string
-  key[0] = (input[0] << 8) + (input[1] << 8) + (input[2] << 8) + input[3];
-  key[1] = (input[4] << 8) + (input[5] << 8) + (input[6] << 8) + input[7];
-  key[2] = (input[8] << 8) + (input[9] << 8) + (input[10] << 8) + input[11];
-  key[3] = (input[12] << 8) + (input[13] << 8) + (input[14] << 8) + input[15];
-  delete [] input;
-  return key;
-}
 
 int main(int arg, char *argc[]) {
 // input parameters processing
@@ -50,6 +28,13 @@ int main(int arg, char *argc[]) {
              "Used byteorder is", descr[byteorder]);
     atomlog->DebugMessage(atomlog->MsgBuf);
   }
+  snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
+           "%s: %i; %s: %i; %s: %i; %s: %i; %s: %i; %s: %i",
+           "Size of char", SIZEOFCHAR, "Size of short int", SIZEOFSHORT,
+           "Size of int", SIZEOFINT, "Size of long int", SIZEOFLONG,
+           "Size of long long int", SIZEOFLONGLONG, "Size of wchar_t",
+           SIZEOFWCHAR_T);
+  atomlog->DebugMessage(atomlog->MsgBuf);
 
   char help[] = "File System Manager - utility to work with Atom \
 File System\nOptions:\n\t-t, --test\t\tTest default file system with standart \
@@ -85,8 +70,8 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
       char **input = new char*[arg - 9];
       int encrypted = 0;
       char *output = 0;
-      unsigned short int encbytes = 0;
-      unsigned char type = 0;
+      unsigned short int encbytes = 0xFFFF;
+      unsigned char type = type_addon;
 // Flags
       bool error = false;
       signed char flag_enc = 0;
@@ -190,7 +175,7 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
 // key is not predefined
         if (key == 0)
           key = PassPrint();
-// inpur files count
+// input files count
         int param = arg - 9;
         atomfs->Create(input, param, output, encbytes, key, type);
       }
@@ -205,8 +190,12 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
     if (arg == 3) {
       snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Open file %s",
                argc[2]);
-        atomfs->Mount(argc[2], "/");
-        atomfs->Navigate();
+// we need a key to open the file
+/*      if (key == 0)
+        key = PassPrint();*/
+// TODO(Lawliet): Make check wrong mount
+      atomfs->Mount(argc[2], "/", key);
+      atomfs->Navigate();
     } else {
       atomlog->DebugMessage(help);
       fprintf(stderr, "%s", help);

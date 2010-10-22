@@ -96,7 +96,7 @@ int AtomFS::Mount(char* filename) {
   return 0;
 }
 // Mount single file
-int AtomFS::Mount(char* filename, char* mountfolder) {
+int AtomFS::Mount(char* filename, char* mountfolder, unsigned int *key) {
   OPENALLOC *tempalloc = 0, *prev = 0;
   if (openalloc != 0) {
     tempalloc = openalloc;
@@ -122,92 +122,70 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
   mountfolder = "/\0";
   }
 // Print some info...
-  const unsigned short s = strlen(filename) + strlen(mountfolder) + 15;
-  char *pbuf = new char[s];
-  snprintf(pbuf, s, "Mounting %s to %s",
+  snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Mounting %s to %s",
            filename, mountfolder);
-  atomlog->DebugMessage(pbuf);
-  delete [] pbuf;
+  atomlog->DebugMessage(atomlog->MsgBuf);
 // create name of the file
   unsigned short int namelen = strlen(filename) + 5;
-  char *binfile = new char[namelen];
-  char *datfile = new char[namelen];
-  snprintf(binfile, s, "%s.bin", filename);
-  snprintf(datfile, s, "%s.dat", filename);
+  char *pakfile = new char[namelen];
+  snprintf(pakfile, namelen, "%s.pak", filename);
 // Try to open
-  FILE *dat, *bin;
-  dat = fopen(datfile, "rb");
-  if (dat == 0) {
+  FILE *pak;
+  pak = fopen(pakfile, "rb");
+  if (pak == 0) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FILE);
-    delete [] binfile;
-    delete [] datfile;
+    delete [] pakfile;
     return -1;
   }
-  bin = fopen(binfile, "rb");
-  if (bin == 0) {
-    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FILE);
-    delete [] binfile;
-    delete [] datfile;
-    fclose(dat);
-    return -1;
-  }
-  tempalloc->file = bin;
+  tempalloc->file = pak;
 // Cleaning...
-  delete [] binfile;
-  delete [] datfile;
-// check filesize
-  if (fseek(dat, 0, SEEK_END) != 0) {
+  delete [] pakfile;
+// get filesize
+  if (fseek(pak, 0, SEEK_END) != 0) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-    fclose(dat);
-    fclose(bin);
+    fclose(pak);
     return -1;
   }
-  unsigned long int datfilesize = ftell(dat) - 1;
-  if (datfilesize == -1L) {
+  unsigned long int pakfilesize = ftell(pak);
+  if (pakfilesize == -1L) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-    fclose(dat);
-    fclose(bin);
+    fclose(pak);
     return -1;
   }
-  rewind(dat);
-// Lets get start info about opened files
+  rewind(pak);
+// Lets get start info about opened file
   HEADER header;
 // Get magic signature
-  if (fread(&header.magic, sizeof(header.magic), 1, dat) != 1) {
+  if (fread(&header.magic, sizeof(header.magic), 1, pak) != 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-    fclose(dat);
-    fclose(bin);
+    fclose(pak);
     return -1;
   }
 // Check this magic
   if (header.magic != magic) {
 // Oops, we opened smth wrong...
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
-    fclose(dat);
-    fclose(bin);
+    fclose(pak);
     return -1;
   }
 // Magic!!!! *YAHOO*
 // Get version
-  if (fread(&header.version, sizeof(header.version), 1, dat) != 1) {
+  if (fread(&header.version, sizeof(header.version), 1, pak) != 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-    fclose(dat);
-    fclose(bin);
+    fclose(pak);
     return -1;
   }
 // Check version
   if (header.version != version) {
 // Oops, version is wrong...
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
-    fclose(dat);
-    fclose(bin);
+    fclose(pak);
     return -1;
   }
 // Get archive type
-  if (fread(&header.type, sizeof(header.type), 1, dat) != 1) {
+  if (fread(&header.type, sizeof(header.type), 1, pak) != 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-    fclose(dat);
-    fclose(bin);
+    fclose(pak);
     return -1;
   }
 // Check this type
@@ -215,56 +193,53 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
        (header.type != type_addon)) {
 // Hmm... Strange type...
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
-    fclose(dat);
-    fclose(bin);
+    fclose(pak);
+    return -1;
+  }
+// Get encoding
+  if (fread(&header.encoding, sizeof(header.encoding), 1, pak) != 1) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+    fclose(pak);
     return -1;
   }
 // Get crypt size
-  if (fread(&header.crypt, sizeof(header.crypt), 1, dat) != 1) {
+  if (fread(&header.crypt, sizeof(header.crypt), 1, pak) != 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-    fclose(dat);
-    fclose(bin);
+    fclose(pak);
     return -1;
   }  // Nothing to check
+// Get data size
+  if (fread(&header.datsize, sizeof(header.datsize), 1, pak) != 1) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+    fclose(pak);
+    return -1;
+  }
 // Get binary files count
 // TODO(Lawliet): Add support for various count of bin files
-  if (fread(&header.bincount, sizeof(header.bincount), 1, dat) != 1) {
+  if (fread(&header.bincount, sizeof(header.bincount), 1, pak) != 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-    fclose(dat);
-    fclose(bin);
+    fclose(pak);
     return -1;
   }
 // Get binary size
 // TODO(Lawliet): Add support for checking the size various count of bin files
-  if (fread(&header.binsize, sizeof(header.binsize), 1, dat) != 1) {
+  if (fread(&header.binsize, sizeof(header.binsize), 1, pak) != 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-    fclose(dat);
-    fclose(bin);
+    fclose(pak);
     return -1;
   }
-// Get data files count
-// TODO(Lawliet): Add support for various count of dat files
-  if (fread(&header.datcount, sizeof(header.datcount), 1, dat) != 1) {
-    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-    fclose(dat);
-    fclose(bin);
-    return -1;
-  }
-// Get data size
-// TODO(Lawliet): Add support for checking the size various count of dat files
-  if (fread(&header.datsize, sizeof(header.datsize), 1, dat) != 1) {
-    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-    fclose(dat);
-    fclose(bin);
+// Check the size
+  if (header.binsize + header.datsize != pakfilesize) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
+    fclose(pak);
     return -1;
   }
 // Check for key
   if (header.type == type_addon) {
 // Ok, let's get the key...
-    if (fread(&header.addon_key, sizeof(header.addon_key), 1, dat) != 1) {
+    if (fread(&header.addon_key, sizeof(header.addon_key), 1, pak) != 1) {
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-      fclose(dat);
-      fclose(bin);
+      fclose(pak);
       return -1;
     }
 // Check wake_table
@@ -278,6 +253,11 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
                      header.addon_key[2], header.addon_key[3]);
       tempalloc->memory = table;
     /*}*/
+  } else {
+    if (key = 0)
+      key = PassPrint();
+    table = GenKey(key[0], key[1], key[2], key[3]);
+    tempalloc->memory = table;
   }
 // Header was parsed. Easiest part is done...
 
@@ -294,8 +274,7 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
   ARGUMENTS *args = ParsePath(atomlog, mountfolder);
   if (args->count < 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_MOUNTPOINT);
-    fclose(dat);
-    fclose(bin);
+    fclose(pak);
     for (int i = 0; i < args->count; i++)
       if (args->output[i] != 0)
         delete [] args->output[i];
@@ -305,8 +284,7 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
 // Check for the root directory
   if (strcmp(args->output[0], "/") != 0) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_MOUNTPOINT);
-    fclose(dat);
-    fclose(bin);
+    fclose(pak);
     for (int i = 0; i < args->count; i++)
       if (args->output[i] != 0)
         delete [] args->output[i];
@@ -387,44 +365,41 @@ int AtomFS::Mount(char* filename, char* mountfolder) {
 RECORD *temprecord;
 temprecord = new RECORD;
 // Get the flag
-  if (fread(&temprecord->flag, sizeof(temprecord->flag), 1, dat) != 1) {
+  if (fread(&temprecord->flag, sizeof(temprecord->flag), 1, pak) != 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-    fclose(dat);
-    fclose(bin);
+    fclose(pak);
     delete temprecord;
     return -1;
   }
 // Check it
   if (temprecord->flag != flag_folder) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
-    fclose(dat);
-    fclose(bin);
+    snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%x: %x", ftell(pak), temprecord->flag);
+    atomlog->DebugMessage(atomlog->MsgBuf);
+    fclose(pak);
     delete temprecord;
     return -1;
   }
 // Get namelen
-  if (fread(&temprecord->namelen, sizeof(temprecord->namelen), 1, dat) != 1) {
+  if (fread(&temprecord->namelen, sizeof(temprecord->namelen), 1, pak) != 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-    fclose(dat);
-    fclose(bin);
+    fclose(pak);
     delete temprecord;
     return -1;
   }
 // Check namelen. It must be equal 1
   if (temprecord->namelen != 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
-    fclose(dat);
-    fclose(bin);
+    fclose(pak);
     delete temprecord;
     return -1;
   }
 // Get the name.
   temprecord->name = new char[temprecord->namelen + 1];
-  if (fread(temprecord->name, 1, temprecord->namelen, dat) !=
+  if (fread(temprecord->name, 1, temprecord->namelen, pak) !=
       temprecord->namelen) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-    fclose(dat);
-    fclose(bin);
+    fclose(pak);
     delete [] temprecord->name;
     delete temprecord;
     return -1;
@@ -433,8 +408,7 @@ temprecord = new RECORD;
 // Check the name. It must be root
   if (strcmp(temprecord->name, "/") != 0) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
-    fclose(dat);
-    fclose(bin);
+    fclose(pak);
     delete [] temprecord->name;
     delete temprecord;
     return -1;
@@ -448,65 +422,59 @@ temprecord = new RECORD;
 // At least we will mount smth!
   while (true) {
 // check for file end
-    if (datfilesize == ftell(dat) - 1) {
+    if (header.datsize == ftell(pak) - 1) {
       break;
     }
     temprecord = new RECORD;
 // Get the flag
-    if (fread(&temprecord->flag, sizeof(temprecord->flag), 1, dat) != 1) {
+    if (fread(&temprecord->flag, sizeof(temprecord->flag), 1, pak) != 1) {
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-      fclose(dat);
-      fclose(bin);
+      fclose(pak);
       delete temprecord;
       return -1;
     }
 // Check the flag
     if (temprecord->flag == flag_file) {
 // Get namelen
-      if (fread(&temprecord->namelen, sizeof(temprecord->namelen), 1, dat) !=
+      if (fread(&temprecord->namelen, sizeof(temprecord->namelen), 1, pak) !=
           1) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-        fclose(dat);
-        fclose(bin);
+        fclose(pak);
         delete temprecord;
         return -1;
       }
 // Get the name.
       temprecord->name = new char[temprecord->namelen + 1];
-      if (fread(temprecord->name, 1, temprecord->namelen, dat) !=
+      if (fread(temprecord->name, 1, temprecord->namelen, pak) !=
           temprecord->namelen) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-        fclose(dat);
-        fclose(bin);
+        fclose(pak);
         delete [] temprecord->name;
         delete temprecord;
         return -1;
       }
       temprecord->name[temprecord->namelen] = '\0';
 // Get the size
-      if (fread(&temprecord->size, sizeof(temprecord->size), 1, dat) != 1) {
+      if (fread(&temprecord->size, sizeof(temprecord->size), 1, pak) != 1) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-        fclose(dat);
-        fclose(bin);
+        fclose(pak);
         delete [] temprecord->name;
         delete temprecord;
         return -1;
       }
 // Get the offset
-        if (fread(&temprecord->offset, sizeof(temprecord->offset), 1, dat) !=
+        if (fread(&temprecord->offset, sizeof(temprecord->offset), 1, pak) !=
             1) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-        fclose(dat);
-        fclose(bin);
+        fclose(pak);
         delete [] temprecord->name;
         delete temprecord;
         return -1;
       }
 // Get crc
-        if (fread(&temprecord->crc, sizeof(temprecord->crc), 1, dat) != 1) {
+        if (fread(&temprecord->crc, sizeof(temprecord->crc), 1, pak) != 1) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-        fclose(dat);
-        fclose(bin);
+        fclose(pak);
         delete [] temprecord->name;
         delete temprecord;
         return -1;
@@ -525,7 +493,7 @@ temprecord = new RECORD;
 #ifdef _CRC_CHECK_
         current->tree_file->crc = temprecord->crc;
 #endif  // _CRC_CHECK_
-        current->tree_file->id = bin;
+        current->tree_file->id = pak;
         current->tree_file->priority = header.type;
         current->tree_file->file = 0;
         current->tree_file->descriptor = 0;
@@ -545,8 +513,7 @@ temprecord = new RECORD;
           if ((tempfile->priority == type_critical) ||
               (header.type < tempfile->priority)) {
             atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OVERWRITE_DENIED);
-            fclose(bin);
-            fclose(dat);
+            fclose(pak);
             delete [] temprecord->name;
             delete temprecord;
             return -1;
@@ -560,7 +527,7 @@ temprecord = new RECORD;
 #ifdef _CRC_CHECK_
             tempfile->crc = temprecord->crc;
 #endif  // _CRC_CHECK_
-            tempfile->id = bin;
+            tempfile->id = pak;
             tempfile->priority = header.type;
             tempfile->file = 0;
             tempfile->tree_file->descriptor = 0;
@@ -584,8 +551,7 @@ temprecord = new RECORD;
               if ((tempfile->priority == type_critical) ||
                   (header.type < tempfile->priority)) {
                 atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OVERWRITE_DENIED);
-                fclose(bin);
-                fclose(dat);
+                fclose(pak);
                 delete [] temprecord->name;
                 delete temprecord;
                 return -1;
@@ -599,7 +565,7 @@ temprecord = new RECORD;
 #ifdef _CRC_CHECK_
                 tempfile->crc = temprecord->crc;
 #endif  // _CRC_CHECK_
-                tempfile->id = bin;
+                tempfile->id = pak;
                 tempfile->priority = header.type;
                 tempfile->file = 0;
                 tempfile->tree_file->descriptor = 0;
@@ -631,7 +597,7 @@ temprecord = new RECORD;
 #ifdef _CRC_CHECK_
           tempfile->tree_file->crc = temprecord->crc;
 #endif  // _CRC_CHECK_
-          tempfile->tree_file->id = bin;
+          tempfile->tree_file->id = pak;
           tempfile->tree_file->priority = header.type;
           tempfile->tree_file->file = 0;
           tempfile->tree_file->descriptor = 0;
@@ -648,21 +614,19 @@ temprecord = new RECORD;
     }
     else if (temprecord->flag == flag_folder) {
 // Get namelen
-      if (fread(&temprecord->namelen, sizeof(temprecord->namelen), 1, dat) !=
+      if (fread(&temprecord->namelen, sizeof(temprecord->namelen), 1, pak) !=
           1) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-        fclose(dat);
-        fclose(bin);
+        fclose(pak);
         delete temprecord;
         return -1;
       }
 // Get the name.
       temprecord->name = new char[temprecord->namelen + 1];
-      if (fread(temprecord->name, 1, temprecord->namelen, dat) !=
+      if (fread(temprecord->name, 1, temprecord->namelen, pak) !=
           temprecord->namelen) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-        fclose(dat);
-        fclose(bin);
+        fclose(pak);
         delete [] temprecord->name;
         delete temprecord;
         return -1;
@@ -733,14 +697,11 @@ temprecord = new RECORD;
       temprecord = 0;
     } else {
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
-      fclose(dat);
-      fclose(bin);
+      fclose(pak);
       delete temprecord;
       return -1;
     }
   }
-// Close data file
-  fclose(dat);
   snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
            "%s was successfully mounted", filename);
   atomlog->DebugMessage(atomlog->MsgBuf);

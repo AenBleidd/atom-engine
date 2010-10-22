@@ -8,7 +8,6 @@
 #endif  // _CRC_CHECK_
 
 #include "../AtomError/AtomError.h"
-//#include "../SysVars/sysvars.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -17,6 +16,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <time.h>
 #endif  // UNIX
 #endif  // _FSMAN_
 
@@ -24,15 +24,20 @@
 static const unsigned int magic = 0x41454653;  // Magic number ("AEFS")
 static const unsigned char version = 0x01;  // current version (1)
 // folder and file flags
-static const unsigned char ff_ro = 0x80;  // read-only
-static const unsigned char ff_rw = 0x0;  // read-write
+static const unsigned char ff_ro = 0x01;  // read-only
+static const unsigned char ff_rw = 0x00;  // read-write
 
 static const unsigned char flag_eoc = 0xCE;  // end of catalogue
 static const unsigned char flag_file = 0x0F;
 static const unsigned char flag_folder = 0x0C;
+static const unsigned char flag_folder_deleted = 0xDC;
+static const unsigned char flag_file_deleted = 0xDF;
+// unicode
+static const unsigned char flag_ascii = 0x00;
+static const unsigned char flag_utf8 = 0xFF;
 // archive types
 static const unsigned char type_critical = 0xFF;
-static const unsigned char type_standart = 0x0;
+static const unsigned char type_standart = 0x00;
 static const unsigned char type_addon = 0x01;
 // CRC32
 #ifdef _CRC_CHECK_
@@ -106,7 +111,7 @@ static const unsigned long int crc32table[256] = {
 // XOR mask for CRC32
 static const unsigned long int mask = 0xFFFFFFFFUL;
 #endif  // _CRC_CHECK_
-
+#pragma pack (1)
 struct HEADER {
 // magic number
   unsigned int magic;
@@ -114,28 +119,34 @@ struct HEADER {
   unsigned char version;
 // type (critical, standart or addon)
   unsigned char type;
+// encoding of the symlols
+  unsigned char encoding;
 // crypt bytes
   unsigned short int crypt;
+// size of the filetable & header
+  unsigned long int datsize;
 // bin file count
   unsigned long int bincount;
 // size of the packed binary data
   unsigned long int binsize;
-// dat file count
-  unsigned long int datcount;
-// size of the filetable & header
-  unsigned long int datsize;
 // addon key
   unsigned int addon_key[4];
 };
 // identify each record in filetable of the packed file
 struct RECORD {
-// flag of the file
-// (0x0C - it's folder; 0x0F - it's file; 0xCE - it's the end of folder)
+/* flag of the file
+// 0x0C - it's folder;
+// 0x0F - it's file;
+// 0xCE - it's the end of folder
+// 0xDC - this folder was deleted
+// 0xDF - this file was deleted*/
   unsigned char flag;
 // lenght of the file or folder name
   unsigned short int namelen;
-// name of the folder or file
+// name of the folder or file. NULL for unicode strings
   char *name;
+// utf-8 encoded name. NULL for ascii encoding
+  wchar_t *wname;
 // size of the file (0 if it is a folder)
   unsigned long int size;
 // SIC! offset of the file in data from the beginning of the data!
@@ -144,12 +155,15 @@ struct RECORD {
 // control check sum (0 if it is a folder)
   unsigned long int crc;
 };
+#pragma unpack
 struct TREE_FILE;
 struct TREE_FOLDER;
 // struct of the file in the file system
 struct TREE_FILE {
-// name of the file
+// name of the file. NULL for unicode strings
   char *name;
+// utf-8 encoded name. NULL for ascii encoding
+  wchar_t *wname;
 // size of the file
   unsigned long int size;
 // offset of the file in the packed file
@@ -183,8 +197,10 @@ struct TREE_FILE {
 };
 // struct of the folder in the file system
 struct TREE_FOLDER {
-// name of the folder
+// name of the folder. NULL for unicode strings
   char* name;
+// utf-8 encoded name. NULL for ascii encoding
+  wchar_t *wname;
 // flags of the folder
   unsigned char flag;
 // pointer to the next folder inside this folder
@@ -211,11 +227,12 @@ class AtomFS {
    filename - name of the mounted file
    mountfolder - folder in the FS to mount the file system
                  located in the mounted file
+   key - wake key
    return value:
                 0 - there is no error
                 another value - some kind of error, look error code
 */
-  int Mount(char* filename, char* mountfolder);
+  int Mount(char* filename, char* mountfolder, unsigned int *key = 0);
 /* Mounting from the mount table
    filename - name of the file with configuration to mount files
    return value:
