@@ -236,6 +236,8 @@ int Copy(AtomLog *atomlog, AtomFS *atomfs, TREE_FOLDER *curfolder, char *in,
     atomlog->DebugMessage(atomlog->MsgBuf);
     return -1;
   }
+  snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%x %p %p %p", src, src, src, src->_IO_read_base);
+  atomlog->DebugMessage(atomlog->MsgBuf);
 // Save the file
   if (atomfs->Save(src, out) != 0) {
     snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s",

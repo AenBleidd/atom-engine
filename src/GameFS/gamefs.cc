@@ -12,10 +12,6 @@ AtomFS::AtomFS(AtomLog *log, unsigned int *key) {
    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRONG_BYTEORDER);
    throw ERROR_WRONG_BYTEORDER;
   }
-/*  snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s: %i; %s: %i; %s: %i",
-           "Size of int", sizeofint, "Size of long int", sizeoflong,
-           "Size of long long int", sizeoflonglong);
-  atomlog->DebugMessage(atomlog->MsgBuf);*/
   wake_key = 0;
 // If class being created with predefined key
   if (key != 0) {
