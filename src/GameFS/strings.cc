@@ -425,3 +425,30 @@ TREE_FILE* FindFileFromPath(AtomLog *atomlog, TREE_FOLDER *root,
   }
   return curfile;
 }
+// 16-byte password input function
+unsigned int* PassPrint(void) {
+  unsigned int *key = new unsigned int[4];  // end key;
+  char *input = new char[17];  // input string
+// password input cycle
+  while (true) {
+    printf("%s:\n", "Print 16-symbol password");
+    fgets(input, 17, stdin);
+    if (strlen(input) == 16)
+      break;
+    else
+      fprintf(stderr, "%s\n", "Password is too short! Try again");
+  }
+  input[16] = '\0';
+// processing input string
+  key[0] = 0, key[1] = 0, key[2] = 0, key[3] = 0;
+  for (int i = 0; i < 4; i++) {
+    for (int j = i * 4; j < (i + 1) * 4; j++) {
+      key[i] += input[j];
+      if (j < (i + 1) * 4 - 1)
+        key[i] <<= 8;
+    }
+  }
+  fprintf(stderr, "%s %x-%x-%x-%x\n", "Password is", key[0], key[1], key[2], key[3]);
+  delete [] input;
+  return key;
+}

@@ -19,4 +19,6 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input);
 // Find the file in the file system
 TREE_FILE* FindFileFromPath(AtomLog *atomlog, TREE_FOLDER *root,
                             TREE_FOLDER *current, ARGUMENTS *path);
+// 16-byte password input function
+unsigned int* PassPrint(void);
 #endif  // _GAMEFS_STRINGS_H_

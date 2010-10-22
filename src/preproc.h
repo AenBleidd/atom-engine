@@ -15,6 +15,14 @@
 // 1 - LE: 3210
 // 2 - MBE: 1032
 // 3 - MLE: 2301
-#define BYTEORDER ByteOrderDetect()
+#define BYTEORDER ByteOrderDetect()        // default is: Little-Endian
+
+// size of main types
+#define SIZEOFCHAR      sizeof(char)       // default is: 1 byte
+#define SIZEOFSHORT     sizeof(short int)  // default is: 2 bytes
+#define SIZEOFINT       sizeof(int)        // default is: 4 bytes
+#define SIZEOFLONG      sizeof(long)       // default is: 8 bytes
+#define SIZEOFLONGLONG  sizeof(long long)  // default is: 8 bytes
+#define SIZEOFWCHAR_T   sizeof(wchar_t)    // default is: 4 bytes
 
 #endif  // _PREPROC_H_
