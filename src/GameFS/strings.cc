@@ -452,3 +452,15 @@ unsigned int* PassPrint(void) {
   delete [] input;
   return key;
 }
+#ifdef _FSMAN_
+#define RANDOM(min,max) (rand()%(max-min+1)+min)
+// Create temp file name
+char* tempname(AtomLog *atomlog) {
+  unsigned char a = 10, b = 20; // diapasone
+  unsigned char count = RANDOM(a,b);
+  char *name = new char[count];
+  for (unsigned char i = 0; i < count; i++)
+    name[i] = RANDOM(0x61, 0x7a);
+  return name;
+}
+#endif  // _FSMAN_

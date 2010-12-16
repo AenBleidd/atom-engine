@@ -11,18 +11,24 @@
 // System parameters
 
 // byteorder:
-// 0 - BE: 0123
-// 1 - LE: 3210
-// 2 - MBE: 1032
-// 3 - MLE: 2301
+#define BO_BE 0  // 0123
+#define BO_LE 1  // 3210
+#define BO_MBE 2  // 1032
+#define BO_MLE 3  // 2301
+
 #define BYTEORDER ByteOrderDetect()        // default is: Little-Endian
 
 // size of main types
 #define SIZEOFCHAR      sizeof(char)       // default is: 1 byte
 #define SIZEOFSHORT     sizeof(short int)  // default is: 2 bytes
 #define SIZEOFINT       sizeof(int)        // default is: 4 bytes
+#define SIZEOFWCHAR_T   sizeof(wchar_t)    // default is: 4 bytes
 #define SIZEOFLONG      sizeof(long)       // default is: 8 bytes
 #define SIZEOFLONGLONG  sizeof(long long)  // default is: 8 bytes
-#define SIZEOFWCHAR_T   sizeof(wchar_t)    // default is: 4 bytes
+
+#define LOWORD(l) ((unsigned short int)(l))
+#define HIWORD(l) ((unsigned short int)(((unsigned int)(l) >> 16) & 0xFFFF))
+#define LOBYTE(w) ((unsigned char)(w))
+#define HIBYTE(w) ((unsigned char)(((unsigned short int)(w) >> 8) & 0xFF))
 
 #endif  // _PREPROC_H_
