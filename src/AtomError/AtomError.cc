@@ -56,7 +56,7 @@ AtomLog::AtomLog(char *name, bool alone, unsigned char lvl) {
 #endif  // WINDOWS
 // One by one, We will fall, down down...
 // Wait a minute ! We have last hope!
-// Lets save logfile in the temp directory.
+// Lets save logfile into the temp directory.
 // At least this directory MUST be exist...
 #ifdef UNIX
       if (mkdir("log", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
@@ -97,13 +97,19 @@ AtomLog::AtomLog(char *name, bool alone, unsigned char lvl) {
     }
 
 // open log file
-    logfile = fopen(plogfilename, "wt");
+    if (alone == false)
+      logfile = fopen(plogfilename, "wt");
+    else
+     logfile = fopen(plogfilename, "at");
     if (logfile == 0) {
 // Another last hope...
 // Try to use standart name
       snprintf(plogfilename, s, "%s%s_%s%s",
                temppath, "atom", CurDateTime(), ".log");
-      logfile = fopen(plogfilename, "wt");
+      if (alone == false)
+        logfile = fopen(plogfilename, "wt");
+      else
+        logfile = fopen(plogfilename, "at");
       if (logfile == 0) {
         delete [] temppath;
         delete [] plogfilename;
@@ -184,7 +190,7 @@ const char *errorcode[] = {
 "Core Error. File System Error.",
 "Engine Error. WindowManager Error."
 };
-const char *errorsubcode[3][17] = {
+const char *errorsubcode[3][18] = {
 {
 "No Error."
 }, {
@@ -204,7 +210,8 @@ const char *errorsubcode[3][17] = {
 "Wrong byteorder. Program can't read files with unknown byteorder.",
 "Path incorrect or directory or file don't exist.",
 "Crc check is failed. File is broken.",
-"Function was called with wrong arguments."
+"Function was called with wrong arguments.",
+"FSMan version is too old or file is from the future."
 }, {
 "No Error",
 "Fatal Error: Error registering the window class",

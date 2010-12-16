@@ -13,11 +13,15 @@ AtomFS::AtomFS(AtomLog *log, unsigned int *key) {
    throw ERROR_WRONG_BYTEORDER;
   }
   wake_key = 0;
+  wake_table = 0;
 // If class being created with predefined key
   if (key != 0) {
     wake_key = key;
     wake_table = GenKey(wake_key[0], wake_key[1], wake_key[2], wake_key[3]);
   }
+// set addon keys to zero...
+  addon_key.addon_key = 0;
+  addon_key.count = 0;
 // create root directory
   root = new TREE_FOLDER;
   const unsigned char s = 2;
@@ -128,11 +132,24 @@ AtomFS::~AtomFS() {
       tempalloc = 0;
       if (openalloc->file != 0)
         fclose(openalloc->file);
-      if (openalloc->memory != 0)
-        delete [] openalloc->memory;
       tempalloc = openalloc->next;
       delete openalloc;
     } while (tempalloc != 0);
     openalloc = 0;
   }
+// release memory used by keys
+  if (addon_key.count != 0) {
+    for (unsigned int i = 0; i < addon_key.count; i++) {
+      delete [] addon_key.addon_key[i];
+      delete [] addon_key.addon_table[i];
+    }
+    delete [] addon_key.addon_key;
+    delete [] addon_key.addon_table;
+    addon_key.addon_key = 0;
+    addon_key.count = 0;
+  }
+// release memory used by main wake_table
+// SIC! memory released by main wake_key MUST be released manually
+  if (wake_table != 0)
+    delete [] wake_table;
 }

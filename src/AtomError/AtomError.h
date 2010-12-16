@@ -14,7 +14,7 @@
 
 #ifdef WINDOWS
 #define localtime_r(timep, result)  (localtime (timep) ? memcpy  ((result), \
-localtime (timep), sizeof (*(result))) : 0)  /*NOLINT*/
+localtime (timep), sizeof (*(result))) : 0)
 #endif  // WINDOWS
 
 #include "../preproc.h"
@@ -73,12 +73,12 @@ class AtomLog {
   void DebugMsg(const char *string);
 };
 
-#define SetLastErr(code,subcode) SetLastError(code,subcode,__FILE__,__LINE__);  /*NOLINT*/
-#define SetLastWrn(code,subcode) SetLastWarning(code,subcode,__FILE__,__LINE__);  /*NOLINT*/
-#define LogMessage(string) LogMsg(string,0,__FILE__,__LINE__);  /*NOLINT*/
-#define DebugMessage(string) DebugMsg(string,0,__FILE__,__LINE__);  /*NOLINT*/
-#define LogMessageV(string,lvl) LogMsg(string,lvl,__FILE__,__LINE__);  /*NOLINT*/
-#define DebugMessageV(string,lvl) DebugMsg(string,lvl,__FILE__,__LINE__);  /*NOLINT*/
+#define SetLastErr(code,subcode) SetLastError(code,subcode,__FILE__,__LINE__);
+#define SetLastWrn(code,subcode) SetLastWarning(code,subcode,__FILE__,__LINE__);
+#define LogMessage(string) LogMsg(string,0,__FILE__,__LINE__);
+#define DebugMessage(string) DebugMsg(string,0,__FILE__,__LINE__);
+#define LogMessageV(string,lvl) LogMsg(string,lvl,__FILE__,__LINE__);
+#define DebugMessageV(string,lvl) DebugMsg(string,lvl,__FILE__,__LINE__);
 
 /* Module General Error Codes */
 #define ERROR_CORE_FS                                                0x00000001
@@ -101,6 +101,7 @@ class AtomLog {
 #define ERROR_INCORRECT_PATH                                         0x0000000E
 #define ERROR_INCORRECT_CRC32                                        0x0000000F
 #define ERROR_FUNCTION_ARGUMENTS                                     0x00000010
+#define ERROR_OLD_FSMAN                                              0x00000011
 
 /* WindowManager Error Codes */
 #define ERROR_CLSREG_FAIL                                            0x00000001

@@ -27,11 +27,12 @@ static const unsigned char version = 0x01;  // current version (1)
 static const unsigned char ff_ro = 0x01;  // read-only
 static const unsigned char ff_rw = 0x00;  // read-write
 
-static const unsigned char flag_eoc = 0xCE;  // end of catalogue
-static const unsigned char flag_file = 0x0F;
-static const unsigned char flag_folder = 0x0C;
-static const unsigned char flag_folder_deleted = 0xDC;
-static const unsigned char flag_file_deleted = 0xDF;
+static const unsigned char flag_eoc = 0xCE;  // end of folder
+static const unsigned char flag_file = 0x0F;  // file
+static const unsigned char flag_folder = 0x0C;  // folder
+static const unsigned char flag_folder_deleted = 0xDC;  // deleted folder
+static const unsigned char flag_file_deleted = 0xDF;  // deleted file
+static const unsigned char flag_key = 0x0E;  // it's wake addon key
 // unicode
 static const unsigned char flag_ascii = 0x00;
 static const unsigned char flag_utf8 = 0xFF;
@@ -123,14 +124,10 @@ struct HEADER {
   unsigned char encoding;
 // crypt bytes
   unsigned short int crypt;
-// size of the filetable & header
-  unsigned long int datsize;
 // bin file count
   unsigned long int bincount;
-// size of the packed binary data
-  unsigned long int binsize;
-// addon key
-  unsigned int addon_key[4];
+// filetable address
+  unsigned long int filetable;
 };
 // identify each record in filetable of the packed file
 struct RECORD {
@@ -215,8 +212,13 @@ struct TREE_FOLDER {
 // structure to store opened files and allocated global blocks of memory
 struct  OPENALLOC {
   FILE *file;
-  unsigned int *memory;
   OPENALLOC *next;
+};
+// structure to store used addon keys
+struct ADDON_KEY {
+  unsigned int count;
+  unsigned int **addon_key;
+  unsigned int **addon_table;
 };
 // FS Class
 class AtomFS {
@@ -273,6 +275,10 @@ class AtomFS {
 // WAKE crypt algorithm
   unsigned int *wake_table;
   unsigned int *wake_key;
+// additional keys
+  ADDON_KEY addon_key;
+// Add new addon key andreturn it's number
+  unsigned int AddAddonKey(unsigned int *key);
   unsigned int* GenKey(unsigned int k0, unsigned int k1,
               unsigned int k2, unsigned int k3);
   void Decrypt(unsigned int *data, int lenght, unsigned int k[4],
