@@ -193,9 +193,8 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
 // we need a key to open the file
 /*      if (key == 0)
         key = PassPrint();*/
-// TODO(Lawliet): Make check wrong mount
-      atomfs->Mount(argc[2], "/", key);
-      atomfs->Navigate();
+      if (atomfs->Mount(argc[2], "/", key) != -1)
+        atomfs->Navigate();
     } else {
       atomlog->DebugMessage(help);
       fprintf(stderr, "%s", help);

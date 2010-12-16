@@ -94,4 +94,45 @@ void AtomFS::Decrypt(unsigned int *data, int lenght, unsigned int k[4],
   }
     r[0] = r3, r[1] = r4, r[2] = r5, r[3] = r6;
 }
-
+// add new addon key
+unsigned int AtomFS::AddAddonKey(unsigned int *key) {
+  unsigned int **temp, **table;
+  if (addon_key.count != 0) {
+// search fo an existing key
+    for (unsigned int i = 0; i < addon_key.count; i++) {
+      if (memcmp(key, addon_key.addon_key[i], 16) == 0) {
+// we find this key
+        delete [] key;
+        return i;
+      }
+    }
+// we didn't find this key, let's add it
+  temp = new unsigned int*[addon_key.count + 1];
+  table = new unsigned int*[addon_key.count + 1];
+// store pointers in new array
+  for (unsigned int i = 0; i < addon_key.count; i++) {
+    temp[i] = addon_key.addon_key[i];
+    table[i] = addon_key.addon_table[i];
+  }
+  temp[addon_key.count] = key;
+  table[addon_key.count] = GenKey(key[0], key[1], key[2], key[3]);
+// delete old array
+  delete [] addon_key.addon_key;
+  delete [] addon_key.addon_table;
+// save new array
+  addon_key.addon_key = temp;
+  addon_key.addon_table = table;
+// return position of he new key
+  return addon_key.count++;
+  } else {
+// create new key
+    addon_key.addon_key = new unsigned int*;
+    addon_key.addon_table = new unsigned int*;
+// set the key
+    addon_key.addon_key[0] = key;
+    addon_key.addon_table[0] = GenKey(key[0], key[1], key[2], key[3]);
+    addon_key.count = 1;
+// return key number
+    return 0;
+  }
+}

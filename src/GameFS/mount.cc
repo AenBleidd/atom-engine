@@ -107,7 +107,6 @@ int AtomFS::Mount(char* filename, char* mountfolder, unsigned int *key) {
   }
   tempalloc = new OPENALLOC;
   tempalloc->file = 0;
-  tempalloc->memory = 0;
   tempalloc->next = 0;
   if (openalloc == 0)
     openalloc = tempalloc;
@@ -128,7 +127,7 @@ int AtomFS::Mount(char* filename, char* mountfolder, unsigned int *key) {
 // create name of the file
   unsigned short int namelen = strlen(filename) + 5;
   char *pakfile = new char[namelen];
-  snprintf(pakfile, namelen, "%s.pak", filename);
+  snprintf(pakfile, namelen, "%s.bin", filename);
 // Try to open
   FILE *pak;
   pak = fopen(pakfile, "rb");
@@ -140,19 +139,6 @@ int AtomFS::Mount(char* filename, char* mountfolder, unsigned int *key) {
   tempalloc->file = pak;
 // Cleaning...
   delete [] pakfile;
-// get filesize
-  if (fseek(pak, 0, SEEK_END) != 0) {
-    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-    fclose(pak);
-    return -1;
-  }
-  unsigned long int pakfilesize = ftell(pak);
-  if (pakfilesize == -1L) {
-    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-    fclose(pak);
-    return -1;
-  }
-  rewind(pak);
 // Lets get start info about opened file
   HEADER header;
 // Get magic signature
@@ -176,9 +162,9 @@ int AtomFS::Mount(char* filename, char* mountfolder, unsigned int *key) {
     return -1;
   }
 // Check version
-  if (header.version != version) {
+  if (header.version > version) {
 // Oops, version is wrong...
-    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OLD_FSMAN);
     fclose(pak);
     return -1;
   }
@@ -208,12 +194,6 @@ int AtomFS::Mount(char* filename, char* mountfolder, unsigned int *key) {
     fclose(pak);
     return -1;
   }  // Nothing to check
-// Get data size
-  if (fread(&header.datsize, sizeof(header.datsize), 1, pak) != 1) {
-    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-    fclose(pak);
-    return -1;
-  }
 // Get binary files count
 // TODO(Lawliet): Add support for various count of bin files
   if (fread(&header.bincount, sizeof(header.bincount), 1, pak) != 1) {
@@ -221,46 +201,56 @@ int AtomFS::Mount(char* filename, char* mountfolder, unsigned int *key) {
     fclose(pak);
     return -1;
   }
-// Get binary size
-// TODO(Lawliet): Add support for checking the size various count of bin files
-  if (fread(&header.binsize, sizeof(header.binsize), 1, pak) != 1) {
+// Get filetable address
+  if (fread(&header.filetable, sizeof(header.filetable), 1, pak) != 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-    fclose(pak);
-    return -1;
-  }
-// Check the size
-  if (header.binsize + header.datsize != pakfilesize) {
-    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
     fclose(pak);
     return -1;
   }
 // Check for key
   if (header.type == type_addon) {
-// Ok, let's get the key...
-    if (fread(&header.addon_key, sizeof(header.addon_key), 1, pak) != 1) {
+    if (key == 0) {
+      key = new unsigned int[4];
+    }
+// go to the key
+    if (fseek(pak, header.filetable - 17, SEEK_SET) != 0) {
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
       fclose(pak);
       return -1;
     }
-// Check wake_table
-/*    if ((header.addon_key[0] == wake_key[0]) &&
-        (header.addon_key[1] == wake_key[1]) &&
-        (header.addon_key[2] == wake_key[2]) &&
-        (header.addon_key[3] == wake_key[3])) {
-      table = wake_table;
-    } else {*/
-      table = GenKey(header.addon_key[0], header.addon_key[1],
-                     header.addon_key[2], header.addon_key[3]);
-      tempalloc->memory = table;
-    /*}*/
+// get the key flag
+    unsigned char flagkey = 0;
+    if (fread(&flagkey, sizeof(flag_key), 1, pak) != 1) {
+      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+      fclose(pak);
+      return -1;
+    }
+// Check the flag
+    if (flagkey != flag_key) {
+      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
+      fclose(pak);
+      return -1;
+    }
+// TODO(Lawliet): Do smth with this. Store predefined key somewhere!
+// if key is predefined it would be lost... for ever...
+// Ok, let's get the key...
+    if (fread(key, 4, 4, pak) != 4) {
+      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+      fclose(pak);
+      return -1;
+    }
   } else {
-    if (key = 0)
+// go to the filetable
+    if (fseek(pak, header.filetable, SEEK_SET) != 0) {
+      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+      fclose(pak);
+      return -1;
+    }
+    if (key == 0)
       key = PassPrint();
-    table = GenKey(key[0], key[1], key[2], key[3]);
-    tempalloc->memory = table;
+// add the key and get the working table
+    table = addon_key.addon_table[AddAddonKey(key)];
   }
-// Header was parsed. Easiest part is done...
-
 // Let's look the mountpont
 // Slash flag
   bool slash = true;
@@ -416,15 +406,13 @@ temprecord = new RECORD;
 // Clean
   delete [] temprecord->name;
   delete temprecord;
-// flag for elements that we fing somewhere
+// flag for elements that we find somewhere
   bool bfound = false;
   TREE_FILE *tempfile = 0;
+// count of opened folders
+  unsigned long int opened = 1;
 // At least we will mount smth!
-  while (true) {
-// check for file end
-    if (header.datsize == ftell(pak) - 1) {
-      break;
-    }
+  while (opened != 0) {
     temprecord = new RECORD;
 // Get the flag
     if (fread(&temprecord->flag, sizeof(temprecord->flag), 1, pak) != 1) {
@@ -498,9 +486,9 @@ temprecord = new RECORD;
         current->tree_file->file = 0;
         current->tree_file->descriptor = 0;
         current->tree_file->key = 0;
-        if (header.type == type_addon) {
+/*        if (header.type == type_addon) {
           current->tree_file->key = header.addon_key;
-        }
+        }*/
         current->tree_file->table = table;
 // Clean
         delete temprecord;
@@ -532,9 +520,9 @@ temprecord = new RECORD;
             tempfile->file = 0;
             tempfile->tree_file->descriptor = 0;
             tempfile->tree_file->key = 0;
-            if (header.type == type_addon) {
+/*            if (header.type == type_addon) {
               tempfile->tree_file->key = header.addon_key;
-            }
+            }*/
             tempfile->tree_file->table = table;
 // Clean
             delete temprecord;
@@ -570,9 +558,9 @@ temprecord = new RECORD;
                 tempfile->file = 0;
                 tempfile->tree_file->descriptor = 0;
                 tempfile->tree_file->key = 0;
-                if (header.type == type_addon) {
+/*                if (header.type == type_addon) {
                   tempfile->tree_file->key = header.addon_key;
-                }
+                }*/
                 tempfile->tree_file->table = table;
 // Clean
                 delete temprecord;
@@ -602,9 +590,9 @@ temprecord = new RECORD;
           tempfile->tree_file->file = 0;
           tempfile->tree_file->descriptor = 0;
           tempfile->tree_file->key = 0;
-          if (header.type == type_addon) {
+/*          if (header.type == type_addon) {
             tempfile->tree_file->key = header.addon_key;
-          }
+          }*/
           tempfile->tree_file->table = table;
 // Clean
           delete temprecord;
@@ -685,6 +673,7 @@ temprecord = new RECORD;
           temprecord = 0;
         }
       }
+      opened++;
     }
     else if (temprecord->flag == flag_eoc) {
 // this is the end of folder
@@ -695,6 +684,7 @@ temprecord = new RECORD;
       }
       delete temprecord;
       temprecord = 0;
+      opened--;
     } else {
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
       fclose(pak);
