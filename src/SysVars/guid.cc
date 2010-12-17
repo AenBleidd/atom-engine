@@ -40,20 +40,23 @@ AGUID* GetAGUID (char *guid) {
     aguid->data3[i] = uuid[i+8];
 #endif // UNIX
 #ifdef WINDOWS
-  GUID uuid;
+  GUID *uuid = new GUID;
   if (guid == 0) {
     if (UuidCreate(uuid) != RPC_S_OK) {
       delete aguid;
+      delete uuid;
       return 0;
     }
-  } else if (UuidFromString(guid, uuid) != RPC_S_OK) {
+  } else if (UuidFromString((unsigned char*)guid, uuid) != RPC_S_OK) {
     delete aguid;
+    delete uuid;
     return 0;
   }
-  aguid->data0 = (unsigned int)uuid.Data1;
-  aguid->data1 = uuid.Data2;
-  aguid->data2 = uuid.Data3;
-  aguid->data3 = uuid.Data4;
+  aguid->data0 = (unsigned int)uuid->Data1;
+  aguid->data1 = uuid->Data2;
+  aguid->data2 = uuid->Data3;
+  memcpy(aguid->data3, uuid->Data4, 8);
+  delete uuid;
 #endif  // WINDOWS
   return aguid;
 }
@@ -115,13 +118,16 @@ char* GetCGUID (AGUID *guid) {
   uuid_unparse(uuid, cguid);
 #endif  // UNIX
 #ifdef WINDOWS
-  GUID uuid;
-  uuid.Data1 = guid->data0;
-  uuid.Data2 = guid->data1;
-  uuid.Data3 = guid->data2;
-  uuid.Data4 = guid->data3;
-  if (UuidToString(uuid, cguid) != RPC_S_OK) {
+  GUID *uuid = new GUID;
+  uuid->Data1 = guid->data0;
+  uuid->Data2 = guid->data1;
+  uuid->Data3 = guid->data2;
+  memcpy(uuid->Data4, guid->data3, 8); 
+  char **ccguid = new char*;
+  ccguid = &cguid;
+  if (UuidToString(uuid, (unsigned char**)ccguid) != RPC_S_OK) {
     delete [] cguid;
+    delete uuid;
     return 0;
   }
 #endif  // WINDOWS

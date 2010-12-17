@@ -26,9 +26,17 @@
 #define SIZEOFLONG      sizeof(long)       // default is: 8 bytes
 #define SIZEOFLONGLONG  sizeof(long long)  // default is: 8 bytes
 
+#ifndef LOWORD
 #define LOWORD(l) ((unsigned short int)(l))
+#endif
+#ifndef HIWORD
 #define HIWORD(l) ((unsigned short int)(((unsigned int)(l) >> 16) & 0xFFFF))
+#endif
+#ifndef LOBYTE
 #define LOBYTE(w) ((unsigned char)(w))
+#endif
+#ifndef HIBYTE
 #define HIBYTE(w) ((unsigned char)(((unsigned short int)(w) >> 8) & 0xFF))
+#endif
 
 #endif  // _PREPROC_H_
