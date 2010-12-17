@@ -91,8 +91,10 @@ FILE* AtomFS::Open(char *name, TREE_FOLDER *current) {
 #endif  // WINDOWS
   FILE *pfile = new FILE;
   *pfile = file;
+#ifdef UNIX
   snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s ENDTEXT %x %p %p %p", buffer, pfile, pfile, buffer, pfile->_IO_read_base);
   atomlog->DebugMessage(atomlog->MsgBuf);
+#endif // UNIX
   return pfile;
 }
 void AtomFS::Close(FILE *file) {
@@ -113,8 +115,10 @@ int AtomFS::Save(FILE *input, char *output) {
     atomlog->DebugMessage(atomlog->MsgBuf);
     return -1;
   }
+#ifdef UNIX
   snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%x %p %p %p", input, input, input, input->_IO_read_base);
   atomlog->DebugMessage(atomlog->MsgBuf);
+#endif  // UNIX
   rewind(input);
 // check filesize
   if (fseek(input, 0, SEEK_END) != 0) {

@@ -11,7 +11,7 @@
 class AtomWindow : public OWindow
 {
 public:
-    AtomWindow( AtomLog* );
+    AtomWindow( AtomLog& );
     ~AtomWindow();
     
     /* inherited functions */
