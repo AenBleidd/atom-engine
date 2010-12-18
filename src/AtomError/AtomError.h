@@ -21,18 +21,15 @@ localtime (timep), sizeof (*(result))) : 0)
 #define MSG_BUFFER_SIZE 1024
 
 struct ERR {
-  int code;
-  int sub_code;
+  uint32_t code;
+  uint32_t sub_code;
   char *description;
 };
-// returns current system time in text format
-// can be useful in another modules
-char* CurDateTime(void);
 
 class AtomLog {
  public:
   explicit AtomLog(char *name = "atom", bool alone = false,
-                    unsigned char lvl = 0xFF);
+                    uint8_t lvl = 0xFF);
   ~AtomLog();
   char MsgBuf[MSG_BUFFER_SIZE];
  private:
@@ -50,23 +47,23 @@ class AtomLog {
   inline ERR GetLastErr() { return global_error; }
   inline ERR GetLastWrn() { return global_warning; }
 // set verbose level
-  inline void SetLogVerbosity(unsigned char lvl) { verbose_level = lvl; }
+  inline void SetLogVerbosity(uint8_t lvl) { verbose_level = lvl; }
 // get verbose level
-  inline unsigned char GetLogVerbosity() { return verbose_level; }
+  inline uint8_t GetLogVerbosity() { return verbose_level; }
 // write last error and warning into the log
-  void SetLastError(unsigned int code, unsigned int subcode,
-                    const char* file, int line);
-  void SetLastWarning(unsigned int code, unsigned int subcode,
-                      const char* file, int line);
+  void SetLastError(uint32_t code, uint32_t subcode,
+                    const char* file, int32_t line);
+  void SetLastWarning(uint32_t code, uint32_t subcode,
+                      const char* file, int32_t line);
 // write log message
-  void LogMsg(const char *string, unsigned char lvl, const char *file,
-              int line);
+  void LogMsg(const char *string, uint8_t lvl, const char *file,
+              int32_t line);
 // write debug log message
-  void DebugMsg(const char *string, unsigned char lvl, const char *file,
-                int line);
+  void DebugMsg(const char *string, uint8_t lvl, const char *file,
+                int32_t line);
  private:
 // verbose level
-  unsigned char verbose_level;
+  uint8_t verbose_level;
 // write log message
   void LogMsg(const char *string);
 // write debug log message

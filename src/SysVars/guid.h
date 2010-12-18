@@ -10,10 +10,10 @@
 #endif  // WINDOWS
 
 struct AGUID {
-  unsigned int data0;
-  unsigned short int data1;
-  unsigned short int data2;
-  unsigned char data3[8];
+  uint32_t data0;
+  uint32_t data1;
+  uint32_t data2;
+  uint32_t data3;
 };
 
 // Generate new GUID

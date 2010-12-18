@@ -1,6 +1,6 @@
 #ifndef _PREPROC_H_
 #define _PREPROC_H_
-
+// SIC! Engine byteorder is Little-Endian! SIC!
 #ifdef _FSMANAGER_
 #define _FSMAN_
 #define _CRC_CHECK_
@@ -19,24 +19,20 @@
 #define BYTEORDER ByteOrderDetect()        // default is: Little-Endian
 
 // size of main types
-#define SIZEOFCHAR      sizeof(char)       // default is: 1 byte
-#define SIZEOFSHORT     sizeof(short int)  // default is: 2 bytes
-#define SIZEOFINT       sizeof(int)        // default is: 4 bytes
 #define SIZEOFWCHAR_T   sizeof(wchar_t)    // default is: 4 bytes
-#define SIZEOFLONG      sizeof(long)       // default is: 8 bytes
-#define SIZEOFLONGLONG  sizeof(long long)  // default is: 8 bytes
 
+// if they are not defined...
 #ifndef LOWORD
-#define LOWORD(l) ((unsigned short int)(l))
+#define LOWORD(l) ((uint16_t)(l))
 #endif
 #ifndef HIWORD
-#define HIWORD(l) ((unsigned short int)(((unsigned int)(l) >> 16) & 0xFFFF))
+#define HIWORD(l) ((uint16_t)(((uint32_t)(l) >> 16) & 0xFFFF))
 #endif
 #ifndef LOBYTE
-#define LOBYTE(w) ((unsigned char)(w))
+#define LOBYTE(w) ((uint8_t)(w))
 #endif
 #ifndef HIBYTE
-#define HIBYTE(w) ((unsigned char)(((unsigned short int)(w) >> 8) & 0xFF))
+#define HIBYTE(w) ((uint8_t)(((uint16_t)(w) >> 8) & 0xFF))
 #endif
 
 #endif  // _PREPROC_H_
