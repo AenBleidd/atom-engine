@@ -22,14 +22,14 @@ char* AtomLog::CurTime() {
   delete timeinfo;
   return timebuf;
 }
-AtomLog::AtomLog(char *name, bool alone, unsigned char lvl) {
+AtomLog::AtomLog(char *name, bool alone, uint8_t lvl) {
   logfile = 0;
   verbose_level = lvl;
   if (name != 0) {
-    const unsigned short s = 355;
+    const uint16_t s = 355;
     char *plogfilename  = new char[s];
 // get current date and time
-    const unsigned char t = 255;
+    const uint8_t t = 255;
     char *temppath = new char[t];
 #ifdef UNIX
 #ifndef ATOM_DEBUG
@@ -148,14 +148,14 @@ AtomLog::~AtomLog() {
     global_warning.description = 0;
   }
 }
-void AtomLog::LogMsg(const char *string, unsigned char lvl, const char *file,
-                     int line) {
+void AtomLog::LogMsg(const char *string, uint8_t lvl, const char *file,
+                     int32_t line) {
   if (lvl <= verbose_level) {
 #ifdef ATOM_DEBUG
-    fprintf(stderr, "%s %s:%i\t%s\n", CurTime(), file, line, string);
+    fprintf(stderr, "%s %s:%PRIi32\t%s\n", CurTime(), file, line, string);
 #endif  // ATOM_DEBUG
     if (logfile != 0) {
-      fprintf(logfile, "%s %s:%i\t%s\n", CurTime(), file, line, string);
+      fprintf(logfile, "%s %s:%PRIi32\t%s\n", CurTime(), file, line, string);
       fflush(logfile);
     }
   }
@@ -171,8 +171,8 @@ void AtomLog::LogMsg(const char *string) {
   }
   return;
 }
-void AtomLog::DebugMsg(const char *string, unsigned char lvl, const char *file,
-                       int line) {
+void AtomLog::DebugMsg(const char *string, uint8_t lvl, const char *file,
+                       int32_t line) {
 #ifdef ATOM_DEBUG
   LogMsg(string, lvl, file, line);
 #endif  // ATOM_DEBUG
@@ -245,8 +245,8 @@ const char *warningsubcode[2][5] = {
 "Path incorrect or directory doesn't exist."
 }
 };
-void AtomLog::SetLastError(unsigned int code, unsigned int subcode,
-                           const char* file, int line) {
+void AtomLog::SetLastError(uint32_t code, uint32_t subcode,
+                           const char* file, int32_t line) {
 // do some clean
   if (global_error.description != 0) {
     delete [] global_error.description;
@@ -254,17 +254,17 @@ void AtomLog::SetLastError(unsigned int code, unsigned int subcode,
   }
   global_error.code = code;
   global_error.sub_code = subcode;
-  unsigned int errlen = 300 + strlen(errorcode[global_error.code]) +
+  uint32_t errlen = 300 + strlen(errorcode[global_error.code]) +
                strlen(errorsubcode[global_error.code][global_error.sub_code]);
   global_error.description = new char[errlen];
-  snprintf(global_error.description, errlen, "%s:%i\tERROR: %s\t%s",
+  snprintf(global_error.description, errlen, "%s:%PRIi32\tERROR: %s\t%s",
            file, line, errorcode[global_error.code],
            errorsubcode[global_error.code][global_error.sub_code]);
 // log the error
   LogMsg(global_error.description);
 }
-void AtomLog::SetLastWarning(unsigned int code, unsigned int subcode,
-                             const char* file, int line) {
+void AtomLog::SetLastWarning(uint32_t code, uint32_t subcode,
+                             const char* file, int32_t line) {
 // do some clean
   if (global_warning.description != 0) {
     delete [] global_warning.description;
@@ -272,10 +272,10 @@ void AtomLog::SetLastWarning(unsigned int code, unsigned int subcode,
   }
   global_warning.code = code;
   global_warning.sub_code = subcode;
-  unsigned int warnlen = 300 + strlen(warningcode[global_warning.code]) +
+  uint32_t warnlen = 300 + strlen(warningcode[global_warning.code]) +
          strlen(warningsubcode[global_warning.code][global_warning.sub_code]);
   global_warning.description = new char[warnlen];
-  snprintf(global_warning.description, warnlen, "%s:%i\tWARNING: %s\t%s",
+  snprintf(global_warning.description, warnlen, "%s:%PRIi32\tWARNING: %s\t%s",
            file, line, warningcode[global_warning.code],
            warningsubcode[global_warning.code][global_warning.sub_code]);
 // log the error

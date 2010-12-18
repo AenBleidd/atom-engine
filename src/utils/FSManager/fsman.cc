@@ -28,13 +28,6 @@ int main(int arg, char *argc[]) {
              "Used byteorder is", descr[byteorder]);
     atomlog->DebugMessage(atomlog->MsgBuf);
   }
-  snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
-           "%s: %i; %s: %i; %s: %i; %s: %i; %s: %i; %s: %i",
-           "Size of char", SIZEOFCHAR, "Size of short int", SIZEOFSHORT,
-           "Size of int", SIZEOFINT, "Size of long int", SIZEOFLONG,
-           "Size of long long int", SIZEOFLONGLONG, "Size of wchar_t",
-           SIZEOFWCHAR_T);
-  atomlog->DebugMessage(atomlog->MsgBuf);
 
   char help[] = "File System Manager - utility to work with Atom \
 File System\nOptions:\n\t-t, --test\t\tTest default file system with standart \
