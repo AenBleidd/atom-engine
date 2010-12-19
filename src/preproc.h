@@ -22,6 +22,12 @@
 #define SIZEOFWCHAR_T   sizeof(wchar_t)    // default is: 4 bytes
 
 // if they are not defined...
+#ifndef LODWORD
+#define LODWORD(ll) ((uint32_t)(ll))
+#endif
+#ifndef HIDWORD
+#define HIDWORD(ll) ((uint32_t)(((uint64_t)(ll) >> 32) & 0xFFFFFFFF))
+#endif
 #ifndef LOWORD
 #define LOWORD(l) ((uint16_t)(l))
 #endif

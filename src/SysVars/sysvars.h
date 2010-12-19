@@ -1,11 +1,8 @@
 #ifndef _SYSVARS_H_
 #define _SYSVARS_H_
 #include <stdint.h>
-// byteorder:
-// 0 - BE: 0123
-// 1 - LE: 3210
-// 2 - MBE: 1032
-// 3 - MLE: 2301
+#include "../preproc.h"
+// byteorder
 int8_t ByteOrderDetect(void);
 // convert from system byteorder to Little-Endian
 uint16_t BoSys2LE(uint16_t n);
