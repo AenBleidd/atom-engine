@@ -77,7 +77,8 @@ uint32_t BoLE2Sys(uint32_t n) {
   else if (bo == BO_MLE)
     return (HIBYTE(LOWORD(n)) + LOBYTE(LOWORD(n)) * 256 +
       HIBYTE(HIWORD(n)) * 256 * 256 + LOBYTE(HIWORD(n)) * 256 * 256 * 256);
-  return n;
+  else
+    return n;
 }
 uint64_t BoLE2Sys(uint64_t n) {
   int8_t bo = BYTEORDER;
