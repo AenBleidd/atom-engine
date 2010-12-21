@@ -37,7 +37,7 @@ AGUID* GetAGUID (char *guid) {
       delete uuid;
       return 0;
     }
-  } else if (UuidFromString(guid, uuid) != RPC_S_OK) {
+  } else if (UuidFromString((unsigned char*)guid, uuid) != RPC_S_OK) {
     delete aguid;
     delete uuid;
     return 0;
