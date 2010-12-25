@@ -7,6 +7,8 @@
 #define _FSMAN_VERSION_ _ATOM_VERSION_
 #endif  // _FSMANAGER_
 
+#include <inttypes.h>
+
 #include "SysVars/sysvars.h"
 // System parameters
 

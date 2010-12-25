@@ -1,8 +1,8 @@
 #include "navigate.h"
 #include <string.h>
-int AtomFS::Navigate(void) {
+int32_t AtomFS::Navigate(void) {
   bool flag = false;
-  const unsigned int buffer_len = 1024;
+  const uint32_t buffer_len = 1024;
   char *buffer = 0;
 // configure FS
   TREE_FOLDER *curfolder = root;
@@ -40,7 +40,7 @@ int AtomFS::Navigate(void) {
         ShowHelp(atomlog);
       } else {
         curfolder = ChDir(atomlog, root, curfolder, path);
-        for (int i = 0; i < path->count; i++)
+        for (int32_t i = 0; i < path->count; i++)
           if(path->output[i] != 0)
             delete [] path->output[i];
         delete [] path->output;
@@ -59,7 +59,7 @@ int AtomFS::Navigate(void) {
     }
 // Cleaning
     if (args != 0) {
-      for (int i = 0; i < args->count; i++)
+      for (int32_t i = 0; i < args->count; i++)
         if (args->output[i] != 0)
           delete [] args->output[i];
       delete [] args->output;
@@ -86,8 +86,9 @@ void ShowHelp(AtomLog *atomlog) {
 
   return;
 }
-int List(AtomLog *atomlog, TREE_FOLDER *curfolder, unsigned char mode) {
-  char flag, permission, priority[3];
+int32_t List(AtomLog *atomlog, TREE_FOLDER *curfolder, uint8_t mode) {
+  int8_t flag, permission;
+  char priority[3];
   double size = 0;
   const char *sizeformat[] = {" B", "KB", "MB", "GB", "TB", "PB"};
   TREE_FOLDER *tempfolder = curfolder;
@@ -105,7 +106,7 @@ int List(AtomLog *atomlog, TREE_FOLDER *curfolder, unsigned char mode) {
         permission = 'r';
       else
         permission = 'w';
-      snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%c%c%s %8i  B %s\n",
+      snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%PRId8%PRId8%s %8PRId8  B %s\n",
                 flag, permission, priority, 0, tempfolder->name);
     }
     atomlog->DebugMessage(atomlog->MsgBuf);
@@ -120,7 +121,8 @@ int List(AtomLog *atomlog, TREE_FOLDER *curfolder, unsigned char mode) {
           permission = 'r';
         else
           permission = 'w';
-        snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%c%c%s %8i  B %s\n",
+        snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
+                  "%PRId8%PRId8%s %8PRId8  B %s\n",
                   flag, permission, priority, 0, tempfolder->name);
     }
       atomlog->DebugMessage(atomlog->MsgBuf);
@@ -130,7 +132,7 @@ int List(AtomLog *atomlog, TREE_FOLDER *curfolder, unsigned char mode) {
 // end with files
   if (tempfile != 0) {
     flag = 'f';
-    unsigned char i = 0;
+    uint8_t i = 0;
     if (mode == 0) {
       snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s\n",
                 tempfile->name);
@@ -139,14 +141,15 @@ int List(AtomLog *atomlog, TREE_FOLDER *curfolder, unsigned char mode) {
         permission = 'r';
       else
         permission = 'w';
-      snprintf(priority, 3, "%02x", tempfile->priority);
+      snprintf(priority, 3, "%02PRIx8", tempfile->priority);
       size = tempfile->size;
       i = 0;
       while (size > 1023) {
         size /= 1024;
         i++;
       }
-      snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%c%c%s %8.f %s %s\n",
+      snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
+               "%PRId8%PRId8%s %8.f %s %s\n",
                flag, permission, priority, size, sizeformat[i],
                tempfile->name);
     }
@@ -162,7 +165,7 @@ int List(AtomLog *atomlog, TREE_FOLDER *curfolder, unsigned char mode) {
           permission = 'r';
         else
           permission = 'w';
-        snprintf(priority, 3, "%02x", tempfile->priority);
+        snprintf(priority, 3, "%02PRIx8", tempfile->priority);
         size = tempfile->size;
         i = 0;
         while (size > 1023) {
@@ -170,7 +173,7 @@ int List(AtomLog *atomlog, TREE_FOLDER *curfolder, unsigned char mode) {
           i++;
         }
         snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
-                "%c%c%s %8.f %s %s\n", flag, permission, priority, size,
+                "%PRId8%PRId8%s %8.f %s %s\n", flag, permission, priority, size,
                 sizeformat[i], tempfile->name);
       }
       atomlog->DebugMessage(atomlog->MsgBuf);
@@ -182,7 +185,7 @@ int List(AtomLog *atomlog, TREE_FOLDER *curfolder, unsigned char mode) {
 TREE_FOLDER* ChDir(AtomLog *atomlog, TREE_FOLDER *root,
                    TREE_FOLDER *curfolder, ARGUMENTS *path) {
   TREE_FOLDER *cur = curfolder, *temp = curfolder;
-  int i = 0;
+  int32_t i = 0;
   bool found = false;
 // check for the root
   if (strcmp(path->output[0], "/") == 0) {
@@ -226,14 +229,12 @@ TREE_FOLDER* ChDir(AtomLog *atomlog, TREE_FOLDER *root,
   }
   return cur;
 }
-int Copy(AtomLog *atomlog, AtomFS *atomfs, TREE_FOLDER *curfolder, char *in,
+int32_t Copy(AtomLog *atomlog, AtomFS *atomfs, TREE_FOLDER *curfolder, char *in,
          char *out) {
 // Open the file
   FILE *src = atomfs->Open(in, curfolder);
   if (src == 0) {
-    snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s",
-              "Source file can not be opened");
-    atomlog->DebugMessage(atomlog->MsgBuf);
+    atomlog->DebugMessage("Source file can not be opened");
     return -1;
   }
 #ifdef UNIX
@@ -242,9 +243,7 @@ int Copy(AtomLog *atomlog, AtomFS *atomfs, TREE_FOLDER *curfolder, char *in,
 #endif  // UNIX
 // Save the file
   if (atomfs->Save(src, out) != 0) {
-    snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s",
-              "File can not be written");
-    atomlog->DebugMessage(atomlog->MsgBuf);
+    atomlog->DebugMessage( "File can not be written");
     atomfs->Close(src);
     return -1;
   }

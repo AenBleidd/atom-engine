@@ -7,7 +7,6 @@ AtomFS::AtomFS(AtomLog *log, unsigned int *key) {
   }
   atomlog = log;
 // Check byteorder
-  extern char byteorder;
   if (BYTEORDER == -1) {
    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRONG_BYTEORDER);
    throw ERROR_WRONG_BYTEORDER;
@@ -24,7 +23,7 @@ AtomFS::AtomFS(AtomLog *log, unsigned int *key) {
   addon_key.count = 0;
 // create root directory
   root = new TREE_FOLDER;
-  const unsigned char s = 2;
+  const uint8_t s = 2;
   char *name = new char[s];
   snprintf(name, s, "%s", "/");
   root->name = name;
@@ -139,7 +138,7 @@ AtomFS::~AtomFS() {
   }
 // release memory used by keys
   if (addon_key.count != 0) {
-    for (unsigned int i = 0; i < addon_key.count; i++) {
+    for (uint32_t i = 0; i < addon_key.count; i++) {
       delete [] addon_key.addon_key[i];
       delete [] addon_key.addon_table[i];
     }

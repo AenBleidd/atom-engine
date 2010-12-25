@@ -39,7 +39,7 @@ FILE* AtomFS::Open(char *name, TREE_FOLDER *current) {
 #ifdef _CRC_CHECK_
   snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Written CRC is: %x\t Calculated CRC is: %x", curfile->crc, GenCRC32((unsigned char*)buffer, curfile->size));
   atomlog->DebugMessage(atomlog->MsgBuf);
-/*  if (curfile->crc != GenCRC32((unsigned char*)buffer, curfile->size)) {
+/*  if (curfile->crc != GenCRC32((uint8_t*)buffer, curfile->size)) {
 // Wrong crc
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_CRC32);
     delete [] buffer;
@@ -47,24 +47,25 @@ FILE* AtomFS::Open(char *name, TREE_FOLDER *current) {
   }*/
 #endif  // _CRC_CHECK_
 // Decrypt
-  unsigned long int crypt = 0;
-  if ((curfile->bytescrypt == 0xFFFF) || (curfile->bytescrypt > curfile->size)) {
+  uint64_t crypt = 0;
+  if ((curfile->bytescrypt == 0xFFFF) ||
+      (curfile->bytescrypt > curfile->size)) {
 // decrypt all file
     crypt = curfile->size;
   } else {
     crypt = curfile->bytescrypt;
   }
 // Decryption...
-  unsigned int *decryptbuf = new unsigned int[crypt];
-  for (unsigned long int i = 0; i < crypt; i++)
-    decryptbuf[i] = (unsigned int)buffer[i];
-  unsigned int r[4];
+  uint32_t *decryptbuf = new uint32_t[crypt];
+  for (uint64_t i = 0; i < crypt; i++)
+    decryptbuf[i] = (uint32_t)buffer[i];
+  uint32_t r[4];
 // TODO(Lawliet): Check this!
   if (curfile->key != 0)
     Decrypt(decryptbuf, crypt, curfile->key, r, curfile->table);
   else
     Decrypt(decryptbuf, crypt, wake_key, r, curfile->table);
-  for (unsigned long int i = 0; i < crypt; i++)
+  for (uint64_t i = 0; i < crypt; i++)
     buffer[i] = (char)decryptbuf[i];
 // TODO(Lawliet): Check this!
 // Create the file
@@ -110,9 +111,7 @@ void AtomFS::Close(FILE *file) {
 int AtomFS::Save(FILE *input, char *output) {
   if (input == 0) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-    snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s",
-             "File pointer can't be equal 0");
-    atomlog->DebugMessage(atomlog->MsgBuf);
+    atomlog->DebugMessage("File pointer can't be equal 0");
     return -1;
   }
 #ifdef UNIX
@@ -125,7 +124,7 @@ int AtomFS::Save(FILE *input, char *output) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
     return -1;
   }
-  unsigned long int size = ftell(input) - 1;
+  uint64_t size = ftell(input) - 1;
   if (size == -1L) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
     return -1;
@@ -137,10 +136,8 @@ int AtomFS::Save(FILE *input, char *output) {
   if ((args == 0) || (args->count == 0)) {
 // wrong path
     atomlog->SetLastErr(ERROR_CORE_FS,ERROR_WRITE_FILE);
-    snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s",
-             "Output filename can't be empty");
-    atomlog->DebugMessage(atomlog->MsgBuf);
-    for (int i = 0; i < args->count; i++)
+    atomlog->DebugMessage("Output filename can't be empty");
+    for (int32_t i = 0; i < args->count; i++)
       if(args->output[i] != 0)
         delete [] args->output[i];
     delete [] args->output;
@@ -151,7 +148,7 @@ int AtomFS::Save(FILE *input, char *output) {
   if (args->count > 1) {
 // Save current directory
     char *curworkdir;
-    unsigned long int pathlen = 1024;
+    uint64_t pathlen = 1024;
     bool bflag = false;
     while (bflag == false) {
       curworkdir = new char[pathlen];
@@ -165,7 +162,7 @@ int AtomFS::Save(FILE *input, char *output) {
                    "Can't get current folder. Error code is", errno);
           atomlog->DebugMessage(atomlog->MsgBuf);
           delete [] curworkdir;
-          for (int i = 0; i < args->count; i++)
+          for (int32_t i = 0; i < args->count; i++)
             if(args->output[i] != 0)
               delete [] args->output[i];
           delete [] args->output;
@@ -181,7 +178,7 @@ int AtomFS::Save(FILE *input, char *output) {
       }
 #endif  // UNIX
 #ifdef WINDOWS
-      unsigned int result = GetCurrentDirectory(pathlen, curworkdir);
+      uint32_t result = GetCurrentDirectory(pathlen, curworkdir);
       if (result == 0) {
 // strange error
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FOLDER);
@@ -189,7 +186,7 @@ int AtomFS::Save(FILE *input, char *output) {
                  "Can't get current folder. Error code is", GetLastError());
         atomlog->DebugMessage(atomlog->MsgBuf);
         delete [] curworkdir;
-        for (int i = 0; i < args->count; i++)
+        for (int32_t i = 0; i < args->count; i++)
           if(args->output[i] != 0)
             delete [] args->output[i];
         delete [] args->output;
@@ -205,7 +202,7 @@ int AtomFS::Save(FILE *input, char *output) {
       }
 #endif  // WINDOWS
     }
-    for (int i = 0; i < args->count - 1; i++) {
+    for (int32_t i = 0; i < args->count - 1; i++) {
 #ifdef UNIX
 // check the directory
       if (chdir(args->output[i]) != 0) {
@@ -231,7 +228,7 @@ int AtomFS::Save(FILE *input, char *output) {
           atomlog->DebugMessage(atomlog->MsgBuf);
 // release memory
           delete [] curworkdir;
-          for (int z = 0; z < args->count; z++)
+          for (int32_t z = 0; z < args->count; z++)
             if (args->output[z] != 0)
               delete [] args->output[z];
           delete [] args->output;
@@ -267,7 +264,7 @@ int AtomFS::Save(FILE *input, char *output) {
 #endif  // WINDOWS
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FOLDER);
       delete [] curworkdir;
-      for (int z = 0; z < args->count; z++)
+      for (int32_t z = 0; z < args->count; z++)
         if (args->output[z] != 0)
           delete [] args->output[z];
       delete [] args->output;
@@ -280,7 +277,7 @@ int AtomFS::Save(FILE *input, char *output) {
     curworkdir = 0;
   }
 // Release the memory
-  for (int i = 0; i < args->count; i++)
+  for (int32_t i = 0; i < args->count; i++)
     if(args->output[i] != 0)
       delete [] args->output[i];
   delete [] args->output;
@@ -290,9 +287,7 @@ int AtomFS::Save(FILE *input, char *output) {
   FILE *out = fopen(output, "wb");
   if (out == 0) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FILE);
-    snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s",
-              "Couldn't open destination file");
-    atomlog->DebugMessage(atomlog->MsgBuf);
+    atomlog->DebugMessage("Couldn't open destination file");
     return -1;  // nothing was written
   }
   char *buffer = new char[size];

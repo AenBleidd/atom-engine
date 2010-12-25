@@ -1,6 +1,6 @@
 #include "gamefs.h"
 #include "strings.h"
-int AtomFS::Mount(char* filename) {
+int32_t AtomFS::Mount(char* filename) {
   atomlog->DebugMessage("Begin mounting filesystem...");
   atomlog->DebugMessage("Reading mount file...");
 // open configuration file for reading
@@ -10,7 +10,7 @@ int AtomFS::Mount(char* filename) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FILE);
     return -1;
   }
- long size = 0;
+ uint64_t size = 0;
 // get file size
   if (fseek(conf, 0, SEEK_END) != 0) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
@@ -40,7 +40,7 @@ int AtomFS::Mount(char* filename) {
       return -1;
     }
 // Lets look the arguments
-    for (int i = 0; i < args->count; i++) {
+    for (int32_t i = 0; i < args->count; i++) {
       if (args->output[i][0] == '#') {
 // it is a comment
         break;
@@ -57,7 +57,7 @@ int AtomFS::Mount(char* filename) {
                      file);
             atomlog->LogMessage(atomlog->MsgBuf);
 // Release memory
-            for (int j = 0; j < args->count; j++)
+            for (int32_t j = 0; j < args->count; j++)
               if (args->output[j] != 0)
                 delete [] args->output[j];
             delete [] args->output;
@@ -68,7 +68,7 @@ int AtomFS::Mount(char* filename) {
 // some garbage
           atomlog->SetLastErr(ERROR_CORE_FS, ERROR_PARSE_MOUNT_FILE);
 // Release memory
-          for (int j = 0; j < args->count; j++)
+          for (int32_t j = 0; j < args->count; j++)
             if (args->output[j] != 0)
               delete [] args->output[j];
           delete [] args->output;
@@ -78,7 +78,7 @@ int AtomFS::Mount(char* filename) {
       }
     }
 // Release memory
-    for (int i = 0; i < args->count; i++)
+    for (int32_t i = 0; i < args->count; i++)
       if (args->output[i] != 0)
         delete [] args->output[i];
     delete [] args->output;
@@ -96,7 +96,7 @@ int AtomFS::Mount(char* filename) {
   return 0;
 }
 // Mount single file
-int AtomFS::Mount(char* filename, char* mountfolder, unsigned int *key) {
+int32_t AtomFS::Mount(char* filename, char* mountfolder, uint32_t *key) {
   OPENALLOC *tempalloc = 0, *prev = 0;
   if (openalloc != 0) {
     tempalloc = openalloc;
@@ -113,7 +113,7 @@ int AtomFS::Mount(char* filename, char* mountfolder, unsigned int *key) {
   if (prev != 0)
     prev->next = tempalloc;
 // pointer to wake_table
-  unsigned int *table;
+  uint32_t *table;
 // Ok, let's do it!
 // Check mount point
   if (mountfolder == 0) {
@@ -125,7 +125,7 @@ int AtomFS::Mount(char* filename, char* mountfolder, unsigned int *key) {
            filename, mountfolder);
   atomlog->DebugMessage(atomlog->MsgBuf);
 // create name of the file
-  unsigned short int namelen = strlen(filename) + 5;
+  uint16_t namelen = strlen(filename) + 5;
   char *pakfile = new char[namelen];
   snprintf(pakfile, namelen, "%s.bin", filename);
 // Try to open
@@ -210,7 +210,7 @@ int AtomFS::Mount(char* filename, char* mountfolder, unsigned int *key) {
 // Check for key
   if (header.type == type_addon) {
     if (key == 0) {
-      key = new unsigned int[4];
+      key = new uint32_t[4];
     }
 // go to the key
     if (fseek(pak, header.filetable - 17, SEEK_SET) != 0) {
@@ -219,7 +219,7 @@ int AtomFS::Mount(char* filename, char* mountfolder, unsigned int *key) {
       return -1;
     }
 // get the key flag
-    unsigned char flagkey = 0;
+    uint8_t flagkey = 0;
     if (fread(&flagkey, sizeof(flag_key), 1, pak) != 1) {
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
       fclose(pak);
@@ -256,16 +256,16 @@ int AtomFS::Mount(char* filename, char* mountfolder, unsigned int *key) {
   bool slash = true;
 // current pointer position within the string
 // we begin the cycle from first element couse zero-element must be root
-  unsigned int pos = 1;
+  uint32_t pos = 1;
 // another counter
-  unsigned int i = 0;
+  uint32_t i = 0;
 // Kyrie!
 // Parse mountpoint
   ARGUMENTS *args = ParsePath(atomlog, mountfolder);
   if (args->count < 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_MOUNTPOINT);
     fclose(pak);
-    for (int i = 0; i < args->count; i++)
+    for (int32_t i = 0; i < args->count; i++)
       if (args->output[i] != 0)
         delete [] args->output[i];
     delete [] args->output;
@@ -275,7 +275,7 @@ int AtomFS::Mount(char* filename, char* mountfolder, unsigned int *key) {
   if (strcmp(args->output[0], "/") != 0) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_MOUNTPOINT);
     fclose(pak);
-    for (int i = 0; i < args->count; i++)
+    for (int32_t i = 0; i < args->count; i++)
       if (args->output[i] != 0)
         delete [] args->output[i];
     delete [] args->output;
@@ -301,7 +301,7 @@ int AtomFS::Mount(char* filename, char* mountfolder, unsigned int *key) {
       current->tree_file = 0;
       current->next_folder = 0;
 // set he name of the folder
-      unsigned int len = strlen(args->output[pos]);
+      uint32_t len = strlen(args->output[pos]);
       current->name = new char[len];
       snprintf(current->name, len, "%s", args->output[pos]);
     } else if (strcmp(current->tree_folder->name, args->output[pos]) == 0) {
@@ -326,7 +326,7 @@ int AtomFS::Mount(char* filename, char* mountfolder, unsigned int *key) {
           current->tree_file = 0;
           current->next_folder = 0;
 // set he name of the folder
-          unsigned int len = strlen(args->output[pos]);
+          uint32_t len = strlen(args->output[pos]);
           current->name = new char[len];
           snprintf(current->name, len, "%s", args->output[pos]);
 // nothing to do anymore
@@ -364,8 +364,6 @@ temprecord = new RECORD;
 // Check it
   if (temprecord->flag != flag_folder) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
-    snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%x: %x", ftell(pak), temprecord->flag);
-    atomlog->DebugMessage(atomlog->MsgBuf);
     fclose(pak);
     delete temprecord;
     return -1;
@@ -410,7 +408,7 @@ temprecord = new RECORD;
   bool bfound = false;
   TREE_FILE *tempfile = 0;
 // count of opened folders
-  unsigned long int opened = 1;
+  uint64_t opened = 1;
 // At least we will mount smth!
   while (opened != 0) {
     temprecord = new RECORD;
