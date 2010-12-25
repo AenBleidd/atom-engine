@@ -11,7 +11,7 @@ AtomFS *atomfs;
 
 int main(int arg, char *argc[]) {
 // input parameters processing
-  unsigned int *key = 0;
+  uint32_t *key = 0;
   atomlog = new AtomLog("fsman");
   snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Start fsman version %s",
            _FSMAN_VERSION_);
@@ -22,7 +22,7 @@ int main(int arg, char *argc[]) {
     "Mixed-Big-Endian",
     "Mixed-Little-Endian"
   };
-  char byteorder = BYTEORDER;
+  int8_t byteorder = BYTEORDER;
   if ((byteorder > 0) && (byteorder < 4)) {
     snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s %s",
              "Used byteorder is", descr[byteorder]);
@@ -37,7 +37,7 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
 [type]\t\tType of new file (critical, standart, addon)\n\t-o, --open \
 [input]\tOpen file for reading\n";
   try { atomfs = new AtomFS(atomlog); }
-  catch(int i) { }
+  catch(int32_t i) { }
   if (arg == 1 || strcmp(argc[1], "-h") == 0 || \
       strcmp(argc[1], "--help") == 0 || strcmp(argc[1], "-help") == 0 || \
       strcmp(argc[1], "/?") == 0) {
@@ -61,18 +61,18 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
   else if (strcmp(argc[1], "-n") == 0 || strcmp(argc[1], "--new") == 0) {
     if (arg > 9) {
       char **input = new char*[arg - 9];
-      int encrypted = 0;
+      int32_t encrypted = 0;
       char *output = 0;
-      unsigned short int encbytes = 0xFFFF;
-      unsigned char type = type_addon;
+      uint16_t encbytes = 0xFFFF;
+      uint8_t type = type_addon;
 // Flags
       bool error = false;
-      signed char flag_enc = 0;
-      signed char flag_out = 0;
-      signed char flag_in = 0;
-      signed char flag_type = 0;
+      int8_t flag_enc = 0;
+      int8_t flag_out = 0;
+      int8_t flag_in = 0;
+      int8_t flag_type = 0;
 // parse commandline
-      for (int i = 2, j = 0; i < arg; i++) {
+      for (int32_t i = 2, j = 0; i < arg; i++) {
         if (error == false) {
 // check all flags
 // encrypt flag
@@ -134,7 +134,7 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
             if (strcmp(argc[i], "critical") == 0) {
               type = type_critical;
             }
-            else if (strcmp(argc[i], "standart") == 0) {
+            else if (strcmp(argc[i], "standard") == 0) {
               type = type_standart;
             }
             else if (strcmp(argc[i], "addon") == 0) {
@@ -156,7 +156,7 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
       if (error == false) {
         if (type == 0)
           snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
-                   "Create new standart file %s", output);
+                   "Create new standard file %s", output);
         else if (type == 1)
           snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
                    "Create new addon file %s", output);
@@ -169,7 +169,7 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
         if (key == 0)
           key = PassPrint();
 // input files count
-        int param = arg - 9;
+        int32_t param = arg - 9;
         atomfs->Create(input, param, output, encbytes, key, type);
       }
 // Make clean

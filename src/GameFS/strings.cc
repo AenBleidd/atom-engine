@@ -8,7 +8,7 @@ ARGUMENTS* ParsePath(AtomLog *atomlog, char *input) {
     atomlog->SetLastWrn(WARNING_CORE_FS, WARNING_EMPTY_STRING);
     return 0;
   }
-  int tempcount;
+  int32_t tempcount;
 // find potential maximum count af arguments
   if ((strlen(input) % 2) == 0) {
     tempcount = strlen(input) / 2;
@@ -18,7 +18,7 @@ ARGUMENTS* ParsePath(AtomLog *atomlog, char *input) {
 // allocate memory for the potential maximum count of arguments
   char **tempoutput = new char*[tempcount];
 // Set all pointer to zero
-  for (int i = 0; i < tempcount; i++)
+  for (int32_t i = 0; i < tempcount; i++)
     tempoutput[i] = 0;
 // count of real argunents
   args.count = 0;
@@ -26,21 +26,21 @@ ARGUMENTS* ParsePath(AtomLog *atomlog, char *input) {
   if (input[0] == '/') {
 // we find first root
     args.count = 1;
-    unsigned char s = 2;
+    uint8_t s = 2;
     tempoutput[0] = new char[s];
     snprintf(tempoutput[0], s, "%s", "/");
   }
-  int j = 0;
+  int32_t j = 0;
 // Lets parse it!
-  int len = strlen(input);
-  for (int i = args.count; i < len; i++) {
+  int32_t len = strlen(input);
+  for (int32_t i = args.count; i < len; i++) {
     if ((input[i] == '/') || (i == len - 1)) {
 // check for error
       tempoutput[args.count][j++] = input[i];
       if (input[i - 1] == '/') {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_MOUNTPOINT);
 // Release allocated memory
-        for (int z = 0; z < tempcount; z++)
+        for (int32_t z = 0; z < tempcount; z++)
           if (tempoutput[z] != 0)
             delete [] tempoutput[z];
         delete [] tempoutput;
@@ -60,14 +60,14 @@ ARGUMENTS* ParsePath(AtomLog *atomlog, char *input) {
   }
 // Copy all arguments
   args.output = new char*[args.count];
-  int size = 0;
-  for (int i = 0; i < args.count; i++) {
+  int32_t size = 0;
+  for (int32_t i = 0; i < args.count; i++) {
     size = strlen(tempoutput[i]) + 1;
     args.output[i] = new char[size];
     snprintf(args.output[i], size, "%s", tempoutput[i]);
   }
 // Release allocated memory
-  for (int i = 0; i < tempcount; i++)
+  for (int32_t i = 0; i < tempcount; i++)
     if (tempoutput[i] != 0)
       delete [] tempoutput[i];
   delete [] tempoutput;
@@ -85,7 +85,7 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input) {
     atomlog->SetLastWrn(WARNING_CORE_FS, WARNING_EMPTY_STRING);
     return 0;
   }
-  int tempcount;
+  int32_t tempcount;
 // find potential maximum count af arguments
   if ((strlen(input) % 2) == 0) {
     tempcount = strlen(input) / 2;
@@ -95,25 +95,25 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input) {
 // allocate memory for the potential maximum count of arguments
   char **tempoutput = new char*[tempcount];
 // Set all pointer to zero
-  for (int i = 0; i < tempcount; i++)
+  for (int32_t i = 0; i < tempcount; i++)
     tempoutput[i] = 0;
 // count of real argunents
   args.count = 0;
 // Lets do it!
-  int len = strlen(input) - 1;
+  int32_t len = strlen(input) - 1;
 // symbols
-  const unsigned char symbol_space = ' ';
-  const unsigned char symbol_quote = '\'';
-  const unsigned char symbol_doublequote = '\"';
-  const unsigned char symbol_slash = '\\';
+  const uint8_t symbol_space = ' ';
+  const uint8_t symbol_quote = '\'';
+  const uint8_t symbol_doublequote = '\"';
+  const uint8_t symbol_slash = '\\';
 // TODO(Lawliet): Check this
-  const unsigned char symbol_tab = '\t';
+  const uint8_t symbol_tab = '\t';
 // flags
   bool arg = false;
   bool quote = false;
   bool doublequote = false;
-  int j = 0;
-  for (int i = 0; i < len; i++) {
+  int32_t j = 0;
+  for (int32_t i = 0; i < len; i++) {
     if ((input[i] == symbol_space) || (input[i] == symbol_tab)) {
       if (arg == true) {
 // maybe it's the end of some argument ?
@@ -151,7 +151,7 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input) {
           if (i == len - 1) {
             atomlog->SetLastErr(ERROR_CORE_FS,ERROR_LOST_QUOTES);
 // Release allocated memory
-            for (int i = 0; i < tempcount; i++)
+            for (int32_t i = 0; i < tempcount; i++)
               if (tempoutput[i] != 0)
                 delete [] tempoutput[i];
             delete [] tempoutput;
@@ -172,7 +172,7 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input) {
         } else {
           atomlog->SetLastErr(ERROR_CORE_FS,ERROR_LOST_QUOTES);
 // Release allocated memory
-          for (int i = 0; i < tempcount; i++)
+          for (int32_t i = 0; i < tempcount; i++)
             if (tempoutput[i] != 0)
               delete [] tempoutput[i];
           delete [] tempoutput;
@@ -188,7 +188,7 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input) {
         } else {
           atomlog->SetLastErr(ERROR_CORE_FS,ERROR_LOST_QUOTES);
 // Release allocated memory
-          for (int i = 0; i < tempcount; i++)
+          for (int32_t i = 0; i < tempcount; i++)
             if (tempoutput[i] != 0)
               delete [] tempoutput[i];
           delete [] tempoutput;
@@ -201,7 +201,7 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input) {
           if (i == len - 1) {
             atomlog->SetLastErr(ERROR_CORE_FS,ERROR_LOST_QUOTES);
 // Release allocated memory
-            for (int i = 0; i < tempcount; i++)
+            for (int32_t i = 0; i < tempcount; i++)
               if (tempoutput[i] != 0)
                 delete [] tempoutput[i];
             delete [] tempoutput;
@@ -222,7 +222,7 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input) {
         } else {
           atomlog->SetLastErr(ERROR_CORE_FS,ERROR_LOST_QUOTES);
 // Release allocated memory
-          for (int i = 0; i < tempcount; i++)
+          for (int32_t i = 0; i < tempcount; i++)
             if (tempoutput[i] != 0)
               delete [] tempoutput[i];
           delete [] tempoutput;
@@ -238,7 +238,7 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input) {
         } else {
           atomlog->SetLastErr(ERROR_CORE_FS,ERROR_LOST_QUOTES);
 // Release allocated memory
-          for (int i = 0; i < tempcount; i++)
+          for (int32_t i = 0; i < tempcount; i++)
             if (tempoutput[i] != 0)
               delete [] tempoutput[i];
           delete [] tempoutput;
@@ -250,7 +250,7 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input) {
         if (input[i] != symbol_quote) {
           atomlog->SetLastErr(ERROR_CORE_FS,ERROR_LOST_QUOTES);
 // Release allocated memory
-          for (int z = 0; z < tempcount; i++)
+          for (int32_t z = 0; z < tempcount; i++)
             if (tempoutput[z] != 0)
               delete [] tempoutput[z];
           delete [] tempoutput;
@@ -260,7 +260,7 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input) {
         if (input[i] != symbol_doublequote) {
           atomlog->SetLastErr(ERROR_CORE_FS,ERROR_LOST_QUOTES);
 // Release allocated memory
-          for (int i = 0; i < tempcount; i++)
+          for (int32_t i = 0; i < tempcount; i++)
             if (tempoutput[i] != 0)
               delete [] tempoutput[i];
           delete [] tempoutput;
@@ -290,14 +290,14 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input) {
   }
 // Copy all arguments
   args.output = new char*[args.count];
-  int size = 0;
-  for (int i = 0; i < args.count; i++) {
+  int32_t size = 0;
+  for (int32_t i = 0; i < args.count; i++) {
     size = strlen(tempoutput[i]) + 1;
     args.output[i] = new char[size];
     snprintf(args.output[i], size, "%s", tempoutput[i]);
   }
 // Release allocated memory
-  for (int i = 0; i < tempcount; i++)
+  for (int32_t i = 0; i < tempcount; i++)
     if (tempoutput[i] != 0)
       delete [] tempoutput[i];
   delete [] tempoutput;
@@ -314,10 +314,8 @@ TREE_FILE* FindFileFromPath(AtomLog *atomlog, TREE_FOLDER *root,
   if (root == 0) {
 // if root not exist
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_FUNCTION_ARGUMENTS);
-    snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s",
-             "Root folder must exist!");
-    atomlog->DebugMessage(atomlog->MsgBuf);
-    for (int i = 0; i < path->count; i++)
+    atomlog->DebugMessage("Root folder must exist!");
+    for (int32_t i = 0; i < path->count; i++)
       if (path->output[i] != 0)
         delete [] path->output[i];
     delete [] path->output;
@@ -329,20 +327,20 @@ TREE_FILE* FindFileFromPath(AtomLog *atomlog, TREE_FOLDER *root,
     curfolder = root;
   else
     curfolder = current;
-  int k = 0;
+  int32_t k = 0;
   if ((path != 0) && (path->count != 0)) {
     if (strcmp(path->output[0], "/") == 0) {
 // if it is root
       curfolder = root;
       k = 1;
     } else {
-      for (int i = k; i < path->count; i++) {
+      for (int32_t i = k; i < path->count; i++) {
         found = false;
         if (i == path->count - 1) {
 // it must be the file
           if (curfolder->tree_file == 0) {
             atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_PATH);
-              for (int i = 0; i < path->count; i++)
+              for (int32_t i = 0; i < path->count; i++)
                 if (path->output[i] != 0)
                   delete [] path->output[i];
               delete [] path->output;
@@ -362,7 +360,7 @@ TREE_FILE* FindFileFromPath(AtomLog *atomlog, TREE_FOLDER *root,
             }
             if (found == false) {
               atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_PATH);
-              for (int i = 0; i < path->count; i++)
+              for (int32_t i = 0; i < path->count; i++)
                 if (path->output[i] != 0)
                   delete [] path->output[i];
               delete [] path->output;
@@ -381,7 +379,7 @@ TREE_FILE* FindFileFromPath(AtomLog *atomlog, TREE_FOLDER *root,
             }
           } else {
             atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_PATH);
-            for (int i = 0; i < path->count; i++)
+            for (int32_t i = 0; i < path->count; i++)
               if (path->output[i] != 0)
                 delete [] path->output[i];
             delete [] path->output;
@@ -398,7 +396,7 @@ TREE_FILE* FindFileFromPath(AtomLog *atomlog, TREE_FOLDER *root,
           }
           if (found == false) {
             atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_PATH);
-            for (int i = 0; i < path->count; i++)
+            for (int32_t i = 0; i < path->count; i++)
               if (path->output[i] != 0)
                 delete [] path->output[i];
             delete [] path->output;
@@ -416,7 +414,7 @@ TREE_FILE* FindFileFromPath(AtomLog *atomlog, TREE_FOLDER *root,
     return 0;
   }
   if (path != 0) {
-    for (int i = 0; i < path->count; i++)
+    for (int32_t i = 0; i < path->count; i++)
       if (path->output[i] != 0)
         delete [] path->output[i];
     delete [] path->output;
@@ -426,8 +424,8 @@ TREE_FILE* FindFileFromPath(AtomLog *atomlog, TREE_FOLDER *root,
   return curfile;
 }
 // 16-byte password input function
-unsigned int* PassPrint(void) {
-  unsigned int *key = new unsigned int[4];  // end key;
+uint32_t* PassPrint(void) {
+  uint32_t *key = new uint32_t[4];  // end key;
   char *input = new char[17];  // input string
 // password input cycle
   while (true) {
@@ -441,8 +439,8 @@ unsigned int* PassPrint(void) {
   input[16] = '\0';
 // processing input string
   key[0] = 0, key[1] = 0, key[2] = 0, key[3] = 0;
-  for (int i = 0; i < 4; i++) {
-    for (int j = i * 4; j < (i + 1) * 4; j++) {
+  for (int32_t i = 0; i < 4; i++) {
+    for (int32_t j = i * 4; j < (i + 1) * 4; j++) {
       key[i] += input[j];
       if (j < (i + 1) * 4 - 1)
         key[i] <<= 8;
@@ -456,10 +454,10 @@ unsigned int* PassPrint(void) {
 #define RANDOM(min,max) (rand()%(max-min+1)+min)
 // Create temp file name
 char* tempname(AtomLog *atomlog) {
-  unsigned char a = 10, b = 20; // diapasone
-  unsigned char count = RANDOM(a,b);
+  uint8_t a = 10, b = 20; // diapasone
+  uint8_t count = RANDOM(a,b);
   char *name = new char[count];
-  for (unsigned char i = 0; i < count; i++)
+  for (uint8_t i = 0; i < count; i++)
     name[i] = RANDOM(0x61, 0x7a);
   return name;
 }
