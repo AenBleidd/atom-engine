@@ -1,11 +1,11 @@
 #include "gamefs.h"
 // Table generation
-unsigned int* AtomFS::GenKey(unsigned int k0, unsigned int k1,
-                    unsigned int k2, unsigned int k3) {
-  long x, z;
-  int p;
-  unsigned int *table = new unsigned int[257];
-  static long tt[10]= {
+uint32_t* AtomFS::GenKey(uint32_t k0, uint32_t k1,
+                    uint32_t k2, uint32_t k3) {
+  int64_t x, z;
+  int32_t p;
+  uint32_t *table = new uint32_t[257];
+  static int64_t tt[10] = {
                        0x726a8f3bL,  // table
                        0xe69a3b5cL,
                        0xd3c71fe5L,
@@ -20,7 +20,7 @@ unsigned int* AtomFS::GenKey(unsigned int k0, unsigned int k1,
   table[3] = k3;
   for (p = 4; p < 256; p++) {
     x = table[p-4] + table[p-1];  // fill t
-    table[p] = (x>>3) ^ tt[(unsigned char)(x&7)];
+    table[p] = (x>>3) ^ tt[(uint8_t)(x&7)];
   }
   for (p = 0; p < 23; p++)
     table[p] += table[p+89];  // mix first entries
@@ -32,19 +32,19 @@ unsigned int* AtomFS::GenKey(unsigned int k0, unsigned int k1,
     table[p] = (table[p] & 0x00ffffffL) ^ x;
   }
   table[256] = table[0];
-  unsigned char y = (unsigned char)(x);
+  uint8_t y = (uint8_t)(x);
   for (p = 0; p < 256; p++) {  // further change perm.
 // and other digits
-    table[p] = table[y = (unsigned char)(table[p^y]^y)];
+    table[p] = table[y = (uint8_t)(table[p^y]^y)];
     table[y] = table[p+1];
   }
   return table;
 }
 #ifdef _FSMAN_
-void AtomFS::Crypt(unsigned int *data, int lenght,
-                   unsigned int k[4], unsigned int r[4], unsigned int *t) {
-  int d;
-  unsigned int r1, r2, r3, r4, r5, r6, *e, m = 0x00ffffff;
+void AtomFS::Crypt(uint32_t *data, int32_t lenght,
+                   uint32_t k[4], uint32_t r[4], uint32_t *t) {
+  int32_t d;
+  uint32_t r1, r2, r3, r4, r5, r6, *e, m = 0x00ffffff;
   r3 = k[0], r4 = k[1], r5 = k[2], r6 = k[3];
   if (lenght < 0)
     d = -1;
@@ -68,10 +68,10 @@ void AtomFS::Crypt(unsigned int *data, int lenght,
   r[0] = r3, r[1] = r4, r[2] = r5, r[3] = r6;
 }
 #endif  // _FSMAN_
-void AtomFS::Decrypt(unsigned int *data, int lenght, unsigned int k[4],
-                     unsigned int r[4], unsigned int *t) {
-  int d;
-  unsigned int r1, r2, r3, r4, r5, r6, *e, m = 0x00ffffff;
+void AtomFS::Decrypt(uint32_t *data, int32_t lenght, uint32_t k[4],
+                     uint32_t r[4], uint32_t *t) {
+  int32_t d;
+  uint32_t r1, r2, r3, r4, r5, r6, *e, m = 0x00ffffff;
   r3 = k[0], r4 = k[1], r5 = k[2], r6 = k[3];
   if (lenght < 0)
     d = -1;
@@ -95,11 +95,11 @@ void AtomFS::Decrypt(unsigned int *data, int lenght, unsigned int k[4],
     r[0] = r3, r[1] = r4, r[2] = r5, r[3] = r6;
 }
 // add new addon key
-unsigned int AtomFS::AddAddonKey(unsigned int *key) {
-  unsigned int **temp, **table;
+uint32_t AtomFS::AddAddonKey(uint32_t *key) {
+  uint32_t **temp, **table;
   if (addon_key.count != 0) {
 // search fo an existing key
-    for (unsigned int i = 0; i < addon_key.count; i++) {
+    for (uint32_t i = 0; i < addon_key.count; i++) {
       if (memcmp(key, addon_key.addon_key[i], 16) == 0) {
 // we find this key
         delete [] key;
@@ -107,10 +107,10 @@ unsigned int AtomFS::AddAddonKey(unsigned int *key) {
       }
     }
 // we didn't find this key, let's add it
-  temp = new unsigned int*[addon_key.count + 1];
-  table = new unsigned int*[addon_key.count + 1];
+  temp = new uint32_t * [addon_key.count + 1];
+  table = new uint32_t * [addon_key.count + 1];
 // store pointers in new array
-  for (unsigned int i = 0; i < addon_key.count; i++) {
+  for (uint32_t i = 0; i < addon_key.count; i++) {
     temp[i] = addon_key.addon_key[i];
     table[i] = addon_key.addon_table[i];
   }
@@ -126,8 +126,8 @@ unsigned int AtomFS::AddAddonKey(unsigned int *key) {
   return addon_key.count++;
   } else {
 // create new key
-    addon_key.addon_key = new unsigned int*;
-    addon_key.addon_table = new unsigned int*;
+    addon_key.addon_key = new uint32_t*;
+    addon_key.addon_table = new uint32_t*;
 // set the key
     addon_key.addon_key[0] = key;
     addon_key.addon_table[0] = GenKey(key[0], key[1], key[2], key[3]);

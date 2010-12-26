@@ -21,29 +21,29 @@
 #endif  // _FSMAN_
 
 // main constants
-static const unsigned int magic = 0x41454653;  // Magic number ("AEFS")
-static const unsigned char version = 0x01;  // current version (1)
+static const uint32_t magic = 0x41454653;  // Magic number ("AEFS")
+static const uint8_t version = 0x01;  // current version (1)
 // folder and file flags
-static const unsigned char ff_ro = 0x01;  // read-only
-static const unsigned char ff_rw = 0x00;  // read-write
+static const uint8_t ff_ro = 0x01;  // read-only
+static const uint8_t ff_rw = 0x00;  // read-write
 
-static const unsigned char flag_eoc = 0xCE;  // end of folder
-static const unsigned char flag_file = 0x0F;  // file
-static const unsigned char flag_folder = 0x0C;  // folder
-static const unsigned char flag_folder_deleted = 0xDC;  // deleted folder
-static const unsigned char flag_file_deleted = 0xDF;  // deleted file
-static const unsigned char flag_key = 0x0E;  // it's wake addon key
+static const uint8_t flag_eoc = 0xCE;  // end of folder
+static const uint8_t flag_file = 0x0F;  // file
+static const uint8_t flag_folder = 0x0C;  // folder
+static const uint8_t flag_folder_deleted = 0xDC;  // deleted folder
+static const uint8_t flag_file_deleted = 0xDF;  // deleted file
+static const uint8_t flag_key = 0x0E;  // it's wake addon key
 // unicode
-static const unsigned char flag_ascii = 0x00;
-static const unsigned char flag_utf8 = 0xFF;
+static const uint8_t flag_ascii = 0x00;
+static const uint8_t flag_utf8 = 0xFF;
 // archive types
-static const unsigned char type_critical = 0xFF;
-static const unsigned char type_standart = 0x00;
-static const unsigned char type_addon = 0x01;
+static const uint8_t type_critical = 0xFF;
+static const uint8_t type_standart = 0x00;
+static const uint8_t type_addon = 0x01;
 // CRC32
 #ifdef _CRC_CHECK_
 // crc32 table generated using standart polynom
-static const unsigned long int crc32table[256] = {
+static const uint32_t crc32table[256] = {
   0x00000000UL, 0x77073096UL, 0xEE0E612CUL, 0x990951BAUL,
   0x076DC419UL, 0x706AF48FUL, 0xE963A535UL, 0x9E6495A3UL,
   0x0EDB8832UL, 0x79DCB8A4UL, 0xE0D5E91EUL, 0x97D2D988UL,
@@ -110,24 +110,24 @@ static const unsigned long int crc32table[256] = {
   0xB40BBE37UL, 0xC30C8EA1UL, 0x5A05DF1BUL, 0x2D02EF8DUL
 };
 // XOR mask for CRC32
-static const unsigned long int mask = 0xFFFFFFFFUL;
+static const uint32_t mask = 0xFFFFFFFFUL;
 #endif  // _CRC_CHECK_
 #pragma pack (1)
 struct HEADER {
 // magic number
-  unsigned int magic;
+  uint32_t magic;
 // version of the paked file
-  unsigned char version;
+  uint8_t version;
 // type (critical, standart or addon)
-  unsigned char type;
+  uint8_t type;
 // encoding of the symlols
-  unsigned char encoding;
+  uint8_t encoding;
 // crypt bytes
-  unsigned short int crypt;
+  uint16_t crypt;
 // bin file count
-  unsigned long int bincount;
+  uint64_t bincount;
 // filetable address
-  unsigned long int filetable;
+  uint64_t filetable;
 };
 // identify each record in filetable of the packed file
 struct RECORD {
@@ -137,20 +137,20 @@ struct RECORD {
 // 0xCE - it's the end of folder
 // 0xDC - this folder was deleted
 // 0xDF - this file was deleted*/
-  unsigned char flag;
+  uint8_t flag;
 // lenght of the file or folder name
-  unsigned short int namelen;
+  uint16_t namelen;
 // name of the folder or file. NULL for unicode strings
   char *name;
 // utf-8 encoded name. NULL for ascii encoding
   wchar_t *wname;
 // size of the file (0 if it is a folder)
-  unsigned long int size;
+  uint64_t size;
 // SIC! offset of the file in data from the beginning of the data!
 // (0 if it is a folder)
-  unsigned long int offset;
+  uint64_t offset;
 // control check sum (0 if it is a folder)
-  unsigned long int crc;
+  uint64_t crc;
 };
 #pragma unpack
 struct TREE_FILE;
@@ -162,31 +162,31 @@ struct TREE_FILE {
 // utf-8 encoded name. NULL for ascii encoding
   wchar_t *wname;
 // size of the file
-  unsigned long int size;
+  uint64_t size;
 // offset of the file in the packed file
-  unsigned long int offset;
+  uint64_t offset;
 // file flags (mode of the opened file)
-  unsigned char flag;
+  uint8_t flag;
 // crypted bytes
-  unsigned short int bytescrypt;
+  uint16_t bytescrypt;
 // SIC! only for file manager! not for engine!
 #ifdef _CRC_CHECK_
 // control check sum
-  unsigned long int crc;
+  uint64_t crc;
 #endif  // _CRC_CHECK_
 // id of the packed file which contain this file
 // (first packed file if the packed file is separated)
   FILE *id;
 // rewrite priority of the file
-  unsigned char priority;
+  uint8_t priority;
 // pointer to the opened file
   FILE *file;
 // counter of the opened instances of the file
-  unsigned short int descriptor;
+  uint16_t descriptor;
 // addon key (if this is not addon file key MUST be equal zero)
-  unsigned int *key;
+  uint32_t *key;
 // wake table
-  unsigned int *table;
+  uint32_t *table;
 // pointer to the next file in folder
   TREE_FILE *tree_file;
 // pointer to the parent folder
@@ -199,7 +199,7 @@ struct TREE_FOLDER {
 // utf-8 encoded name. NULL for ascii encoding
   wchar_t *wname;
 // flags of the folder
-  unsigned char flag;
+  uint8_t flag;
 // pointer to the next folder inside this folder
   TREE_FOLDER *tree_folder;
 // pointer to the first file inside this folder
@@ -216,15 +216,15 @@ struct  OPENALLOC {
 };
 // structure to store used addon keys
 struct ADDON_KEY {
-  unsigned int count;
-  unsigned int **addon_key;
-  unsigned int **addon_table;
+  uint32_t count;
+  uint32_t **addon_key;
+  uint32_t **addon_table;
 };
 // FS Class
 class AtomFS {
  public:
 // constructors
-  explicit AtomFS(AtomLog *log, unsigned int *key = 0);
+  explicit AtomFS(AtomLog *log, uint32_t *key = 0);
 /* Mounting single file
    filename - name of the mounted file
    mountfolder - folder in the FS to mount the file system
@@ -234,14 +234,14 @@ class AtomFS {
                 0 - there is no error
                 another value - some kind of error, look error code
 */
-  int Mount(char* filename, char* mountfolder, unsigned int *key = 0);
+  int32_t Mount(char* filename, char* mountfolder, uint32_t *key = 0);
 /* Mounting from the mount table
    filename - name of the file with configuration to mount files
    return value:
                 0 - there is no error
                 another value - some kind of error, look error code
 */
-  int Mount(char* filename);
+  int32_t Mount(char* filename);
 // open file from FS
   FILE* Open(char* name, TREE_FOLDER *current = 0);
 // close opened file from FS
@@ -257,13 +257,13 @@ class AtomFS {
                 0 - there is no error
                 another value - some kind of error, look error code
 */
-  int Create(char** input, unsigned int count, char* file,
-             unsigned short int encrypt, unsigned int *key,
-             unsigned char type);
+  int32_t Create(char** input, uint32_t count, char* file,
+             uint16_t encrypt, uint32_t *key,
+             uint8_t type);
 // save file from FS to disc
-  int Save(FILE *input, char *output);
+  int32_t Save(FILE *input, char *output);
 // Navigate VirtualFS
-  int Navigate(void);
+  int32_t Navigate(void);
 #endif  // _FSMAN_
 // destructor
   ~AtomFS();
@@ -271,25 +271,25 @@ class AtomFS {
 // root directory
   TREE_FOLDER *root;
   AtomLog *atomlog;
-  unsigned short int bytescrypt;  // count of first bytes to encrypt
+  uint16_t bytescrypt;  // count of first bytes to encrypt
 // WAKE crypt algorithm
-  unsigned int *wake_table;
-  unsigned int *wake_key;
+  uint32_t *wake_table;
+  uint32_t *wake_key;
 // additional keys
   ADDON_KEY addon_key;
-// Add new addon key andreturn it's number
-  unsigned int AddAddonKey(unsigned int *key);
-  unsigned int* GenKey(unsigned int k0, unsigned int k1,
-              unsigned int k2, unsigned int k3);
-  void Decrypt(unsigned int *data, int lenght, unsigned int k[4],
-               unsigned int r[4], unsigned int *t);
+// Add new addon key and return it's number
+  uint32_t AddAddonKey(uint32_t *key);
+  uint32_t* GenKey(uint32_t k0, uint32_t k1,
+              uint32_t k2, uint32_t k3);
+  void Decrypt(uint32_t *data, int32_t lenght, uint32_t k[4],
+               uint32_t r[4], uint32_t *t);
 #ifdef _FSMAN_
-  void Crypt(unsigned int *data, int lenght, unsigned int k[4],
-             unsigned int r[4], unsigned int *t);
+  void Crypt(uint32_t *data, int32_t lenght, uint32_t k[4],
+             uint32_t r[4], uint32_t *t);
 // Scan for all files and directories to add to the packed file
-  int FolderScan(char *ch, FILE *dat, FILE *bin, int level);
+  int32_t FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level);
 // Write data from added files
-  int Write(char *in,  FILE *dat, FILE *bin);
+  int32_t Write(char *in,  FILE *dat, FILE *bin);
 #endif  // _FSMAN_
   OPENALLOC *openalloc;
 };
