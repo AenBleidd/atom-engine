@@ -9,7 +9,7 @@
 
 struct ARGUMENTS {
   char **output;
-  int count;
+  int32_t count;
 };
 
 // Parse the *nix-style path
@@ -20,7 +20,7 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input);
 TREE_FILE* FindFileFromPath(AtomLog *atomlog, TREE_FOLDER *root,
                             TREE_FOLDER *current, ARGUMENTS *path);
 // 16-byte password input function
-unsigned int* PassPrint(void);
+uint32_t* PassPrint(void);
 // Generate random name
 #ifdef _FSMAN_
 char* tempname(AtomLog *atomlog);
