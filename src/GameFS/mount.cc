@@ -155,6 +155,12 @@ int32_t AtomFS::Mount(char* filename, char* mountfolder, uint32_t *key) {
     return -1;
   }
 // Magic!!!! *YAHOO*
+// Get GUID
+  if (fread(&header.guid, sizeof(header.guid), 1, pak) != 1) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+    fclose(pak);
+    return -1;
+  }
 // Get version
   if (fread(&header.version, sizeof(header.version), 1, pak) != 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
@@ -411,6 +417,10 @@ temprecord = new RECORD;
   uint64_t opened = 1;
 // At least we will mount smth!
   while (opened != 0) {
+/************************* D E B U G ****************************************/
+    snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE, "Opened folders: %i", opened);
+    atomlog->DebugMessage(atomlog->MsgBuf);
+/************************* D E B U G   E N D*********************************/
     temprecord = new RECORD;
 // Get the flag
     if (fread(&temprecord->flag, sizeof(temprecord->flag), 1, pak) != 1) {
@@ -440,6 +450,10 @@ temprecord = new RECORD;
         return -1;
       }
       temprecord->name[temprecord->namelen] = '\0';
+/************************* D E B U G ****************************************/
+      snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE, "Open file %s", temprecord->name);
+      atomlog->DebugMessage(atomlog->MsgBuf);
+/************************* D E B U G   E N D*********************************/
 // Get the size
       if (fread(&temprecord->size, sizeof(temprecord->size), 1, pak) != 1) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
@@ -618,6 +632,10 @@ temprecord = new RECORD;
         return -1;
       }
       temprecord->name[temprecord->namelen] = '\0';
+/************************* D E B U G ****************************************/
+      snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE, "Open folder %s", temprecord->name);
+      atomlog->DebugMessage(atomlog->MsgBuf);
+/************************* D E B U G   E N D*********************************/
 // Search for this folder
       bfound = false;
       if (current->tree_folder == 0) {
@@ -677,6 +695,10 @@ temprecord = new RECORD;
 // this is the end of folder
 // we will move to the one level up
 // TODO(Lawliet): Add check for the superfluous of the flag
+/************************* D E B U G ****************************************/
+      snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE, "Close folder");
+      atomlog->DebugMessage(atomlog->MsgBuf);
+/************************* D E B U G   E N D*********************************/
       if (current->parent_folder != 0) {
         current = current->parent_folder;
       }

@@ -446,19 +446,6 @@ uint32_t* PassPrint(void) {
         key[i] <<= 8;
     }
   }
-  fprintf(stderr, "%s %x-%x-%x-%x\n", "Password is", key[0], key[1], key[2], key[3]);
   delete [] input;
   return key;
 }
-#ifdef _FSMAN_
-#define RANDOM(min,max) (rand()%(max-min+1)+min)
-// Create temp file name
-char* tempname(AtomLog *atomlog) {
-  uint8_t a = 10, b = 20; // diapasone
-  uint8_t count = RANDOM(a,b);
-  char *name = new char[count];
-  for (uint8_t i = 0; i < count; i++)
-    name[i] = RANDOM(0x61, 0x7a);
-  return name;
-}
-#endif  // _FSMAN_
