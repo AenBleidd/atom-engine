@@ -53,7 +53,7 @@ int32_t AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level = 0) {
     char *curdir = 0;
 #ifdef UNIX
 // TODO(Lawliet): Check this string if first call chdir(ch) is NULL
-    if (chdir(ch) != 0) return 0;
+    if (chdir(ch) != 0) return -1;
     struct dirent64 **eps;
     struct stat64 st;
     int32_t n;
@@ -95,20 +95,6 @@ int32_t AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level = 0) {
           delete [] curdir;
           curdir = 0;
 #endif  // WINDOWS
-// End of catalogue
-// TODO(Lawliet): Check recurse in this function
-          record.flag = flag_eoc;
-          record.namelen = 0;
-          record.name = 0;
-          record.size = 0;
-          record.offset = 0;
-          record.crc = 0;
-          if (fwrite(&record.flag, sizeof(record.flag), 1, dat) != 1) {
-            atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-            return -1;
-          }
-// Update datsize
-          datsize += sizeof(record.flag);
         }
 #ifdef UNIX
         if (eps[cnt]->d_type == DT_REG) {  // it is a file
@@ -122,7 +108,7 @@ int32_t AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level = 0) {
           int64_t fsize = (st.nFileSizeHigh * (MAXDWORD+1)) + st.nFileSizeLow;
 #endif  // WINDOWS
           snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE,
-                   "Writing file %s (%PRId64 bytes)", curdir, fsize);
+                   "Writing file %s (%ld bytes)", curdir, fsize);
           atomlog->DebugMessage(atomlog->MsgBuf);
 #ifdef WINDOWS
           const uint32_t st_size = strlen(ch) + strlen(st.cFileName) + 2;
@@ -144,6 +130,22 @@ int32_t AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level = 0) {
       delete [] tmp;
       tmp = 0;
 #endif  // WINDOWS
+// End of catalogue
+// TODO(Lawliet): Check recurse in this function
+      record.flag = flag_eoc;
+      record.namelen = 0;
+      record.name = 0;
+      record.size = 0;
+      record.offset = 0;
+      record.crc = 0;
+      if (fwrite(&record.flag, sizeof(record.flag), 1, dat) != 1) {
+        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
+        return -1;
+      }
+// Update datsize
+          datsize += sizeof(record.flag);
+          snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s %s", "Leaving folder", ch);
+          atomlog->DebugMessage(atomlog->MsgBuf);
 #ifdef UNIX
     for (cnt = 0; cnt < n; ++cnt) free(eps[cnt]);
     free(eps);
@@ -285,7 +287,7 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
 // Create name of the output files
   uint32_t namelen = strlen(file)+5;
   char *bin = new char[namelen];
-  char *dat = tempname(atomlog);
+  char *dat = GetCGUID();
   snprintf(bin, namelen, "%s.bin", file);
 // check if output files exist
   datfile = fopen(dat, "r");
@@ -294,7 +296,7 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
     do {
       delete [] dat;
       fclose(datfile);
-      dat = tempname(atomlog);
+      dat = GetCGUID();
       datfile = fopen(dat, "r");
     } while (datfile != NULL);
   }
@@ -313,7 +315,7 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
       s = strlen(bin) + k + 5;
       bintemp = new char[s];
 // create filename
-      snprintf(bintemp, s, "%s.%03PRId32", bin, i);
+      snprintf(bintemp, s, "%s.%03d", bin, i);
       bintempfile = fopen(bintemp, "r");
       if (bintempfile == NULL) {
         if (rename(bin, bintemp) == 0)
@@ -334,6 +336,10 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
 // set static header information
   HEADER header;
   header.magic = magic;
+  AGUID *guid = GetAGUID();
+  header.guid = *guid;
+  delete guid;
+  guid = 0;
   header.version = version;
   header.type = type;
   header.encoding = flag_ascii;
@@ -419,7 +425,7 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
       int64_t size = (st.nFileSizeHigh * (MAXDWORD+1)) + st.nFileSizeLow;
 #endif  // WINDOWS
       snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE,
-                "Writing file %s (%PRId64 bytes)", input[i], size);
+                "Writing file %s (%ld bytes)", input[i], size);
       atomlog->DebugMessage(atomlog->MsgBuf);
       if (Write(input[i], datfile, binfile) != 0) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);

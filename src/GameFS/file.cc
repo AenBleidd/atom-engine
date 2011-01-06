@@ -6,6 +6,21 @@
 #ifdef UNIX
 #include "errno.h"
 #endif  // UNIX
+#ifdef WINDOWS
+FILE* fmemopen(void *s, size_t len, const char *modes) {
+// Now actionally modes do nothing. Mode is always "r"
+  FILE file;
+  FILE *pfile = new FILE;
+
+  file._flag = _IOREAD | _IOSTRG;
+  file._base = s;
+  file._ptr = file._base;
+  file._cnt = len;
+
+  *pfile = file;
+  return pfile;
+}
+#endif  // WINDOWS
 FILE* AtomFS::Open(char *name, TREE_FOLDER *current) {
 // Parse the path
   TREE_FILE *curfile = FindFileFromPath(atomlog, root, current,
@@ -16,7 +31,6 @@ FILE* AtomFS::Open(char *name, TREE_FOLDER *current) {
   }
 // Get info about this file
 // file that we create
-  FILE file;
   if (curfile->id == 0) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
     atomlog->LogMessage("Binary file is closed");
@@ -69,33 +83,9 @@ FILE* AtomFS::Open(char *name, TREE_FOLDER *current) {
     buffer[i] = (char)decryptbuf[i];
 // TODO(Lawliet): Check this!
 // Create the file
-#ifdef UNIX
-// defined in libio.h
-  file._flags = _IO_MAGIC | _IO_NO_WRITES;
-  file._IO_read_base = buffer;
-  /*file._IO_read_ptr = file._IO_read_base;
-  file._IO_read_end = buffer + curfile->size - 1;
-  file._IO_write_base = file._IO_read_base;
-  file._IO_write_ptr = file._IO_read_ptr;
-  file._IO_write_end = file._IO_read_end;
-  file._IO_buf_base = file._IO_read_base;
-  file._IO_buf_end = file._IO_read_end;
-  file._chain = 0;
-  file._fileno = 0;*/
-  file._mode = -1;
-#endif  // UNIX
-#ifdef WINDOWS
-  file._flag = _IOREAD | _IOSTRG;
-  file._base = buffer;
-  file._ptr = file._base;
-  file._cnt = curfile->size;
-#endif  // WINDOWS
-  FILE *pfile = new FILE;
-  *pfile = file;
-#ifdef UNIX
-  snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s ENDTEXT %x %p %p %p", buffer, pfile, pfile, buffer, pfile->_IO_read_base);
-  atomlog->DebugMessage(atomlog->MsgBuf);
-#endif // UNIX
+  FILE *pfile;
+  pfile = fmemopen(buffer, curfile->size, "r");
+
   return pfile;
 }
 void AtomFS::Close(FILE *file) {
@@ -104,6 +94,7 @@ void AtomFS::Close(FILE *file) {
 // close the file
   fclose(file);
 // release memory (if we really need this)
+// TODO (Lawliet): Check if we need to release buffer too
   delete t;
   return;
 }

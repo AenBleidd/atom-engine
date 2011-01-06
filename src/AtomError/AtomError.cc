@@ -152,10 +152,10 @@ void AtomLog::LogMsg(const char *string, uint8_t lvl, const char *file,
                      int32_t line) {
   if (lvl <= verbose_level) {
 #ifdef ATOM_DEBUG
-    fprintf(stderr, "%s %s:%PRIi32\t%s\n", CurTime(), file, line, string);
+    fprintf(stderr, "%s %s:%i\t%s\n", CurTime(), file, line, string);
 #endif  // ATOM_DEBUG
     if (logfile != 0) {
-      fprintf(logfile, "%s %s:%PRIi32\t%s\n", CurTime(), file, line, string);
+      fprintf(logfile, "%s %s:%i\t%s\n", CurTime(), file, line, string);
       fflush(logfile);
     }
   }
@@ -257,7 +257,7 @@ void AtomLog::SetLastError(uint32_t code, uint32_t subcode,
   uint32_t errlen = 300 + strlen(errorcode[global_error.code]) +
                strlen(errorsubcode[global_error.code][global_error.sub_code]);
   global_error.description = new char[errlen];
-  snprintf(global_error.description, errlen, "%s:%PRIi32\tERROR: %s\t%s",
+  snprintf(global_error.description, errlen, "%s:%i\tERROR: %s\t%s",
            file, line, errorcode[global_error.code],
            errorsubcode[global_error.code][global_error.sub_code]);
 // log the error
@@ -275,7 +275,7 @@ void AtomLog::SetLastWarning(uint32_t code, uint32_t subcode,
   uint32_t warnlen = 300 + strlen(warningcode[global_warning.code]) +
          strlen(warningsubcode[global_warning.code][global_warning.sub_code]);
   global_warning.description = new char[warnlen];
-  snprintf(global_warning.description, warnlen, "%s:%PRIi32\tWARNING: %s\t%s",
+  snprintf(global_warning.description, warnlen, "%s:%i\tWARNING: %s\t%s",
            file, line, warningcode[global_warning.code],
            warningsubcode[global_warning.code][global_warning.sub_code]);
 // log the error
