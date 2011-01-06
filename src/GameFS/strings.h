@@ -21,8 +21,5 @@ TREE_FILE* FindFileFromPath(AtomLog *atomlog, TREE_FOLDER *root,
                             TREE_FOLDER *current, ARGUMENTS *path);
 // 16-byte password input function
 uint32_t* PassPrint(void);
-// Generate random name
-#ifdef _FSMAN_
-char* tempname(AtomLog *atomlog);
-#endif  // _FSMAN_
+
 #endif  // _GAMEFS_STRINGS_H_

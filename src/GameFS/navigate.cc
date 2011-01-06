@@ -106,7 +106,7 @@ int32_t List(AtomLog *atomlog, TREE_FOLDER *curfolder, uint8_t mode) {
         permission = 'r';
       else
         permission = 'w';
-      snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%PRId8%PRId8%s %8PRId8  B %s\n",
+      snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%d%d%s %8d  B %s\n",
                 flag, permission, priority, 0, tempfolder->name);
     }
     atomlog->DebugMessage(atomlog->MsgBuf);
@@ -122,7 +122,7 @@ int32_t List(AtomLog *atomlog, TREE_FOLDER *curfolder, uint8_t mode) {
         else
           permission = 'w';
         snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
-                  "%PRId8%PRId8%s %8PRId8  B %s\n",
+                  "%d%d%s %8d  B %s\n",
                   flag, permission, priority, 0, tempfolder->name);
     }
       atomlog->DebugMessage(atomlog->MsgBuf);
@@ -141,7 +141,7 @@ int32_t List(AtomLog *atomlog, TREE_FOLDER *curfolder, uint8_t mode) {
         permission = 'r';
       else
         permission = 'w';
-      snprintf(priority, 3, "%02PRIx8", tempfile->priority);
+      snprintf(priority, 3, "%02x", tempfile->priority);
       size = tempfile->size;
       i = 0;
       while (size > 1023) {
@@ -149,7 +149,7 @@ int32_t List(AtomLog *atomlog, TREE_FOLDER *curfolder, uint8_t mode) {
         i++;
       }
       snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
-               "%PRId8%PRId8%s %8.f %s %s\n",
+               "%d%d%s %8.f %s %s\n",
                flag, permission, priority, size, sizeformat[i],
                tempfile->name);
     }
@@ -165,7 +165,7 @@ int32_t List(AtomLog *atomlog, TREE_FOLDER *curfolder, uint8_t mode) {
           permission = 'r';
         else
           permission = 'w';
-        snprintf(priority, 3, "%02PRIx8", tempfile->priority);
+        snprintf(priority, 3, "%02x", tempfile->priority);
         size = tempfile->size;
         i = 0;
         while (size > 1023) {
@@ -173,7 +173,7 @@ int32_t List(AtomLog *atomlog, TREE_FOLDER *curfolder, uint8_t mode) {
           i++;
         }
         snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
-                "%PRId8%PRId8%s %8.f %s %s\n", flag, permission, priority, size,
+                "%d%d%s %8.f %s %s\n", flag, permission, priority, size,
                 sizeformat[i], tempfile->name);
       }
       atomlog->DebugMessage(atomlog->MsgBuf);

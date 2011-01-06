@@ -10,6 +10,7 @@
 #include "../AtomError/AtomError.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "../SysVars/guid.h"
 
 #ifdef _FSMAN_
 #ifdef UNIX
@@ -19,6 +20,14 @@
 #include <time.h>
 #endif  // UNIX
 #endif  // _FSMAN_
+
+#ifdef UNIX
+#define _GNU_SOURCE
+#endif  // UNIX
+
+#ifdef WINDOWS
+FILE* fmemopen(void *s, size_t len, const char *modes);
+#endif // WINDOWS
 
 // main constants
 static const uint32_t magic = 0x41454653;  // Magic number ("AEFS")
@@ -116,6 +125,8 @@ static const uint32_t mask = 0xFFFFFFFFUL;
 struct HEADER {
 // magic number
   uint32_t magic;
+// GUID
+  AGUID guid;
 // version of the paked file
   uint8_t version;
 // type (critical, standart or addon)

@@ -11,9 +11,9 @@ INCLUDE ( "${MODULE_PATH}/modules.cmake" )
 # Create a static library which will be used by the engine
 ADD_LIBRARY ( ${SYSVARS_MODULE} STATIC byteorderdetect guid )
 IF ( UNIX )
-TARGET_LINK_LIBRARIES ( uuid )
+TARGET_LINK_LIBRARIES ( ${SYSVARS_MODULE} uuid )
 ELSEIF ( WIN32 )
-TARGET_LINK_LIBRARIES ( rpcrt4 )
+TARGET_LINK_LIBRARIES ( ${SYSVARS_MODULE} rpcrt4 )
 ENDIF()
 
 # Installation instructions for the SysVars module
