@@ -237,10 +237,6 @@ int32_t Copy(AtomLog *atomlog, AtomFS *atomfs, TREE_FOLDER *curfolder, char *in,
     atomlog->DebugMessage("Source file can not be opened");
     return -1;
   }
-#ifdef UNIX
-  snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%x %p %p %p", src, src, src, src->_IO_read_base);
-  atomlog->DebugMessage(atomlog->MsgBuf);
-#endif  // UNIX
 // Save the file
   if (atomfs->Save(src, out) != 0) {
     atomlog->DebugMessage( "File can not be written");

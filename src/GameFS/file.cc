@@ -37,12 +37,12 @@ FILE* AtomFS::Open(char *name, TREE_FOLDER *current) {
     return 0;
   }
 // find the data
-  if (fseek(curfile->id, curfile->offset, SEEK_SET) != 0) {
+  if (fseek(curfile->id, curfile->offset + sizeof(HEADER), SEEK_SET) != 0) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
     return 0;
   }
 // data buffer
-  char *buffer = new char[curfile->size];
+  uint8_t *buffer = new uint8_t[curfile->size];
 // read the data
   if (fread(buffer, curfile->size, 1, curfile->id) != 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
@@ -51,14 +51,19 @@ FILE* AtomFS::Open(char *name, TREE_FOLDER *current) {
   }
 // Check the file
 #ifdef _CRC_CHECK_
-  snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Written CRC is: %x\t Calculated CRC is: %x", curfile->crc, GenCRC32((unsigned char*)buffer, curfile->size));
+/************************* D E B U G ****************************************/
+  snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
+    "Written CRC is: %x\t Calculated CRC is: %x", curfile->crc,
+    GenCRC32(buffer, curfile->size));
   atomlog->DebugMessage(atomlog->MsgBuf);
-/*  if (curfile->crc != GenCRC32((uint8_t*)buffer, curfile->size)) {
+  atomlog->DebugMessage((char*)buffer);
+/************************* D E B U G   E N D*********************************/
+  if (curfile->crc != GenCRC32(buffer, curfile->size)) {
 // Wrong crc
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_CRC32);
     delete [] buffer;
     return 0;
-  }*/
+  }
 #endif  // _CRC_CHECK_
 // Decrypt
   uint64_t crypt = 0;
@@ -105,10 +110,6 @@ int AtomFS::Save(FILE *input, char *output) {
     atomlog->DebugMessage("File pointer can't be equal 0");
     return -1;
   }
-#ifdef UNIX
-  snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%x %p %p %p", input, input, input, input->_IO_read_base);
-  atomlog->DebugMessage(atomlog->MsgBuf);
-#endif  // UNIX
   rewind(input);
 // check filesize
   if (fseek(input, 0, SEEK_END) != 0) {
