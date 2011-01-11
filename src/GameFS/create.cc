@@ -186,14 +186,13 @@ int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
     return -1;
   }
   rewind(file);
-  uint64_t crc = mask;
 // encrypt
   uint64_t count;
   if ((bytescrypt == 0xFFFF) || (bytescrypt > record.size))
     count = record.size;
   else
     count = bytescrypt;
-  uint32_t *buf = new uint32_t[count];
+  uint8_t *buf = new uint8_t[count];
   if (fread(buf, 1, count, file) != count) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
     fclose(file);
@@ -201,8 +200,14 @@ int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
     return -1;
   }
   uint32_t r[4];
-  Crypt(buf, count, wake_key, r, wake_table);
-  uint64_t t = count;
+  uint64_t t = (count % 4)?(count % 4):((count % 4) + 1);
+  uint32_t *tempbuf = new uint32_t[t];
+  memcpy(tempbuf, buf, count);
+  Crypt(tempbuf, t, wake_key, r, wake_table);
+// TODO (Lawliet): Check! We can have some lost info here if t != count % 4
+  memcpy(buf, tempbuf, count);
+  delete [] tempbuf;
+  tempbuf = 0;
 // write to disk crypted data
   if (fwrite(buf, 1, count, bin) != count) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
@@ -210,21 +215,19 @@ int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
     delete [] buf;
     return -1;
   }
-  uint32_t *tempbuf = buf;
-  while (t--)
-    crc = crc32table[(crc ^ *buf++) & 0xFF] ^ (crc >> 8);
-  delete [] tempbuf;
-  tempbuf = 0;
+  uint64_t crc = GenCRC32(buf, count);
+  delete [] buf;
   buf = 0;
 // writing to disk and calculating crc
+  uint8_t smth;
   for (uint64_t i = count-1; i < record.size; i++) {
-    if (fread(&t, 1, 1, file) != 1) {
+    if (fread(&smth, 1, 1, file) != 1) {
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
       fclose(file);
       return -1;
     }
-    crc = crc32table[(crc ^ (uint8_t)t) & 0xFF] ^ (crc >> 8);
-    if (fwrite(&t, 1, 1, bin) != 1) {
+    crc = GenCRC32(&smth, 1, crc);
+    if (fwrite(&smth, 1, 1, bin) != 1) {
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
       fclose(file);
       return -1;
@@ -232,9 +235,11 @@ int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
   }
   fflush(file);
   fclose(file);
-  record.crc = crc ^ mask;
+  record.crc = crc;
   record.offset = binsize;
 // Write data
+// TODO (Lawliet): WTF??? WHY?????
+  record.size++;
   if (fwrite(&record.flag, sizeof(record.flag), 1, dat) != 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
     return -1;
