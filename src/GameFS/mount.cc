@@ -417,10 +417,6 @@ temprecord = new RECORD;
   uint64_t opened = 1;
 // At least we will mount smth!
   while (opened != 0) {
-/************************* D E B U G ****************************************/
-    snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE, "Opened folders: %i", opened);
-    atomlog->DebugMessage(atomlog->MsgBuf);
-/************************* D E B U G   E N D*********************************/
     temprecord = new RECORD;
 // Get the flag
     if (fread(&temprecord->flag, sizeof(temprecord->flag), 1, pak) != 1) {
