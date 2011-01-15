@@ -51,6 +51,9 @@ FILE* AtomFS::Open(char *name, TREE_FOLDER *current) {
   }
 // Check the file
 #ifdef _CRC_CHECK_
+  if (curfile->crc != GenCRC32(buffer, curfile->size)) {
+// Wrong crc
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_CRC32);
 /************************* D E B U G ****************************************/
   snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
     "Written CRC is: %x\t Calculated CRC is: %x", curfile->crc,
@@ -58,9 +61,6 @@ FILE* AtomFS::Open(char *name, TREE_FOLDER *current) {
   atomlog->DebugMessage(atomlog->MsgBuf);
   atomlog->DebugMessage((char*)buffer);
 /************************* D E B U G   E N D*********************************/
-  if (curfile->crc != GenCRC32(buffer, curfile->size)) {
-// Wrong crc
-    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_CRC32);
     delete [] buffer;
     return 0;
   }
@@ -75,17 +75,19 @@ FILE* AtomFS::Open(char *name, TREE_FOLDER *current) {
     crypt = curfile->bytescrypt;
   }
 // Decryption...
-  uint32_t *decryptbuf = new uint32_t[crypt];
-  for (uint64_t i = 0; i < crypt; i++)
-    decryptbuf[i] = (uint32_t)buffer[i];
+  uint64_t t = (crypt % 4)?(crypt % 4):((crypt % 4) + 1);
+  uint32_t *decryptbuf = new uint32_t[t];
+  memcpy(decryptbuf, buffer, crypt);
   uint32_t r[4];
 // TODO(Lawliet): Check this!
   if (curfile->key != 0)
-    Decrypt(decryptbuf, crypt, curfile->key, r, curfile->table);
+    Decrypt(decryptbuf, t, curfile->key, r, curfile->table);
   else
-    Decrypt(decryptbuf, crypt, wake_key, r, curfile->table);
-  for (uint64_t i = 0; i < crypt; i++)
-    buffer[i] = (char)decryptbuf[i];
+    Decrypt(decryptbuf, t, wake_key, r, curfile->table);
+// TODO (Lawliet): Check! We can have some lost info here if t != count % 4
+  memcpy(buffer, decryptbuf, crypt);
+  delete [] decryptbuf;
+  decryptbuf = 0;
 // TODO(Lawliet): Check this!
 // Create the file
   FILE *pfile;

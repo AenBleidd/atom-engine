@@ -494,9 +494,9 @@ temprecord = new RECORD;
         current->tree_file->file = 0;
         current->tree_file->descriptor = 0;
         current->tree_file->key = 0;
-/*        if (header.type == type_addon) {
-          current->tree_file->key = header.addon_key;
-        }*/
+        if (header.type == type_addon) {
+          current->tree_file->key = key;
+        }
         current->tree_file->table = table;
 // Clean
         delete temprecord;
@@ -528,9 +528,9 @@ temprecord = new RECORD;
             tempfile->file = 0;
             tempfile->tree_file->descriptor = 0;
             tempfile->tree_file->key = 0;
-/*            if (header.type == type_addon) {
-              tempfile->tree_file->key = header.addon_key;
-            }*/
+            if (header.type == type_addon) {
+              tempfile->tree_file->key = key;
+            }
             tempfile->tree_file->table = table;
 // Clean
             delete temprecord;
@@ -566,9 +566,9 @@ temprecord = new RECORD;
                 tempfile->file = 0;
                 tempfile->tree_file->descriptor = 0;
                 tempfile->tree_file->key = 0;
-/*                if (header.type == type_addon) {
-                  tempfile->tree_file->key = header.addon_key;
-                }*/
+                if (header.type == type_addon) {
+                  tempfile->tree_file->key = key;
+                }
                 tempfile->tree_file->table = table;
 // Clean
                 delete temprecord;
@@ -598,9 +598,9 @@ temprecord = new RECORD;
           tempfile->tree_file->file = 0;
           tempfile->tree_file->descriptor = 0;
           tempfile->tree_file->key = 0;
-/*          if (header.type == type_addon) {
-            tempfile->tree_file->key = header.addon_key;
-          }*/
+          if (header.type == type_addon) {
+            tempfile->tree_file->key = key;
+          }
           tempfile->tree_file->table = table;
 // Clean
           delete temprecord;
