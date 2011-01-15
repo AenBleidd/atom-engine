@@ -22,7 +22,9 @@
 #endif  // _FSMAN_
 
 #ifdef UNIX
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif  // _GNU_SOURCE
 #endif  // UNIX
 
 #ifdef WINDOWS
