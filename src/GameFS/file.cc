@@ -13,7 +13,7 @@ FILE* fmemopen(void *s, size_t len, const char *modes) {
   FILE *pfile = new FILE;
 
   file._flag = _IOREAD | _IOSTRG;
-  file._base = s;
+  file._base = (char*)s;
   file._ptr = file._base;
   file._cnt = len;
 
