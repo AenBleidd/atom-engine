@@ -92,7 +92,7 @@ FILE* AtomFS::Open(char *name, TREE_FOLDER *current) {
 // TODO(Lawliet): Check this!
 // Create the file
   FILE *pfile;
-  pfile = fmemopen(decrypted, curfile->size, "r");
+  pfile = fmemopen(decrypted, curfile->size, "rb");
 
   return pfile;
 }
