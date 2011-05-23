@@ -54,7 +54,7 @@ void AtomFS::Crypt(uint32_t *data, int32_t lenght,
   while (data-e) {
     r1 = *data;
     r2 = r1^r6;
-    *data = r2;  // Change into r1 for decoding.
+    *data = r2;
     data += d;
     r3 = r3 + r2;
     r3 = (r3>>8&m)^t[r3&255];
@@ -122,7 +122,7 @@ uint32_t AtomFS::AddAddonKey(uint32_t *key) {
 // save new array
   addon_key.addon_key = temp;
   addon_key.addon_table = table;
-// return position of he new key
+// return position of the new key
   return addon_key.count++;
   } else {
 // create new key

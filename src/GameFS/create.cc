@@ -179,7 +179,7 @@ int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
     fclose(file);
     return -1;
   }
-  record.size = ftell(file) - 1;
+  record.size = ftell(file);
   if (record.size == -1L) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
     fclose(file);
@@ -192,54 +192,47 @@ int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
     count = record.size;
   else
     count = bytescrypt;
-  uint8_t *buf = new uint8_t[count];
-  if (fread(buf, 1, count, file) != count) {
+  count = (count & ~3) / 4;
+  if (count % 4 != 0)
+    count++;
+// Read all file from disc
+  uint8_t *buf = new uint8_t[record.size];
+  if (fread(buf, 1, record.size, file) != record.size) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
     fclose(file);
     delete [] buf;
     return -1;
   }
   uint32_t r[4];
-  uint64_t t = (count % 4)?(count % 4):((count % 4) + 1);
+  uint64_t t = (record.size & ~3) / 4;
+  if (record.size % 4 != 0)
+    t++;
   uint32_t *tempbuf = new uint32_t[t];
-  memcpy(tempbuf, buf, count);
-  Crypt(tempbuf, t, wake_key, r, wake_table);
-// TODO (Lawliet): Check! We can have some lost info here if t != count % 4
-  memcpy(buf, tempbuf, count);
+  memcpy(tempbuf, buf, record.size);
+  Crypt(tempbuf, count, wake_key, r, wake_table);
+// realloc the buffer
+  delete [] buf;
+  t *= 4;
+  buf = new uint8_t[t];
+  memcpy(buf, tempbuf, t);
   delete [] tempbuf;
   tempbuf = 0;
+// calculating crc
+  uint64_t crc = GenCRC32(buf, t);
 // write to disk crypted data
-  if (fwrite(buf, 1, count, bin) != count) {
+  if (fwrite(buf, 1, t, bin) != t) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
     fclose(file);
     delete [] buf;
     return -1;
   }
-  uint64_t crc = GenCRC32(buf, count);
   delete [] buf;
   buf = 0;
-// writing to disk and calculating crc
-  uint8_t smth;
-  for (uint64_t i = count-1; i < record.size; i++) {
-    if (fread(&smth, 1, 1, file) != 1) {
-      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-      fclose(file);
-      return -1;
-    }
-    crc = GenCRC32(&smth, 1, crc);
-    if (fwrite(&smth, 1, 1, bin) != 1) {
-      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-      fclose(file);
-      return -1;
-    }
-  }
   fflush(file);
   fclose(file);
   record.crc = crc;
   record.offset = binsize;
 // Write data
-// TODO (Lawliet): WTF??? WHY?????
-  record.size++;
   if (fwrite(&record.flag, sizeof(record.flag), 1, dat) != 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
     return -1;
@@ -267,7 +260,7 @@ int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
   datsize += (sizeof(record.flag) + sizeof(record.namelen) + record.namelen +
              sizeof(record.size) + sizeof(record.offset) + sizeof(record.crc));
 
-  binsize += record.size;
+  binsize += t;
   snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE,
            "File %s was successfully written", in);
   atomlog->DebugMessage(atomlog->MsgBuf);
@@ -288,7 +281,10 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
     wake_table = GenKey(wake_key[0], wake_key[1], wake_key[2], wake_key[3]);
   }
 // set encrypt bytes count
-  bytescrypt = encrypt;
+  if (encrypt > 4 && encrypt != 0xFFFF && encrypt % 4 != 0)
+    bytescrypt = encrypt - (encrypt % 4) + 4;
+  else
+    bytescrypt = encrypt;
 // Create name of the output files
   uint32_t namelen = strlen(file)+5;
   char *bin = new char[namelen];

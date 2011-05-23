@@ -254,9 +254,10 @@ int32_t AtomFS::Mount(char* filename, char* mountfolder, uint32_t *key) {
     }
     if (key == 0)
       key = PassPrint();
-// add the key and get the working table
-    table = addon_key.addon_table[AddAddonKey(key)];
   }
+// add the key and get the working table
+    int ii = AddAddonKey(key);
+    table = addon_key.addon_table[ii];
 // Let's look the mountpont
 // Slash flag
   bool slash = true;
