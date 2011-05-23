@@ -42,25 +42,22 @@ FILE* AtomFS::Open(char *name, TREE_FOLDER *current) {
     return 0;
   }
 // data buffer
-  uint8_t *buffer = new uint8_t[curfile->size];
+  uint64_t t = (curfile->size & ~3) / 4;
+  if (curfile->size % 4 != 0)
+    t++;
+  t *= 4;
+  uint8_t *buffer = new uint8_t[t];
 // read the data
-  if (fread(buffer, curfile->size, 1, curfile->id) != 1) {
+  if (fread(buffer, 1, t, curfile->id) != t) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
     delete [] buffer;
     return 0;
   }
 // Check the file
 #ifdef _CRC_CHECK_
-  if (curfile->crc != GenCRC32(buffer, curfile->size)) {
+  if (curfile->crc != GenCRC32(buffer, t)) {
 // Wrong crc
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_CRC32);
-/************************* D E B U G ****************************************/
-  snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
-    "Written CRC is: %x\t Calculated CRC is: %x", curfile->crc,
-    GenCRC32(buffer, curfile->size));
-  atomlog->DebugMessage(atomlog->MsgBuf);
-  atomlog->DebugMessage((char*)buffer);
-/************************* D E B U G   E N D*********************************/
     delete [] buffer;
     return 0;
   }
@@ -75,23 +72,27 @@ FILE* AtomFS::Open(char *name, TREE_FOLDER *current) {
     crypt = curfile->bytescrypt;
   }
 // Decryption...
-  uint64_t t = (crypt % 4)?(crypt % 4):((crypt % 4) + 1);
-  uint32_t *decryptbuf = new uint32_t[t];
-  memcpy(decryptbuf, buffer, crypt);
   uint32_t r[4];
 // TODO(Lawliet): Check this!
+  uint32_t *decrypt = new uint32_t[t/4];
+  memcpy(decrypt, buffer, t);
+  delete [] buffer;
+  buffer = 0;
+  t = (crypt & ~3) / 4;
+  if (crypt % 4 != 0)
+    t++;
   if (curfile->key != 0)
-    Decrypt(decryptbuf, t, curfile->key, r, curfile->table);
+    Decrypt(decrypt, t, curfile->key, r, curfile->table);
   else
-    Decrypt(decryptbuf, t, wake_key, r, curfile->table);
-// TODO (Lawliet): Check! We can have some lost info here if t != count % 4
-  memcpy(buffer, decryptbuf, crypt);
-  delete [] decryptbuf;
-  decryptbuf = 0;
+    Decrypt(decrypt, t, wake_key, r, curfile->table);
+  uint8_t *decrypted = new uint8_t[curfile->size];
+  memcpy(decrypted, decrypt, curfile->size);
+  delete [] decrypt;
+  decrypt = 0;
 // TODO(Lawliet): Check this!
 // Create the file
   FILE *pfile;
-  pfile = fmemopen(buffer, curfile->size, "r");
+  pfile = fmemopen(decrypted, curfile->size, "r");
 
   return pfile;
 }
@@ -118,7 +119,7 @@ int AtomFS::Save(FILE *input, char *output) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
     return -1;
   }
-  uint64_t size = ftell(input) - 1;
+  uint64_t size = ftell(input);
   if (size == -1L) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
     return -1;
