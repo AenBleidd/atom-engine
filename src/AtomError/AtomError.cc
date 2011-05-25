@@ -6,7 +6,7 @@ char* AtomLog::CurDateTime() {
   time_t seconds = time(NULL);
   tm *timeinfo = new tm;
   timeinfo = (tm*) localtime_r(&seconds, timeinfo);
-  snprintf(datetimebuf, 20, "%i.%02i.%02i_%02i.%02i.%02i",
+  snprintf(datetimebuf, sizeof(datetimebuf), "%i.%02i.%02i_%02i.%02i.%02i",
           timeinfo->tm_year+1900, timeinfo->tm_mon+1,
           timeinfo->tm_mday, timeinfo->tm_hour,
           timeinfo->tm_min, timeinfo->tm_sec);
@@ -17,7 +17,7 @@ char* AtomLog::CurTime() {
   time_t seconds = time(NULL);
   tm *timeinfo = new tm;
   timeinfo = (tm*) localtime_r(&seconds, timeinfo);
-  snprintf(timebuf, 10, "%02i:%02i:%02i", timeinfo->tm_hour,
+  snprintf(timebuf, sizeof(timebuf), "%02i:%02i:%02i", timeinfo->tm_hour,
           timeinfo->tm_min, timeinfo->tm_sec);
   delete timeinfo;
   return timebuf;

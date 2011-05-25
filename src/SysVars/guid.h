@@ -18,9 +18,9 @@ struct AGUID {
 
 // Generate new GUID
 // or return a GUID of previously generated GUID string
-AGUID* GetAGUID (char *guid = 0);
+AGUID* GetAGUID(char *guid = 0);
 // Generate new GUID and return it like a string
 // or return a string of the already generated GUID
-char* GetCGUID (AGUID *guid = 0);
+char* GetCGUID(AGUID *guid = 0);
 
 #endif  // _GUID_H_
