@@ -10,7 +10,7 @@ int32_t AtomFS::Mount(char* filename) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FILE);
     return -1;
   }
- uint64_t size = 0;
+  uint64_t size = 0;
 // get file size
   if (fseek(conf, 0, SEEK_END) != 0) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
@@ -32,10 +32,10 @@ int32_t AtomFS::Mount(char* filename) {
   char *buf = new char[size];
   ARGUMENTS *args;
   char *file = 0, *mountpoint = 0;
-  while(fgets(buf, size, conf)) {
+  while (fgets(buf, size, conf)) {
     args = ParseArgs(atomlog, buf);
     if (args == 0) {
-      atomlog->SetLastErr(ERROR_CORE_FS,ERROR_PARSE_MOUNT_FILE);
+      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_PARSE_MOUNT_FILE);
       delete [] buf;
       return -1;
     }
@@ -100,7 +100,7 @@ int32_t AtomFS::Mount(char* filename, char* mountfolder, uint32_t *key) {
   OPENALLOC *tempalloc = 0, *prev = 0;
   if (openalloc != 0) {
     tempalloc = openalloc;
-    while(tempalloc->next != 0) {
+    while (tempalloc->next != 0) {
       tempalloc = tempalloc->next;
     }
     prev = tempalloc;

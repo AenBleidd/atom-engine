@@ -8,8 +8,8 @@ AtomFS::AtomFS(AtomLog *log, unsigned int *key) {
   atomlog = log;
 // Check byteorder
   if (BYTEORDER == -1) {
-   atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRONG_BYTEORDER);
-   throw ERROR_WRONG_BYTEORDER;
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRONG_BYTEORDER);
+    throw ERROR_WRONG_BYTEORDER;
   }
   wake_key = 0;
   wake_table = 0;

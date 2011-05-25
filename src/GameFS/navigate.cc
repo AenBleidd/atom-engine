@@ -41,7 +41,7 @@ int32_t AtomFS::Navigate(void) {
       } else {
         curfolder = ChDir(atomlog, root, curfolder, path);
         for (int32_t i = 0; i < path->count; i++)
-          if(path->output[i] != 0)
+          if (path->output[i] != 0)
             delete [] path->output[i];
         delete [] path->output;
         delete path;
@@ -96,7 +96,7 @@ int32_t List(AtomLog *atomlog, TREE_FOLDER *curfolder, uint8_t mode) {
 // begin with folders
   if (tempfolder->tree_folder != 0) {
     tempfolder = tempfolder->tree_folder;
-    snprintf(priority, 3, "%s", "--");
+    snprintf(priority, sizeof(priority), "%s", "--");
     flag = 'd';
     if (mode == 0) {
       snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s\n",
@@ -141,7 +141,7 @@ int32_t List(AtomLog *atomlog, TREE_FOLDER *curfolder, uint8_t mode) {
         permission = 'r';
       else
         permission = 'w';
-      snprintf(priority, 3, "%02x", tempfile->priority);
+      snprintf(priority, sizeof(priority), "%02x", tempfile->priority);
       size = tempfile->size;
       i = 0;
       while (size > 1023) {
@@ -165,7 +165,7 @@ int32_t List(AtomLog *atomlog, TREE_FOLDER *curfolder, uint8_t mode) {
           permission = 'r';
         else
           permission = 'w';
-        snprintf(priority, 3, "%02x", tempfile->priority);
+        snprintf(priority, sizeof(priority), "%02x", tempfile->priority);
         size = tempfile->size;
         i = 0;
         while (size > 1023) {
@@ -239,7 +239,7 @@ int32_t Copy(AtomLog *atomlog, AtomFS *atomfs, TREE_FOLDER *curfolder, char *in,
   }
 // Save the file
   if (atomfs->Save(src, out) != 0) {
-    atomlog->DebugMessage( "File can not be written");
+    atomlog->DebugMessage("File can not be written");
     atomfs->Close(src);
     return -1;
   }

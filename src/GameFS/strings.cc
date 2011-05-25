@@ -13,7 +13,7 @@ ARGUMENTS* ParsePath(AtomLog *atomlog, char *input) {
   if ((strlen(input) % 2) == 0) {
     tempcount = strlen(input) / 2;
   } else {
-    tempcount = (strlen(input) + 1 ) / 2;
+    tempcount = (strlen(input) + 1) / 2;
   }
 // allocate memory for the potential maximum count of arguments
   char **tempoutput = new char*[tempcount];
@@ -90,7 +90,7 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input) {
   if ((strlen(input) % 2) == 0) {
     tempcount = strlen(input) / 2;
   } else {
-    tempcount = (strlen(input) + 1 ) / 2;
+    tempcount = (strlen(input) + 1) / 2;
   }
 // allocate memory for the potential maximum count of arguments
   char **tempoutput = new char*[tempcount];
@@ -127,7 +127,7 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input) {
           tempoutput[args.count][j++] = input[i];
         }
       }
-    } else if(input[i] == symbol_slash) {
+    } else if (input[i] == symbol_slash) {
 // we got slash here...
       if ((input[i + 1] == symbol_quote) || (input[i + 1] == symbol_slash) ||
           (input[i + 1] == symbol_doublequote) ||
@@ -149,7 +149,7 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input) {
       if (quote == false) {
         if (i == 0) {
           if (i == len - 1) {
-            atomlog->SetLastErr(ERROR_CORE_FS,ERROR_LOST_QUOTES);
+            atomlog->SetLastErr(ERROR_CORE_FS, ERROR_LOST_QUOTES);
 // Release allocated memory
             for (int32_t i = 0; i < tempcount; i++)
               if (tempoutput[i] != 0)
@@ -163,14 +163,15 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input) {
             tempoutput[args.count] = new char[len - i + 2];
             arg = true;
           }
-        } else if (((input[i - 1] == symbol_space) || (input[i - 1] == symbol_tab)) &&
+        } else if (((input[i - 1] == symbol_space) ||
+            (input[i - 1] == symbol_tab)) &&
             (input[i + 1] != symbol_space) && (input[i + 1] != symbol_tab)) {
 // Quotes begin...
           quote = true;
           tempoutput[args.count] = new char[len - i + 2];
           arg = true;
         } else {
-          atomlog->SetLastErr(ERROR_CORE_FS,ERROR_LOST_QUOTES);
+          atomlog->SetLastErr(ERROR_CORE_FS, ERROR_LOST_QUOTES);
 // Release allocated memory
           for (int32_t i = 0; i < tempcount; i++)
             if (tempoutput[i] != 0)
@@ -186,7 +187,7 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input) {
           j = 0;
           arg = false;
         } else {
-          atomlog->SetLastErr(ERROR_CORE_FS,ERROR_LOST_QUOTES);
+          atomlog->SetLastErr(ERROR_CORE_FS, ERROR_LOST_QUOTES);
 // Release allocated memory
           for (int32_t i = 0; i < tempcount; i++)
             if (tempoutput[i] != 0)
@@ -199,7 +200,7 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input) {
       if (doublequote == false) {
         if (i == 0) {
           if (i == len - 1) {
-            atomlog->SetLastErr(ERROR_CORE_FS,ERROR_LOST_QUOTES);
+            atomlog->SetLastErr(ERROR_CORE_FS, ERROR_LOST_QUOTES);
 // Release allocated memory
             for (int32_t i = 0; i < tempcount; i++)
               if (tempoutput[i] != 0)
@@ -213,14 +214,15 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input) {
             tempoutput[args.count] = new char[len - i + 2];
             arg = true;
           }
-        } else if (((input[i - 1] == symbol_space) || (input[i - 1] == symbol_tab)) &&
+        } else if (((input[i - 1] == symbol_space) ||
+            (input[i - 1] == symbol_tab)) &&
             (input[i + 1] != symbol_space) && (input[i + 1] != symbol_tab)) {
 // Quotes begin...
           doublequote = true;
           tempoutput[args.count] = new char[len - i + 2];
           arg = true;
         } else {
-          atomlog->SetLastErr(ERROR_CORE_FS,ERROR_LOST_QUOTES);
+          atomlog->SetLastErr(ERROR_CORE_FS, ERROR_LOST_QUOTES);
 // Release allocated memory
           for (int32_t i = 0; i < tempcount; i++)
             if (tempoutput[i] != 0)
@@ -229,14 +231,14 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input) {
           return 0;
         }
       } else {
-        if((input[i + 1] == symbol_space) || (input[i + 1] == symbol_tab)) {
+        if ((input[i + 1] == symbol_space) || (input[i + 1] == symbol_tab)) {
 // Quotes end...
           doublequote = false;
           tempoutput[args.count++][j] = '\0';
           j = 0;
           arg = false;
         } else {
-          atomlog->SetLastErr(ERROR_CORE_FS,ERROR_LOST_QUOTES);
+          atomlog->SetLastErr(ERROR_CORE_FS, ERROR_LOST_QUOTES);
 // Release allocated memory
           for (int32_t i = 0; i < tempcount; i++)
             if (tempoutput[i] != 0)
@@ -248,7 +250,7 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input) {
     } else if (i == len - 1) {
       if (quote == true) {
         if (input[i] != symbol_quote) {
-          atomlog->SetLastErr(ERROR_CORE_FS,ERROR_LOST_QUOTES);
+          atomlog->SetLastErr(ERROR_CORE_FS, ERROR_LOST_QUOTES);
 // Release allocated memory
           for (int32_t z = 0; z < tempcount; i++)
             if (tempoutput[z] != 0)
@@ -258,7 +260,7 @@ ARGUMENTS* ParseArgs(AtomLog *atomlog, char *input) {
         }
       } else if (doublequote == true) {
         if (input[i] != symbol_doublequote) {
-          atomlog->SetLastErr(ERROR_CORE_FS,ERROR_LOST_QUOTES);
+          atomlog->SetLastErr(ERROR_CORE_FS, ERROR_LOST_QUOTES);
 // Release allocated memory
           for (int32_t i = 0; i < tempcount; i++)
             if (tempoutput[i] != 0)

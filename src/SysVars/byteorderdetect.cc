@@ -53,9 +53,11 @@ uint64_t BoSys2LE(uint64_t n) {
     return n;
 // I hope we will never use this
   else if (bo == BO_BE || bo == BO_MBE)
-    return (BoSys2LE(HIDWORD(n)) + BoSys2LE(LODWORD(n)) * 256 * 256 * 256 * 256);
+    return (BoSys2LE(HIDWORD(n)) + BoSys2LE(LODWORD(n)) *
+      256 * 256 * 256 * 256);
   else if (bo == BO_MLE)
-    return (BoSys2LE(LODWORD(n)) + BoSys2LE(HIDWORD(n)) * 256 * 256 * 256 * 256);
+    return (BoSys2LE(LODWORD(n)) + BoSys2LE(HIDWORD(n)) *
+      256 * 256 * 256 * 256);
   else
     return n;
 }
@@ -87,9 +89,11 @@ uint64_t BoLE2Sys(uint64_t n) {
     return n;
 // I hope we will never use this
   else if (bo == BO_BE || bo == BO_MBE)
-    return (BoLE2Sys(HIDWORD(n)) + BoLE2Sys(LODWORD(n)) * 256 * 256 * 256 * 256);
+    return (BoLE2Sys(HIDWORD(n)) + BoLE2Sys(LODWORD(n)) *
+      256 * 256 * 256 * 256);
   else if (bo == BO_MLE)
-    return (BoLE2Sys(LODWORD(n)) + BoLE2Sys(HIDWORD(n)) * 256 * 256 * 256 * 256);
+    return (BoLE2Sys(LODWORD(n)) + BoLE2Sys(HIDWORD(n)) *
+      256 * 256 * 256 * 256);
   else
     return n;
 }

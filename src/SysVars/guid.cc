@@ -1,5 +1,5 @@
 #include "guid.h"
-AGUID* GetAGUID (char *guid) {
+AGUID* GetAGUID(char *guid) {
   AGUID *aguid = new AGUID;
   aguid->data0 = 0;
   aguid->data1 = 0;
@@ -28,7 +28,7 @@ AGUID* GetAGUID (char *guid) {
   aguid->data1 = BoLE2Sys(aguid->data1);
   aguid->data2 = BoLE2Sys(aguid->data2);
   aguid->data3 = BoLE2Sys(aguid->data3);
-#endif // UNIX
+#endif  // UNIX
 #ifdef WINDOWS
   GUID *uuid = new GUID;
   if (guid == 0) {
@@ -47,10 +47,10 @@ AGUID* GetAGUID (char *guid) {
   uuid->Data2 = BoSys2LE(uuid->Data2);
   uuid->Data3 = BoSys2LE(uuid->Data3);
   aguid->data1 = uuid->Data3 + uuid->Data2 * 256 * 256;
-  aguid->data2 = uuid->Data4[3] + uuid->Data4[2] * 256 + uuid->Data4[1] * 256 * 256 +
-    uuid->Data4[0] * 256 * 256 * 256;
-  aguid->data3 = uuid->Data4[7] + uuid->Data4[6] * 256 + uuid->Data4[5] * 256 * 256 +
-    uuid->Data4[4] * 256 * 256 * 256;
+  aguid->data2 = uuid->Data4[3] + uuid->Data4[2] * 256 + uuid->Data4[1] *
+    256 * 256 + uuid->Data4[0] * 256 * 256 * 256;
+  aguid->data3 = uuid->Data4[7] + uuid->Data4[6] * 256 + uuid->Data4[5] *
+    256 * 256 + uuid->Data4[4] * 256 * 256 * 256;
   aguid->data1 = BoLE2Sys(aguid->data1);
   aguid->data2 = BoLE2Sys(aguid->data2);
   aguid->data3 = BoLE2Sys(aguid->data3);
@@ -59,8 +59,8 @@ AGUID* GetAGUID (char *guid) {
 #endif  // WINDOWS
   return aguid;
 }
-char* GetCGUID (AGUID *guid) {
-  char *cguid = new char [37];
+char* GetCGUID(AGUID *guid) {
+  char *cguid = new char[37];
   if (guid == 0) {
     guid = new AGUID;
     guid = GetAGUID();
