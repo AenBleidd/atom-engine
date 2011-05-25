@@ -29,7 +29,7 @@
 
 #ifdef WINDOWS
 FILE* fmemopen(void *s, size_t len, const char *modes);
-#endif // WINDOWS
+#endif  // WINDOWS
 
 // main constants
 static const uint32_t magic = 0x41454653;  // Magic number ("AEFS")
@@ -123,7 +123,7 @@ static const uint32_t crc32table[256] = {
 // XOR mask for CRC32
 static const uint32_t mask = 0xFFFFFFFFUL;
 #endif  // _CRC_CHECK_
-#pragma pack (1)
+#pragma pack(1)
 struct HEADER {
 // magic number
   uint32_t magic;

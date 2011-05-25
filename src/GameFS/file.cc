@@ -102,7 +102,7 @@ void AtomFS::Close(FILE *file) {
 // close the file
   fclose(file);
 // release memory (if we really need this)
-// TODO (Lawliet): Check if we need to release buffer too
+// TODO(Lawliet): Check if we need to release buffer too
   delete t;
   return;
 }
@@ -130,10 +130,10 @@ int AtomFS::Save(FILE *input, char *output) {
   ARGUMENTS *args = ParsePath(atomlog, output);
   if ((args == 0) || (args->count == 0)) {
 // wrong path
-    atomlog->SetLastErr(ERROR_CORE_FS,ERROR_WRITE_FILE);
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
     atomlog->DebugMessage("Output filename can't be empty");
     for (int32_t i = 0; i < args->count; i++)
-      if(args->output[i] != 0)
+      if (args->output[i] != 0)
         delete [] args->output[i];
     delete [] args->output;
     delete args;
@@ -158,7 +158,7 @@ int AtomFS::Save(FILE *input, char *output) {
           atomlog->DebugMessage(atomlog->MsgBuf);
           delete [] curworkdir;
           for (int32_t i = 0; i < args->count; i++)
-            if(args->output[i] != 0)
+            if (args->output[i] != 0)
               delete [] args->output[i];
           delete [] args->output;
           delete args;
@@ -182,7 +182,7 @@ int AtomFS::Save(FILE *input, char *output) {
         atomlog->DebugMessage(atomlog->MsgBuf);
         delete [] curworkdir;
         for (int32_t i = 0; i < args->count; i++)
-          if(args->output[i] != 0)
+          if (args->output[i] != 0)
             delete [] args->output[i];
         delete [] args->output;
         delete args;
@@ -273,7 +273,7 @@ int AtomFS::Save(FILE *input, char *output) {
   }
 // Release the memory
   for (int32_t i = 0; i < args->count; i++)
-    if(args->output[i] != 0)
+    if (args->output[i] != 0)
       delete [] args->output[i];
   delete [] args->output;
   delete args;

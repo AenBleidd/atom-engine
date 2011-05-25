@@ -144,7 +144,8 @@ int32_t AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level = 0) {
       }
 // Update datsize
           datsize += sizeof(record.flag);
-          snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s %s", "Leaving folder", ch);
+          snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s %s",
+            "Leaving folder", ch);
           atomlog->DebugMessage(atomlog->MsgBuf);
 #ifdef UNIX
     for (cnt = 0; cnt < n; ++cnt) free(eps[cnt]);
