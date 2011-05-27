@@ -211,6 +211,7 @@ bool AtomWindow::IsMaximized( void )
 
 bool AtomWindow::IsFullScreen( void )
 {
+	return false;
 }
 
 bool AtomWindow::IsBorderSizeable( void )
