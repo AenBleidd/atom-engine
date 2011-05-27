@@ -7,7 +7,13 @@
 #define _FSMAN_VERSION_ _ATOM_VERSION_
 #endif  // _FSMANAGER_
 
+// If it will be compiled on MSVC
+#ifdef _MSC_VER
+// Oh God! I hate Microsoft!..
+#define snprintf sprintf_s
+#else
 #include <inttypes.h>
+#endif // _MSC_VER
 
 #include "SysVars/sysvars.h"
 // System parameters

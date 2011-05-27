@@ -165,7 +165,13 @@ struct RECORD {
 // control check sum (0 if it is a folder)
   uint64_t crc;
 };
+// It is MSVC ?
+#ifdef _MSC_VER
+//TODO(Lawliet): Check this!
+#pragma pack(pop)
+#else
 #pragma unpack
+#endif  // _MSC_VER
 struct TREE_FILE;
 struct TREE_FOLDER;
 // struct of the file in the file system
