@@ -6,6 +6,14 @@ AtomFS::AtomFS(AtomLog *log, unsigned int *key) {
     throw -1;
   }
   atomlog = log;
+  ERROR_CORE_FS = atomlog->LoadStrings(ERROR, gamefserrorcodes,
+                                       gamefs_error_description);
+  WARNING_CORE_FS = atomlog->LoadStrings(WARNING, gamefswarncodes,
+                                       gamefs_warn_descr);
+  if (ERROR_CORE_FS == -1 || WARNING_CORE_FS == -1) {
+// Why ???
+    throw -1;
+  }
 // Check byteorder
   if (BYTEORDER == -1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRONG_BYTEORDER);

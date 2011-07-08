@@ -33,10 +33,12 @@ FILE* fmemopen(void *s, size_t len, const char *modes);
 
 // main constants
 static const uint32_t magic = 0x41454653;  // Magic number ("AEFS")
+// TODO:(Lawliet) Maybe we need to change version type to
+// {MAJOR.MINOR.PATCH-REVISION} (4 bytes) ?
 static const uint8_t version = 0x01;  // current version (1)
 // folder and file flags
-static const uint8_t ff_ro = 0x01;  // read-only
 static const uint8_t ff_rw = 0x00;  // read-write
+static const uint8_t ff_ro = 0x01;  // read-only
 
 static const uint8_t flag_eoc = 0xCE;  // end of folder
 static const uint8_t flag_file = 0x0F;  // file
@@ -48,9 +50,9 @@ static const uint8_t flag_key = 0x0E;  // it's wake addon key
 static const uint8_t flag_ascii = 0x00;
 static const uint8_t flag_utf8 = 0xFF;
 // archive types
-static const uint8_t type_critical = 0xFF;
 static const uint8_t type_standart = 0x00;
 static const uint8_t type_addon = 0x01;
+static const uint8_t type_critical = 0xFF;
 // CRC32
 #ifdef _CRC_CHECK_
 // crc32 table generated using standart polynom
@@ -123,6 +125,66 @@ static const uint32_t crc32table[256] = {
 // XOR mask for CRC32
 static const uint32_t mask = 0xFFFFFFFFUL;
 #endif  // _CRC_CHECK_
+// Error codes
+static int32_t ERROR_CORE_FS = -1;
+static char *gamefs_error_description = "Core Error. File System Error.";
+/* GameFS Error Codes */
+#define NO_ERROR                                                     0x00000000
+#define ERROR_OPEN_FILE                                              0x00000001
+#define ERROR_READ_FILE                                              0x00000002
+#define ERROR_PARSE_MOUNT_FILE_QUOTES                                0x00000003
+#define ERROR_PARSE_MOUNT_FILE                                       0x00000004
+#define ERROR_MOUNT_FS                                               0x00000005
+#define ERROR_OPEN_FOLDER                                            0x00000006
+#define ERROR_WRITE_FILE                                             0x00000007
+#define ERROR_INCORRECT_FILE                                         0x00000008
+#define ERROR_INCORRECT_MOUNTPOINT                                   0x00000009
+#define ERROR_OVERWRITE_DENIED                                       0x0000000A
+#define ERROR_LOST_QUOTES                                            0x0000000B
+#define ERROR_PARSE_STRING                                           0x0000000C
+#define ERROR_WRONG_BYTEORDER                                        0x0000000D
+#define ERROR_INCORRECT_PATH                                         0x0000000E
+#define ERROR_INCORRECT_CRC32                                        0x0000000F
+#define ERROR_FUNCTION_ARGUMENTS                                     0x00000010
+#define ERROR_OLD_FSMAN                                              0x00000011
+/* GameFS Error Descriptions */
+static char *gamefserrorcodes[] = {
+"No Error.",
+"Error opening the file.",
+"Error reading the file.",
+"Error parsing the mount file. No closing quotes.",
+"Error parsing the mount file.",
+"Error mounting the file system.",
+"Couldn't open the directory.",
+"Error while writing the file.",
+"Incorrect file.",
+"Incorrect mountpoint",
+"Can't overwrite the file.",
+"Lost quotes.",
+"Error parsing the string.",
+"Wrong byteorder. Program can't read files with unknown byteorder.",
+"Path incorrect or directory or file don't exist.",
+"Crc check is failed. File is broken.",
+"Function was called with wrong arguments.",
+"FSMan version is too old or file is from the future."
+};
+// Warning codes
+static int32_t WARNING_CORE_FS = -1;
+static char *gamefs_warn_descr = "Core Warning. File System Warning.";
+/* GameFS Warning Codes */
+#define NO_WARNING                                                   0x00000000
+#define WARNING_OVERWRITE                                            0x00000001
+#define WARNING_EMPTY_STRING                                         0x00000002
+#define WARNING_WRONG_COMMAND                                        0x00000003
+#define WARNING_INCORRECT_PATH                                       0x00000004
+/* GameFS Warning Descriptions */
+static char *gamefswarncodes[] = {
+"No Warning.",
+"File was overwritten.",
+"Empty string. Nothing to parse.",
+"Wrong syntax or unknown command.",
+"Path incorrect or directory doesn't exist."
+};
 #pragma pack(1)
 struct HEADER {
 // magic number
@@ -299,7 +361,7 @@ class AtomFS {
 // Add new addon key and return it's number
   uint32_t AddAddonKey(uint32_t *key);
   uint32_t* GenKey(uint32_t k0, uint32_t k1,
-              uint32_t k2, uint32_t k3);
+                   uint32_t k2, uint32_t k3);
   void Decrypt(uint32_t *data, int32_t lenght, uint32_t k[4],
                uint32_t r[4], uint32_t *t);
 #ifdef _FSMAN_
