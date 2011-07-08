@@ -103,7 +103,7 @@ AtomLog::AtomLog(char *name, bool alone, uint8_t lvl) {
      logfile = fopen(plogfilename, "at");
     if (logfile == 0) {
 // Another last hope...
-// Try to use standart name
+// Try to use standard name
       snprintf(plogfilename, s, "%s%s_%s%s",
                temppath, "atom", CurDateTime(), ".log");
       if (alone == false)
@@ -127,12 +127,18 @@ AtomLog::AtomLog(char *name, bool alone, uint8_t lvl) {
       throw -1;
     }
   }
+  errorcode = 0;
+  errorsubcode = 0;
+  warningcode = 0;
+  warningsubcode = 0;
   global_error.code = 0;
   global_error.sub_code = 0;
   global_error.description = 0;
   global_warning.code = 0;
   global_warning.sub_code = 0;
   global_warning.description = 0;
+  module_error_count = 0;
+  module_warning_count = 0;
 }
 AtomLog::~AtomLog() {
 // close log file
@@ -184,67 +190,6 @@ void AtomLog::DebugMsg(const char *string) {
 #endif  // ATOM_DEBUG
 return;
 }
-// Errors description
-const char *errorcode[] = {
-"No Error.",
-"Core Error. File System Error.",
-"Engine Error. WindowManager Error."
-};
-const char *errorsubcode[3][18] = {
-{
-"No Error."
-}, {
-"No Error.",
-"Error opening the file.",
-"Error reading the file.",
-"Error parsing the mount file. No closing quotes.",
-"Error parsing the mount file.",
-"Error mounting the file system.",
-"Couldn't open the directory.",
-"Error while writing the file.",
-"Incorrect file.",
-"Incorrect mountpoint",
-"Can't overwrite the file.",
-"Lost quotes.",
-"Error parsing the string.",
-"Wrong byteorder. Program can't read files with unknown byteorder.",
-"Path incorrect or directory or file don't exist.",
-"Crc check is failed. File is broken.",
-"Function was called with wrong arguments.",
-"FSMan version is too old or file is from the future."
-}, {
-"No Error",
-"Fatal Error: Error registering the window class",
-"Fatal Errpr: Couldn't create a window",
-"Invalid input parameter",
-"Error unregistering the window class",
-"Error getting window title",
-"Error getting the window info block",
-"Error setting the window text while applying the window info block",
-"Error trying to change window size and dimentions",
-"Error adjusting the client area for a window",
-"Error trying to make window topmost",
-"No connection to X server established",
-"Error getting WM hints: window size and position",
-"No memory for XLib string conversion"
-}
-};
-// Warning description
-const char *warningcode[] = {
-"No Warning.",
-"Core Warning. File System Warning."
-};
-const char *warningsubcode[2][5] = {
-{
-"No Warning."
-}, {
-"No Warning.",
-"File was overwritten.",
-"Empty string. Nothing to parse.",
-"Wrong syntax or unknown command.",
-"Path incorrect or directory doesn't exist."
-}
-};
 void AtomLog::SetLastError(uint32_t code, uint32_t subcode,
                            const char* file, int32_t line) {
 // do some clean
@@ -282,4 +227,52 @@ void AtomLog::SetLastWarning(uint32_t code, uint32_t subcode,
   LogMsg(global_warning.description);
 
   return;
+}
+
+int32_t AtomLog::LoadStrings(bool type, char **subcodes, char *module_description) {
+  if (type == ERROR) {
+// load errors
+    if (errorcode == 0 && errorsubcode == 0) {
+      errorcode = new char*;
+      errorcode[0] = module_description;
+      errorsubcode = new char**;
+      errorsubcode[0] = subcodes;
+    } else {
+      char ***temp = new char**[module_error_count + 1];
+      for (uint32_t i = 0; i < module_error_count; i++)
+        temp[i] = errorsubcode[i];
+      temp[module_error_count] = subcodes;
+      delete [] errorsubcode;
+      errorsubcode = temp;
+      char **t = new char*[module_error_count + 1];
+      for (uint32_t i = 0; i < module_error_count; i++)
+        t[i] = errorcode[i];
+      t[module_error_count] = module_description;
+      delete [] errorcode;
+      errorcode = t;
+    }
+    return module_error_count++;
+  } else {
+// load warnings
+    if (warningcode == 0 && warningsubcode == 0) {
+      warningcode = new char*;
+      warningcode[0] = module_description;
+      warningsubcode = new char**;
+      warningsubcode[0] = subcodes;
+    } else {
+      char ***temp = new char**[module_warning_count + 1];
+      for (uint32_t i = 0; i < module_warning_count; i++)
+        temp[i] = warningsubcode[i];
+      temp[module_warning_count] = subcodes;
+      delete [] warningsubcode;
+      warningsubcode = temp;
+      char **t = new char*[module_warning_count + 1];
+      for (uint32_t i = 0; i < module_warning_count; i++)
+        t[i] = warningcode[i];
+      t[module_warning_count] = module_description;
+      delete [] warningcode;
+      warningcode = t;
+    }
+    return module_warning_count++;
+  }
 }
