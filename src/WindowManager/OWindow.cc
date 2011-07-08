@@ -2,6 +2,7 @@
 
 OWindow::OWindow( AtomLog& Log ) : log( Log )
 {
+    ERROR_ENGINE_WM = log.LoadStrings(ERROR, wm_errors, wm_error_descr);
     printf( "Going to write log\n");
     printf( "Log has been written\n" );
 }

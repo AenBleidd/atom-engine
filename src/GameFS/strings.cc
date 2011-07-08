@@ -17,7 +17,7 @@ ARGUMENTS* ParsePath(AtomLog *atomlog, char *input) {
   }
 // allocate memory for the potential maximum count of arguments
   char **tempoutput = new char*[tempcount];
-// Set all pointer to zero
+// Set all pointers to zero
   for (int32_t i = 0; i < tempcount; i++)
     tempoutput[i] = 0;
 // count of real argunents

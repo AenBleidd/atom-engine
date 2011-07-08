@@ -36,10 +36,15 @@ class AtomLog {
 // global last error and warning
   ERR global_error;
   ERR global_warning;
+// errors and warnings
+  char **errorcode;
+  char ***errorsubcode;
+  char **warningcode;
+  char ***warningsubcode;
 // logfile
   FILE *logfile;
  public:
-// Current dtae and time
+// Current date and time
   char* CurDateTime();
 // Current time
   char* CurTime();
@@ -61,9 +66,17 @@ class AtomLog {
 // write debug log message
   void DebugMsg(const char *string, uint8_t lvl, const char *file,
                 int32_t line);
+// load error descriptions and return module code
+// type - ERROR or WARNING
+#define ERROR true
+#define WARNING false
+  int32_t LoadStrings(bool type, char **subcodes, char *module_description);
  private:
 // verbose level
   uint8_t verbose_level;
+// modules count
+  uint32_t module_error_count;
+  uint32_t module_warning_count;
 // write log message
   void LogMsg(const char *string);
 // write debug log message
@@ -76,52 +89,5 @@ class AtomLog {
 #define DebugMessage(string) DebugMsg(string,0,__FILE__,__LINE__);
 #define LogMessageV(string,lvl) LogMsg(string,lvl,__FILE__,__LINE__);
 #define DebugMessageV(string,lvl) DebugMsg(string,lvl,__FILE__,__LINE__);
-
-/* Module General Error Codes */
-#define ERROR_CORE_FS                                                0x00000001
-#define ERROR_ENGINE_WM                                              0x00000002
-
-/* GameFS Error Codes */
-#define ERROR_OPEN_FILE                                              0x00000001
-#define ERROR_READ_FILE                                              0x00000002
-#define ERROR_PARSE_MOUNT_FILE_QUOTES                                0x00000003
-#define ERROR_PARSE_MOUNT_FILE                                       0x00000004
-#define ERROR_MOUNT_FS                                               0x00000005
-#define ERROR_OPEN_FOLDER                                            0x00000006
-#define ERROR_WRITE_FILE                                             0x00000007
-#define ERROR_INCORRECT_FILE                                         0x00000008
-#define ERROR_INCORRECT_MOUNTPOINT                                   0x00000009
-#define ERROR_OVERWRITE_DENIED                                       0x0000000A
-#define ERROR_LOST_QUOTES                                            0x0000000B
-#define ERROR_PARSE_STRING                                           0x0000000C
-#define ERROR_WRONG_BYTEORDER                                        0x0000000D
-#define ERROR_INCORRECT_PATH                                         0x0000000E
-#define ERROR_INCORRECT_CRC32                                        0x0000000F
-#define ERROR_FUNCTION_ARGUMENTS                                     0x00000010
-#define ERROR_OLD_FSMAN                                              0x00000011
-
-/* WindowManager Error Codes */
-#define ERROR_CLSREG_FAIL                                            0x00000001
-#define ERROR_WND_CR_FAIL                                            0x00000002
-#define ERROR_INVALID_INPUT_PARAMETER                                0x00000003
-#define ERROR_CLSUNREG_FAIL                                          0x00000004
-#define ERROR_TITLE                                                  0x00000005
-#define ERROR_WINDOWINFO_QUERY_FAIL                                  0x00000006
-#define ERROR_WINDOWINFO_SETTEXT                                     0x00000007
-#define ERROR_MVWIN_FAIL                                             0x00000008
-#define ERROR_ADJUSTRECT_FAIL                                        0x00000009
-#define ERROR_BRING_TO_TOP                                           0x0000000A
-#define ERROR_X11_CONNECTION                                         0x0000000B
-#define ERROR_X11_WM_HINTS                                           0x0000000C
-#define ERROR_X11_STRING_CONVERSION                                  0x0000000D
-
-/* Module General Warning Codes */
-#define WARNING_CORE_FS                                              0x00000001
-
-/* GameFS Warning Codes */
-#define WARNING_OVERWRITE                                            0x00000001
-#define WARNING_EMPTY_STRING                                         0x00000002
-#define WARNING_WRONG_COMMAND                                        0x00000003
-#define WARNING_INCORRECT_PATH                                       0x00000004
 
 #endif  // _CORE_ERROR_H_

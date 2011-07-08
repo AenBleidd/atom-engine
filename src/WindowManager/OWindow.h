@@ -24,7 +24,40 @@ enum WND_BUTTON_FLAGS
     ATOMWND_BTN_EXIT            = 0x00000040,
     ATOMWND_BTN_HELP            = 0x00000080
 };
-
+// Error Codes
+static int32_t ERROR_ENGINE_WM = -1;
+static char *wm_error_descr = "Engine Error. WindowManager Error.";
+/* WindowManager Error Codes */
+#define NO_ERROR                                                     0x00000000
+#define ERROR_CLSREG_FAIL                                            0x00000001
+#define ERROR_WND_CR_FAIL                                            0x00000002
+#define ERROR_INVALID_INPUT_PARAMETER                                0x00000003
+#define ERROR_CLSUNREG_FAIL                                          0x00000004
+#define ERROR_TITLE                                                  0x00000005
+#define ERROR_WINDOWINFO_QUERY_FAIL                                  0x00000006
+#define ERROR_WINDOWINFO_SETTEXT                                     0x00000007
+#define ERROR_MVWIN_FAIL                                             0x00000008
+#define ERROR_ADJUSTRECT_FAIL                                        0x00000009
+#define ERROR_BRING_TO_TOP                                           0x0000000A
+#define ERROR_X11_CONNECTION                                         0x0000000B
+#define ERROR_X11_WM_HINTS                                           0x0000000C
+#define ERROR_X11_STRING_CONVERSION                                  0x0000000D
+static char *wm_errors[] = {
+"No Error",
+"Fatal Error: Error registering the window class",
+"Fatal Errpr: Couldn't create a window",
+"Invalid input parameter",
+"Error unregistering the window class",
+"Error getting window title",
+"Error getting the window info block",
+"Error setting the window text while applying the window info block",
+"Error trying to change window size and dimentions",
+"Error adjusting the client area for a window",
+"Error trying to make window topmost",
+"No connection to X server established",
+"Error getting WM hints: window size and position",
+"No memory for XLib string conversion"
+};
 
 class OWindow
 {
