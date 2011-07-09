@@ -185,7 +185,12 @@ static char *gamefswarncodes[] = {
 "Wrong syntax or unknown command.",
 "Path incorrect or directory doesn't exist."
 };
+// It is MSVC ?
+#ifdef _MSC_VER
+#pragma pack(push,1)
+#else
 #pragma pack(1)
+#endif  // _MSC_VER
 struct HEADER {
 // magic number
   uint32_t magic;

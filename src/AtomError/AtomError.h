@@ -68,8 +68,8 @@ class AtomLog {
                 int32_t line);
 // load error descriptions and return module code
 // type - ERROR or WARNING
-#define ERROR true
-#define WARNING false
+#define ATOMERROR true
+#define ATOMWARNING false
   int32_t LoadStrings(bool type, char **subcodes, char *module_description);
  private:
 // verbose level
