@@ -271,7 +271,7 @@ int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
 #ifdef _FSMAN_
 int32_t AtomFS::Create(char **input, uint32_t count, char *file,
                    uint16_t encrypt, uint32_t *key, uint8_t type) {
-  FILE *binfile, *datfile, *bintempfile, *dattempfile;
+  FILE *binfile, *datfile, *bintempfile;
   datsize = 0;
 // set random number generator
   srand(time(NULL));
