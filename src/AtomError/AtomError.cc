@@ -230,7 +230,7 @@ void AtomLog::SetLastWarning(uint32_t code, uint32_t subcode,
 }
 
 int32_t AtomLog::LoadStrings(bool type, char **subcodes, char *module_description) {
-  if (type == ERROR) {
+  if (type == ATOMERROR) {
 // load errors
     if (errorcode == 0 && errorsubcode == 0) {
       errorcode = new char*;
