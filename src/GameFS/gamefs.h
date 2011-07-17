@@ -12,19 +12,19 @@
 #include <stdio.h>
 #include "../SysVars/guid.h"
 
-#ifdef _FSMAN_
 #ifdef UNIX
+
+#ifdef _FSMAN_
 #include <dirent.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <time.h>
-#endif  // UNIX
 #endif  // _FSMAN_
 
-#ifdef UNIX
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
-#endif  // _GNU_SOURCE
+#endif  // 
+
 #endif  // UNIX
 
 #ifdef WINDOWS

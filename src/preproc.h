@@ -19,8 +19,8 @@
 // System parameters
 
 // byteorder:
-#define BO_BE 0  // 0123
-#define BO_LE 1  // 3210
+#define BO_BE  0  // 0123
+#define BO_LE  1  // 3210
 #define BO_MBE 2  // 1032
 #define BO_MLE 3  // 2301
 
