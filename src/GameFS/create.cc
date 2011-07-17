@@ -75,6 +75,8 @@ int32_t AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level = 0) {
         fclose(dat);
         fclose(bin);
         FindClose(hf);
+        delete [] tmp;
+        tmp = 0;
         return -1;
       }
       do {
@@ -90,7 +92,13 @@ int32_t AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level = 0) {
           curdir = new char[fsize];
           snprintf(curdir, fsize, "%s\\%s", ch, st.cFileName);
 #endif  // WINDOWS
-          if (FolderScan(curdir, dat, bin, level+1) == -1) return -1;
+          if (FolderScan(curdir, dat, bin, level+1) == -1) {
+#ifdef WINDOWS
+            delete [] curdir;
+            curdir = 0;
+#endif // WINDOWS
+            return -1;
+          }
 #ifdef WINDOWS
           delete [] curdir;
           curdir = 0;
@@ -115,7 +123,13 @@ int32_t AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level = 0) {
           curdir = new char[st_size];
           snprintf(curdir, st_size, "%s\\%s", ch, st.cFileName);
 #endif  // WINDOWS
-          if (Write(curdir, dat, bin) == -1) return -1;
+          if (Write(curdir, dat, bin) == -1) {
+#ifdef WINDOWS
+            delete [] curdir;
+            curdir = 0;
+#endif  // WINDOWS
+            return -1;
+          }
 #ifdef WINDOWS
           delete [] curdir;
           curdir = 0;
