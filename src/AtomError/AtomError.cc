@@ -209,9 +209,16 @@ void AtomLog::SetLastError(uint32_t code, uint32_t subcode,
   uint32_t errlen = strlen(errorcode[global_error.code]) +
              strlen(errorsubcode[global_error.code][global_error.sub_code]);
   global_error.description = new char[errlen];
-// TODO (Lawliet): Rewrite this
-  if (verbose_level == SHOWSYSTEMERRORSDESCR) {
-    errlen += 300 + 30 + MSG_BUFFER_SIZE;
+  errlen += 300;
+  snprintf(global_error.description, errlen, "%s:%i\tERROR: %s\t%s",
+           file, line, errorcode[global_error.code],
+           errorsubcode[global_error.code][global_error.sub_code]);
+  if (verbose_level >= SHOWSYSTEMERRORS) {
+    snprintf(MsgBuf, MSG_BUFFER_SIZE, "%s: %x", "Last system error is",
+             global_error.system_code);
+    DebugMsg(MsgBuf);
+  }
+  if (verbose_level >= SHOWSYSTEMERRORSDESCR) {
 #ifdef WINDOWS
     FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
                   NULL, global_error.system_code,
@@ -221,21 +228,7 @@ void AtomLog::SetLastError(uint32_t code, uint32_t subcode,
 #ifdef UNIX
     strerror_r(global_error.system_code, MsgBuf, MSG_BUFFER_SIZE);
 #endif  // UNIX
-    snprintf(global_error.description, errlen, "%s:%i\tERROR: %s\t%s\n%s %x: %s",
-             file, line, errorcode[global_error.code],
-             errorsubcode[global_error.code][global_error.sub_code],
-             "Last system error is", global_error.system_code, MsgBuf);
-  } else if (verbose_level == SHOWSYSTEMERRORS) {
-    errlen += 300 + 30;
-    snprintf(global_error.description, errlen, "%s:%i\tERROR: %s\t%s\n%s %x",
-             file, line, errorcode[global_error.code],
-             errorsubcode[global_error.code][global_error.sub_code],
-             "Last system error is:", global_error.system_code);
-  } else {
-    errlen += 300;
-    snprintf(global_error.description, errlen, "%s:%i\tERROR: %s\t%s",
-             file, line, errorcode[global_error.code],
-             errorsubcode[global_error.code][global_error.sub_code]);
+    DebugMsg(MsgBuf);
   }
 // log the error
   LogMsg(global_error.description);
