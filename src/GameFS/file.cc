@@ -9,16 +9,17 @@
 #ifdef WINDOWS
 FILE* fmemopen(void *s, size_t len, const char *modes) {
 // Now actionally modes do nothing. Mode is always "r"
-  FILE file;
-  FILE *pfile = new FILE;
+  FILE *file = new FILE;
 
-  file._flag = _IOREAD | _IOSTRG;
-  file._base = (char*)s;
-  file._ptr = file._base;
-  file._cnt = len;
+  file->_flag = _IOREAD | _IOSTRG;
+// if we open it for writing
+  if (strcmp(modes, "w") == 0 || strcmp(modes, "wb") == 0) 
+    file->_flag |= _IOWRT;
+  file->_base = (char*)s;
+  file->_ptr = file->_base;
+  file->_cnt = len;
 
-  *pfile = file;
-  return pfile;
+  return file;
 }
 #endif  // WINDOWS
 FILE* AtomFS::Open(char *name, TREE_FOLDER *current) {
