@@ -301,10 +301,8 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
   else
     bytescrypt = encrypt;
 // Create name of the output files
-  uint32_t namelen = strlen(file)+5;
-  char *bin = new char[namelen];
+  char *bin = file;
   char *dat = GetCGUID();
-  snprintf(bin, namelen, "%s.bin", file);
 // check if output files exist
   datfile = fopen(dat, "r");
   if (datfile != NULL) {
