@@ -64,6 +64,7 @@ ADD_SUBDIRECTORY ( AtomError )
 ADD_SUBDIRECTORY ( GameFS )
 ADD_SUBDIRECTORY ( SysVars )
 ADD_SUBDIRECTORY ( utils )
+ADD_SUBDIRECTORY ( ResourceManager )
 
 
 # Cache some of the command-line parameters

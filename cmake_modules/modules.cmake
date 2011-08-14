@@ -16,3 +16,7 @@ SET ( FSMAN_MODULE "FSMan" )
 # SysVars module name
 # Needed to identify some system variables
 SET ( SYSVARS_MODULE "SysVars" )
+
+# ResourceManager module name
+# Needed to manage memory
+SET ( RESOURCEMANAGER_MODULE "ResourceManager" )
