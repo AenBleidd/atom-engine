@@ -6,7 +6,7 @@
 
 class ResourceManager {
 public:
-  explicit ResourceManager(AtomLog *log, AtomFS *fs = 0);
+  explicit ResourceManager(AtomLog *log);
   ~ResourceManager();
 };
 
