@@ -8,6 +8,9 @@ class ResourceManager {
 public:
   explicit ResourceManager(AtomLog *log);
   ~ResourceManager();
+  void* Allocate(uint64_t size);
+  void* Reallocate(void* mem, uint64_t size);
+  void Release(void* mem);
 };
 
 #endif  // _RESOURCE_MANAGER_H_

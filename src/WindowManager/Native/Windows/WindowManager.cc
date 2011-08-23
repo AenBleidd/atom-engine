@@ -1,7 +1,8 @@
 #include "WindowManager.h"
 #include "EventHandler.h"
 
-    /* TODO:          * Fix Noborder and FullScreen styles.
+    /* TODO:     
+     * Fix Noborder and FullScreen styles.
     */
 
 void TranslateRect( LPRECT SystemRect, PATOMRECT AtomRect )
@@ -220,7 +221,7 @@ bool AtomWindow::IsBorderSizeable( void )
     if( !GetWindowInfo( hWnd, &wi ) )
     {
         log.SetLastErr( ERROR_ENGINE_WM, ERROR_WINDOWINFO_QUERY_FAIL );
-        log.DebugMessage( "Error: AtomWindow::IsVisible() : Call to GetWindowInfo() has failed" );
+        log.DebugMessage( "Error: AtomWindow::IsBorderSizeable() : Call to GetWindowInfo() has failed" );
         return false;
     }
 
@@ -243,7 +244,7 @@ bool AtomWindow::IsTopMost( void )
     if( !GetWindowInfo( hWnd, &wi ) )
     {
         log.SetLastErr( ERROR_ENGINE_WM, ERROR_WINDOWINFO_QUERY_FAIL );
-        log.DebugMessage( "Error: AtomWindow::IsVisible() : Call to GetWindowInfo() has failed" );
+        log.DebugMessage( "Error: AtomWindow::IsTopMost() : Call to GetWindowInfo() has failed" );
         return false;
     }
 
@@ -259,7 +260,7 @@ bool AtomWindow::HasMinimizeButton( void )
     if( !GetWindowInfo( hWnd, &wi ) )
     {
         log.SetLastErr( ERROR_ENGINE_WM, ERROR_WINDOWINFO_QUERY_FAIL );
-        log.DebugMessage( "Error: AtomWindow::IsVisible() : Call to GetWindowInfo() has failed" );
+        log.DebugMessage( "Error: AtomWindow::IsMinimizeButton() : Call to GetWindowInfo() has failed" );
         return false;
     }
 
@@ -275,7 +276,7 @@ bool AtomWindow::HasMaximizeButton( void )
     if( !GetWindowInfo( hWnd, &wi ) )
     {
         log.SetLastErr( ERROR_ENGINE_WM, ERROR_WINDOWINFO_QUERY_FAIL );
-        log.DebugMessage( "Error: AtomWindow::IsVisible() : Call to GetWindowInfo() has failed" );
+        log.DebugMessage( "Error: AtomWindow::IsMaximizeButton() : Call to GetWindowInfo() has failed" );
         return false;
     }
 
@@ -291,7 +292,7 @@ bool AtomWindow::HasExitButton( void )
     if( !GetWindowInfo( hWnd, &wi ) )
     {
         log.SetLastErr( ERROR_ENGINE_WM, ERROR_WINDOWINFO_QUERY_FAIL );
-        log.DebugMessage( "Error: AtomWindow::IsVisible() : Call to GetWindowInfo() has failed" );
+        log.DebugMessage( "Error: AtomWindow::HasExitButton() : Call to GetWindowInfo() has failed" );
         return false;
     }
 
@@ -307,7 +308,7 @@ bool AtomWindow::HasHelpButton( void )
     if( !GetWindowInfo( hWnd, &wi ) )
     {
         log.SetLastErr( ERROR_ENGINE_WM, ERROR_WINDOWINFO_QUERY_FAIL );
-        log.DebugMessage( "Error: AtomWindow::IsVisible() : Call to GetWindowInfo() has failed" );
+        log.DebugMessage( "Error: AtomWindow::HasHelpButton() : Call to GetWindowInfo() has failed" );
         return false;
     }
 
