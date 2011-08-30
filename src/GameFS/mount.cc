@@ -315,7 +315,7 @@ int32_t AtomFS::Mount(char* filename, char* mountfolder, uint32_t *key) {
 // this is a folder we search for
       current = current->tree_folder;
     } else {
-// my be we can find smth ?
+// may be we can find smth ?
       current = current->tree_folder;
       while (true) {
         if (current->next_folder == 0) {
@@ -332,7 +332,7 @@ int32_t AtomFS::Mount(char* filename, char* mountfolder, uint32_t *key) {
           current->tree_folder = 0;
           current->tree_file = 0;
           current->next_folder = 0;
-// set he name of the folder
+// set the name of the folder
           uint32_t len = strlen(args->output[pos]);
           current->name = new char[len];
           snprintf(current->name, len, "%s", args->output[pos]);
@@ -476,7 +476,7 @@ temprecord = new RECORD;
         delete temprecord;
         return -1;
       }
-// Search fo the file
+// Search for the file
       bfound = false;
       if (current->tree_file == 0) {
         current->tree_file = new TREE_FILE;

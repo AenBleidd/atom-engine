@@ -10,15 +10,23 @@
 FILE* fmemopen(void *s, size_t len, const char *modes) {
 // Now actionally modes do nothing. Mode is always "r"
   FILE *file = new FILE;
-
+#ifdef _MSC_VER
   file->_flag = _IOREAD | _IOSTRG;
 // if we open it for writing
-  if (strcmp(modes, "w") == 0 || strcmp(modes, "wb") == 0) 
-    file->_flag |= _IOWRT;
+/*
+  if (strcmp(modes, "w") == 0 || strcmp(modes, "wb") == 0)
+	file->_flag |= _IOWRT;
+*/
   file->_base = (char*)s;
   file->_ptr = file->_base;
   file->_cnt = len;
-
+#endif  // _MSC_VER
+#ifdef __BORLANDC__
+  file->flags = _F_READ | _F_BIN;
+  file->buffer = (unsigned char*)s;
+  file->curp = file->buffer;
+  file->bsize = len;
+#endif  // __BORLANDC__
   return file;
 }
 #endif  // WINDOWS
@@ -126,7 +134,7 @@ int AtomFS::Save(FILE *input, char *output) {
     return -1;
   }
   rewind(input);
-// Check the way where to save file
+// Check the path to save file
 // Parse the path
   ARGUMENTS *args = ParsePath(atomlog, output);
   if ((args == 0) || (args->count == 0)) {
@@ -216,7 +224,7 @@ int AtomFS::Save(FILE *input, char *output) {
         if ((CreateDirectory(args->output[i], NULL) == 0) &&
             (GetLastError() == ERROR_ALREADY_EXISTS)) {
 #endif  // WINDOWS
-// we can'r create directory cause we have another file with this name
+// we can't create directory cause we have another file with this name
           atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FOLDER);
           snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s",
                    "Can't open or create directory: there is a file \

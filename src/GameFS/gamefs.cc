@@ -55,7 +55,7 @@ AtomFS::AtomFS(AtomLog *log, unsigned int *key) {
 AtomFS::~AtomFS() {
 // delete root directory
   TREE_FOLDER *nextfolder = 0, *tempfolder = 0, *nearfolder = 0;
-  TREE_FILE *nextfile = 0, *tempfile = 0, *temphead = 0, *tempcurrent = 0;
+  TREE_FILE *nextfile = 0, *tempfile = 0;
   nextfolder = root;
   while (true) {
 // it may be the last element

@@ -1,19 +1,24 @@
 #include "sysvars.h"
+int8_t byte_order = 4;
 int8_t ByteOrderDetect(void) {
+  if (byte_order != 4)
+	return byte_order;
+
   int8_t *ptest;
   int32_t test = 0x12345678;
   ptest = (int8_t*)&test;
   if (ptest[0] == 0x12)
-    return 0;
+	byte_order = 0;
   else if (ptest[0] == 0x34)
-    return 2;
+	byte_order = 2;
   else if (ptest[0] == 0x56)
-    return 3;
+	byte_order = 3;
   else if (ptest[0] == 0x78)
-    return 1;
+	byte_order = 1;
 // WTF??? O_o
   else
-    return -1;
+	byte_order -1;
+  return byte_order;
 }
 // convert from system byteorder to Little-Endian
 uint16_t BoSys2LE(uint16_t n) {
