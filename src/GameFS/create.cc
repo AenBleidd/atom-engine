@@ -144,7 +144,7 @@ int32_t AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level = 0) {
       delete [] tmp;
       tmp = 0;
 #endif  // WINDOWS
-// End of catalogue
+// End of folder
 // TODO(Lawliet): Check recurse in this function
       record.flag = flag_eoc;
       record.namelen = 0;
@@ -426,7 +426,7 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
 #endif  // WINDOWS
       if (FolderScan(input[i], datfile, binfile, 0) == -1) {
         fclose(datfile);
-        fclose(binfile);
+		fclose(binfile);
         return -1;
       }
     }
@@ -526,7 +526,7 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
   fclose(binfile);
   delete [] bin;
   bin = 0;
-// end worh with pak file
+// end working with pak file
   return 0;
 }
 #endif  // _FSMAN_

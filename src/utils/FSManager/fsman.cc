@@ -23,7 +23,7 @@ int main(int arg, char *argc[]) {
     "Mixed-Little-Endian"
   };
   int8_t byteorder = BYTEORDER;
-  if ((byteorder > 0) && (byteorder < 4)) {
+  if ((byteorder >= 0) && (byteorder < 4)) {
     snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s %s",
              "Used byteorder is", descr[byteorder]);
     atomlog->DebugMessage(atomlog->MsgBuf);

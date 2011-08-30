@@ -3,6 +3,9 @@
 
 #ifdef WINDOWS
 #include <windows.h>
+#ifdef __BORLANDC__
+#include <time.h>
+#endif  // __BORLANDC__
 #endif  // WINDOWS
 #include <string.h>
 #include <stdio.h>
@@ -12,11 +15,6 @@
 #include <sys/stat.h>
 #include <errno.h>
 #endif  // UNIX
-
-#ifdef WINDOWS
-#define localtime_r(timep, result)  (localtime (timep) ? memcpy  ((result), \
-localtime (timep), sizeof (*(result))) : 0)
-#endif  // WINDOWS
 
 #include "../preproc.h"
 #define MSG_BUFFER_SIZE 1024

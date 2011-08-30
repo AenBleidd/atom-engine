@@ -98,7 +98,7 @@ void AtomFS::Decrypt(uint32_t *data, int32_t lenght, uint32_t k[4],
 uint32_t AtomFS::AddAddonKey(uint32_t *key) {
   uint32_t **temp, **table;
   if (addon_key.count != 0) {
-// search fo an existing key
+// search for an existing key
     for (uint32_t i = 0; i < addon_key.count; i++) {
       if (memcmp(key, addon_key.addon_key[i], 16) == 0) {
 // we find this key
