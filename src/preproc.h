@@ -7,13 +7,40 @@
 #define _FSMAN_VERSION_ _ATOM_VERSION_
 #endif  // _FSMANAGER_
 
-// If it will be compiled on MSVC
+// Check environment
+#ifdef WINDOWS
+// we works on windows
+#ifdef _MSC_VER
+// we compile engine using Microsoft Visual C/C++
+#elif __BORLANDC__
+// we compile engine using Borland Builder
+#else
+// unsupported compiler
+#error "Unsupported compiler. A.T.O.M Engine can be compiled using \
+Microsoft Visual C++ or Borland C++ Builder"
+#endif  // windows compiler
+#elif UNIX
+// we works on linux
+#else
+// we can't work here
+#error "Unsupported system. \
+A.T.O.M Engine can be compiled only on Windows or Unix"
+#endif  // system
+
+// If it will be compiled on Windows
+#ifdef WINDOWS
+#define localtime_r(timep, result)  (localtime (timep) ? memcpy  ((result), \
+localtime (timep), sizeof (*(result))) : 0)
 #ifdef _MSC_VER
 // Oh God! I hate Microsoft!..
 #define snprintf sprintf_s
+#endif  // _MSC_VER
+#ifdef __BORLANDC__
+#include "sys/types.h"
+#endif  // __BORLANDC__
 #else
 #include <inttypes.h>
-#endif // _MSC_VER
+#endif  // WINDOWS
 
 #include "SysVars/sysvars.h"
 // System parameters

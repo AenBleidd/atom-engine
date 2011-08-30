@@ -23,7 +23,7 @@
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
-#endif  // 
+#endif  // _GNU_SOURCE
 
 #endif  // UNIX
 
@@ -33,8 +33,6 @@ FILE* fmemopen(void *s, size_t len, const char *modes);
 
 // main constants
 static const uint32_t magic = 0x41454653;  // Magic number ("AEFS")
-// TODO:(Lawliet) Maybe we need to change version type to
-// {MAJOR.MINOR.PATCH-REVISION} (4 bytes) ?
 static const uint8_t version = 0x01;  // current version (1)
 // folder and file flags
 static const uint8_t ff_rw = 0x00;  // read-write
@@ -185,12 +183,12 @@ static char *gamefswarncodes[] = {
 "Wrong syntax or unknown command.",
 "Path incorrect or directory doesn't exist."
 };
-// It is MSVC ?
-#ifdef _MSC_VER
+// It is Windows ?
+#ifdef WINDOWS
 #pragma pack(push,1)
 #else
 #pragma pack(1)
-#endif  // _MSC_VER
+#endif  // WINDOWS
 struct HEADER {
 // magic number
   uint32_t magic;
@@ -232,13 +230,13 @@ struct RECORD {
 // control check sum (0 if it is a folder)
   uint64_t crc;
 };
-// It is MSVC ?
-#ifdef _MSC_VER
+// It is Windows ?
+#ifdef WINDOWS
 //TODO(Lawliet): Check this!
 #pragma pack(pop)
 #else
 #pragma unpack
-#endif  // _MSC_VER
+#endif  // WINDOWS
 struct TREE_FILE;
 struct TREE_FOLDER;
 // struct of the file in the file system
