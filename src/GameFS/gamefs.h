@@ -186,9 +186,11 @@ static char *gamefswarncodes[] = {
 // It is Windows ?
 #ifdef WINDOWS
 #pragma pack(push,1)
-#else
-#pragma pack(1)
 #endif  // WINDOWS
+#ifdef UNIX
+#pragma pack(1)
+#endif  // UNIX
+
 struct HEADER {
 // magic number
   uint32_t magic;
@@ -234,9 +236,10 @@ struct RECORD {
 #ifdef WINDOWS
 //TODO(Lawliet): Check this!
 #pragma pack(pop)
-#else
-#pragma unpack
 #endif  // WINDOWS
+#ifdef UNIX
+#pragma unpack
+#endif  // UNIX
 struct TREE_FILE;
 struct TREE_FOLDER;
 // struct of the file in the file system
