@@ -58,14 +58,14 @@ IF ( DEFINED GUI AND NOT GUI STREQUAL "" )
 		ENDIF( GUI STREQUAL "SDL" )
 		# TODO: ADD MORE LIBRARIES HERE
 	ELSE()
-		MESSAGE ( FATAL_ERROR "No suitable GUI parameter value supplied. Possible values are: ${GUI_VARIANTS}. Please choose one among them." )
+		MESSAGE ( FATAL_ERROR "No suitable GUI parameter value supplied. Possible values are: ${GUI_TYPES}. Please choose one among them." )
 	ENDIF()
 ELSE()
-	MESSAGE ( FATAL_ERROR "No GUI parameter value supplied. Possible values are: ${GUI_VARIANTS}. Please choose one among them." )
+	MESSAGE ( FATAL_ERROR "No GUI parameter value supplied. Possible values are: ${GUI_TYPES}. Please choose one among them." )
 ENDIF()
 
 # Send GUI to cache
-SET ( GUI "${GUI}" CACHE STRING "The library responsible for GUI windows events. Possible values are: ${GUI_VARIANTS}" FORCE )
+SET ( GUI "${GUI}" CACHE STRING "The library responsible for GUI windows events. Possible values are: ${GUI_TYPES}" FORCE )
 
 # Installation instructions for the WindowManager module
 # Please specify the installation instructions sprcific 

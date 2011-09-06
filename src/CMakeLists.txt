@@ -1,5 +1,10 @@
 # cmake configuration file for building ATOM package
 
+# TODO: Add default settings for Embarcadero
+# CMAKE_C_FLAGS             -tM
+# CMAKE_CXX_FLAGS           -tM
+# CMAKE_SHARED_LINKER_FLAGS -tCDR -lS:10000000 -lSc:10000000 
+
 CMAKE_MINIMUM_REQUIRED ( VERSION  2.6 )
 
 # Project information and versioning
@@ -49,13 +54,13 @@ ENDIF()
 # Nessessary definitions
 
 IF ( UNIX )
-	ADD_DEFINITIONS ( "-DUNIX" )
+  ADD_DEFINITIONS ( "-DUNIX" )
 ELSEIF( WIN32 )
   ADD_DEFINITIONS ( "-DWINDOWS" )
 ENDIF()
 
 IF ( CMAKE_BUILD_TYPE STREQUAL "Debug" )
-	ADD_DEFINITIONS ( "-DATOM_DEBUG" )
+  ADD_DEFINITIONS ( "-DATOM_DEBUG" )
 ENDIF()
 
 # Recurse into subdirectory
