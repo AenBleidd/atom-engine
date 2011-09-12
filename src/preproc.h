@@ -7,6 +7,9 @@
 #define _FSMAN_VERSION_ _ATOM_VERSION_
 #endif  // _FSMANAGER_
 
+// Microsoft Security File
+#include "banned.h"
+
 // Check environment
 #ifdef WINDOWS
 // we works on windows
