@@ -210,39 +210,65 @@ int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
   count = (count & ~3) / 4;
   if (count % 4 != 0)
     count++;
-// Read all file from disc
-  uint8_t *buf = new uint8_t[record.size];
-  if (fread(buf, 1, record.size, file) != record.size) {
-    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-    fclose(file);
-    delete [] buf;
-    return -1;
-  }
+  uint64_t alreadyRead = 0;
+  uint64_t currentRead = 0;
+  uint64_t crypted = 0;
+  uint64_t crypting = 0;
+  uint64_t crc = 0;
+// Alloc buffer for reading
+  uint8_t *buf = new uint8_t[MAX_READ_LEN];
+  uint32_t *tempbuf = new uint32_t[MAX_READ_LEN / 4];
   uint32_t r[4];
-  uint64_t t = (record.size & ~3) / 4;
-  if (record.size % 4 != 0)
-    t++;
-  uint32_t *tempbuf = new uint32_t[t];
-  memcpy(tempbuf, buf, record.size);
-  Crypt(tempbuf, count, wake_key, r, wake_table);
-// realloc the buffer
-  delete [] buf;
-  t *= 4;
-  buf = new uint8_t[t];
-  memcpy(buf, tempbuf, t);
-  delete [] tempbuf;
-  tempbuf = 0;
+// TODO(Lawliet): Optimize this
+  r[0] = wake_key[0];
+  r[1] = wake_key[1];
+  r[2] = wake_key[2];
+  r[3] = wake_key[3];
+  uint64_t t = 0;
+  while (alreadyRead < record.size) {
+    if ((record.size - alreadyRead) >= MAX_READ_LEN)
+      currentRead = MAX_READ_LEN;
+    else
+      currentRead = record.size;
+// Read the piece of file
+    if (fread(buf, 1, currentRead, file) != currentRead) {
+      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+      fclose(file);
+      delete [] buf;
+      delete [] tempbuf;
+      return -1;
+    }
+    alreadyRead += currentRead;
+    t = (currentRead & ~3) / 4;
+    if (currentRead % 4 != 0)
+      t++;
+// copy this piece of file
+    memcpy(tempbuf, buf, currentRead);
+    if ((count - crypted) >= MAX_READ_LEN)
+      crypting = MAX_READ_LEN;
+    else
+      crypting = count - crypted;
+    Crypt(tempbuf, crypting, r, r, wake_table);
+    crypted += crypting;
+    t *= 4;
+// copy crypted piece of file
+    memcpy(buf, tempbuf, t);
 // calculating crc
-  uint64_t crc = GenCRC32(buf, t);
+    crc = GenCRC32(buf, t, crc);
 // write to disk crypted data
-  if (fwrite(buf, 1, t, bin) != t) {
-    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-    fclose(file);
-    delete [] buf;
-    return -1;
+    if (fwrite(buf, 1, t, bin) != t) {
+      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
+      fclose(file);
+      delete [] buf;
+      delete [] tempbuf;
+      return -1;
+    }
   }
   delete [] buf;
   buf = 0;
+  delete [] tempbuf;
+  tempbuf = 0;
+// TODO(Lawliet): We really need this string?
   fflush(file);
   fclose(file);
   record.crc = crc;
