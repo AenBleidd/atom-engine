@@ -27,9 +27,7 @@
 
 #endif  // UNIX
 
-#ifdef _FSMAN_
 #define MAX_READ_LEN 16*1024*1024
-#endif  // _FSMAN_
 
 #ifdef WINDOWS
 FILE* fmemopen(void *s, size_t len, const char *modes);
