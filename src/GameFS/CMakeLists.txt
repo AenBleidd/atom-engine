@@ -17,7 +17,7 @@ SET_TARGET_PROPERTIES ( ${GAMEFS_FSMAN_MODULE} PROPERTIES
 )
 
 # Installation instructions for the GameFS module
-# Please specify the installation instructions sprcific
+# Please specify the installation instructions specific
 # To the architecture the project is being built for.
 
 # TODO: ${GAMEFS_FSMAN_MODULE} should not be installed,

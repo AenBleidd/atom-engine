@@ -307,7 +307,7 @@ int32_t AtomFS::Mount(char* filename, char* mountfolder, uint32_t *key) {
       current->tree_folder = 0;
       current->tree_file = 0;
       current->next_folder = 0;
-// set he name of the folder
+// set the name of the folder
       uint32_t len = strlen(args->output[pos]);
       current->name = new char[len];
       snprintf(current->name, len, "%s", args->output[pos]);
