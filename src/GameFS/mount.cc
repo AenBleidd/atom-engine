@@ -126,19 +126,14 @@ int32_t AtomFS::Mount(char* filename, char* mountfolder, uint32_t *key) {
   atomlog->DebugMessage(atomlog->MsgBuf);
 // create name of the file
   uint16_t namelen = strlen(filename) + 5;
-  char *pakfile = new char[namelen];
-  snprintf(pakfile, namelen, "%s.bin", filename);
 // Try to open
   FILE *pak;
-  pak = fopen(pakfile, "rb");
+  pak = fopen(filename, "rb");
   if (pak == 0) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FILE);
-    delete [] pakfile;
     return -1;
   }
   tempalloc->file = pak;
-// Cleaning...
-  delete [] pakfile;
 // Lets get start info about opened file
   HEADER header;
 // Get magic signature
