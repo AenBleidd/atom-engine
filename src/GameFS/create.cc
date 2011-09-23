@@ -536,7 +536,8 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
 // we've finished the work with dat file
   fclose(datfile);
   remove(dat);
-  delete [] dat;
+// Program crashes here... But why???
+//  delete [] dat;
   dat = 0;
   delete [] tempbuf;
 // rewind the file to write the header
