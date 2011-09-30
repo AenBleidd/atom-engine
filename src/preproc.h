@@ -35,6 +35,7 @@ A.T.O.M Engine can be compiled only on Windows or Unix"
 #define localtime_r(timep, result)  (localtime (timep) ? memcpy  ((result), \
 localtime (timep), sizeof (*(result))) : 0)
 #ifdef _MSC_VER
+#define WIN32_LEAN_AND_MEAN
 // Oh God! I hate Microsoft!..
 #define snprintf sprintf_s
 #endif  // _MSC_VER
