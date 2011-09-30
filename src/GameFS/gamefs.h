@@ -126,27 +126,29 @@ static const uint32_t crc32table[256] = {
 static const uint32_t mask = 0xFFFFFFFFUL;
 #endif  // _CRC_CHECK_
 // Error codes
-static int32_t ERROR_CORE_FS = -1;
+static int32_t ERROR_CORE_FS;
 static char *gamefs_error_description = "Core Error. File System Error.";
 /* GameFS Error Codes */
-#define NO_ERROR                                                     0x00000000
-#define ERROR_OPEN_FILE                                              0x00000001
-#define ERROR_READ_FILE                                              0x00000002
-#define ERROR_PARSE_MOUNT_FILE_QUOTES                                0x00000003
-#define ERROR_PARSE_MOUNT_FILE                                       0x00000004
-#define ERROR_MOUNT_FS                                               0x00000005
-#define ERROR_OPEN_FOLDER                                            0x00000006
-#define ERROR_WRITE_FILE                                             0x00000007
-#define ERROR_INCORRECT_FILE                                         0x00000008
-#define ERROR_INCORRECT_MOUNTPOINT                                   0x00000009
-#define ERROR_OVERWRITE_DENIED                                       0x0000000A
-#define ERROR_LOST_QUOTES                                            0x0000000B
-#define ERROR_PARSE_STRING                                           0x0000000C
-#define ERROR_WRONG_BYTEORDER                                        0x0000000D
-#define ERROR_INCORRECT_PATH                                         0x0000000E
-#define ERROR_INCORRECT_CRC32                                        0x0000000F
-#define ERROR_FUNCTION_ARGUMENTS                                     0x00000010
-#define ERROR_OLD_FSMAN                                              0x00000011
+enum {
+  NOERRORS = 0x00000000,
+  ERROR_OPEN_FILE,
+  ERROR_READ_FILE,
+  ERROR_PARSE_MOUNT_FILE_QUOTES,
+  ERROR_PARSE_MOUNT_FILE,
+  ERROR_MOUNT_FS,
+  ERROR_OPEN_FOLDER,
+  ERROR_WRITE_FILE,
+  ERROR_INCORRECT_FILE,
+  ERROR_INCORRECT_MOUNTPOINT,
+  ERROR_OVERWRITE_DENIED,
+  ERROR_LOST_QUOTES,
+  ERROR_PARSE_STRING,
+  ERROR_WRONG_BYTEORDER,
+  ERROR_INCORRECT_PATH,
+  ERROR_INCORRECT_CRC32,
+  ERROR_FUNCTION_ARGUMENTS,
+  ERROR_OLD_FSMAN
+};
 /* GameFS Error Descriptions */
 static char *gamefserrorcodes[] = {
 "No Error.",
@@ -169,14 +171,16 @@ static char *gamefserrorcodes[] = {
 "FSMan version is too old or file is from the future."
 };
 // Warning codes
-static int32_t WARNING_CORE_FS = -1;
+static int32_t WARNING_CORE_FS;
 static char *gamefs_warn_descr = "Core Warning. File System Warning.";
 /* GameFS Warning Codes */
-#define NO_WARNING                                                   0x00000000
-#define WARNING_OVERWRITE                                            0x00000001
-#define WARNING_EMPTY_STRING                                         0x00000002
-#define WARNING_WRONG_COMMAND                                        0x00000003
-#define WARNING_INCORRECT_PATH                                       0x00000004
+enum {
+  NOWARNINGS = 0x00000000,
+  WARNING_OVERWRITE,
+  WARNING_EMPTY_STRING,
+  WARNING_WRONG_COMMAND,
+  WARNING_INCORRECT_PATH
+};
 /* GameFS Warning Descriptions */
 static char *gamefswarncodes[] = {
 "No Warning.",
@@ -213,12 +217,12 @@ struct HEADER {
 };
 // identify each record in filetable of the packed file
 struct RECORD {
-/* flag of the file
+// flag of the file
 // 0x0C - it's folder;
 // 0x0F - it's file;
 // 0xCE - it's the end of folder
 // 0xDC - this folder was deleted
-// 0xDF - this file was deleted*/
+// 0xDF - this file was deleted
   uint8_t flag;
 // lenght of the file or folder name
   uint16_t namelen;

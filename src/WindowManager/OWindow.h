@@ -25,27 +25,29 @@ enum WND_BUTTON_FLAGS
     ATOMWND_BTN_HELP            = 0x00000080
 };
 // Error Codes
-static int32_t ERROR_ENGINE_WM = -1;
+static int32_t ERROR_ENGINE_WM;
 static char *wm_error_descr = "Engine Error. WindowManager Error.";
 /* WindowManager Error Codes */
-#define NO_ERROR                                                     0x00000000
-#define ERROR_CLSREG_FAIL                                            0x00000001
-#define ERROR_WND_CR_FAIL                                            0x00000002
-#define ERROR_INVALID_INPUT_PARAMETER                                0x00000003
-#define ERROR_CLSUNREG_FAIL                                          0x00000004
-#define ERROR_TITLE                                                  0x00000005
-#define ERROR_WINDOWINFO_QUERY_FAIL                                  0x00000006
-#define ERROR_WINDOWINFO_SETTEXT                                     0x00000007
-#define ERROR_MVWIN_FAIL                                             0x00000008
-#define ERROR_ADJUSTRECT_FAIL                                        0x00000009
-#define ERROR_BRING_TO_TOP                                           0x0000000A
-#define ERROR_X11_CONNECTION                                         0x0000000B
-#define ERROR_X11_WM_HINTS                                           0x0000000C
-#define ERROR_X11_STRING_CONVERSION                                  0x0000000D
+enum {
+  NOERRORS = 0x00000000,
+  ERROR_CLSREG_FAIL,
+  ERROR_WND_CR_FAIL,
+  ERROR_INVALID_INPUT_PARAMETER,
+  ERROR_CLSUNREG_FAIL,
+  ERROR_TITLE,
+  ERROR_WINDOWINFO_QUERY_FAIL,
+  ERROR_WINDOWINFO_SETTEXT,
+  ERROR_MVWIN_FAIL,
+  ERROR_ADJUSTRECT_FAIL,
+  ERROR_BRING_TO_TOP,
+  ERROR_X11_CONNECTION,
+  ERROR_X11_WM_HINTS,
+  ERROR_X11_STRING_CONVERSION
+};
 static char *wm_errors[] = {
 "No Error",
 "Fatal Error: Error registering the window class",
-"Fatal Errpr: Couldn't create a window",
+"Fatal Error: Couldn't create a window",
 "Invalid input parameter",
 "Error unregistering the window class",
 "Error getting window title",

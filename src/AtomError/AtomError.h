@@ -82,6 +82,11 @@ class AtomLog {
 // modules count
   uint32_t module_error_count;
   uint32_t module_warning_count;
+// for datetime functions
+  char datetimebuf[20];
+  char timebuf[10];
+  tm *ptimeinfo;
+
 // write log message
   void LogMsg(const char *string);
 // write debug log message
