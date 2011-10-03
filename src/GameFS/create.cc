@@ -214,6 +214,7 @@ int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
   uint64_t currentRead = 0;
   uint64_t crypted = 0;
   uint64_t crypting = 0;
+  uint64_t realcrypting = 0;
   uint64_t crc = 0;
 // Alloc buffer for reading
   uint8_t *buf = new uint8_t[MAX_READ_LEN];
@@ -248,7 +249,10 @@ int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
       crypting = MAX_READ_LEN;
     else
       crypting = count - crypted;
-    Crypt(tempbuf, crypting, r, r, wake_table);
+    realcrypting = (crypting & ~3) / 4;
+    if (crypting % 4 != 0)
+      realcrypting++;
+    Crypt(tempbuf, realcrypting, r, r, wake_table);
     crypted += crypting;
     t *= 4;
 // copy crypted piece of file
