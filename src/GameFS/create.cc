@@ -230,7 +230,7 @@ int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
     if ((record.size - alreadyRead) >= MAX_READ_LEN)
       currentRead = MAX_READ_LEN;
     else
-      currentRead = record.size;
+      currentRead = record.size - alreadyRead;
 // Read the piece of file
     if (fread(buf, 1, currentRead, file) != currentRead) {
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
@@ -555,7 +555,7 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
   }
 // we've finished the work with bin file
   fclose(binfile);
-  delete [] bin;
+//  delete [] bin;
   bin = 0;
 // end working with pak file
   return 0;
