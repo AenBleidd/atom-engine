@@ -382,7 +382,7 @@ class AtomFS {
 // Scan for all files and directories to add to the packed file
   int32_t FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level);
 // Write data from added files
-  int32_t Write(char *in,  FILE *dat, FILE *bin);
+  int32_t Write(char *in, FILE *dat, FILE *bin, char *shortname = 0);
 #endif  // _FSMAN_
   OPENALLOC *openalloc;
 };
