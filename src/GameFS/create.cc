@@ -123,7 +123,7 @@ int32_t AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level = 0) {
           curdir = new char[st_size];
           snprintf(curdir, st_size, "%s\\%s", ch, st.cFileName);
 #endif  // WINDOWS
-          if (Write(curdir, dat, bin) == -1) {
+          if (Write(curdir, dat, bin, st.cFileName) == -1) {
 #ifdef WINDOWS
             delete [] curdir;
             curdir = 0;
@@ -177,17 +177,28 @@ int32_t AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level = 0) {
 }
 #endif  // _FSMAN_
 #ifdef _FSMAN_
-int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin) {
+int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin, char *shortname) {
   FILE *file = fopen(in, "rb");
   if (file == 0) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FILE);
     return -1;  // nothing was written
   }
+  if (shortname == 0) {
+// we need to get real name of the file without its path
+    uint32_t pos = 0;
+    for (int i = 0; i < strlen(in); i++)
+      if (in[i] == '\\' || in[i] == '/')
+	    pos = i+1;
+    if (pos < strlen(in) + 1) {
+      shortname = new char[strlen(in) - pos];
+      strcpy(shortname, in+pos);
+    }
+  }
 // Collect info about file
   RECORD record;
   record.flag = flag_file;
-  record.namelen = strlen(in);
-  record.name = in;
+  record.namelen = strlen(shortname);
+  record.name = shortname;
 // check filesize
   if (fseek(file, 0, SEEK_END) != 0) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
@@ -469,9 +480,9 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
       int64_t size = (st.nFileSizeHigh * (MAXDWORD+1)) + st.nFileSizeLow;
 #endif  // WINDOWS
       snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE,
-                "Writing file %s (%ld bytes)", input[i], size);
+        "Writing file %s (%ld bytes)", input[i], size);
       atomlog->DebugMessage(atomlog->MsgBuf);
-      if (Write(input[i], datfile, binfile) != 0) {
+      if (Write(input[i], datfile, binfile, st.cFileName) != 0) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
         fclose(datfile);
         fclose(binfile);
