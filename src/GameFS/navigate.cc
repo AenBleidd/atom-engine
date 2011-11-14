@@ -15,15 +15,16 @@ int32_t AtomFS::Navigate(void) {
     ARGUMENTS *args = ParseArgs(atomlog, buffer);
 // look the commands
     if ((args == 0) || (args->count == 0)) {
-      atomlog->SetLastWrn(WARNING_CORE_FS, WARNING_WRONG_COMMAND);
+/*      atomlog->SetLastWrn(WARNING_CORE_FS, WARNING_WRONG_COMMAND);
       snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s\n",
                "Wrong syntax or unknown command");
       atomlog->DebugMessage(atomlog->MsgBuf);
       fprintf(stderr, atomlog->MsgBuf);
-      ShowHelp(atomlog);
+      ShowHelp(atomlog);*/
     } else if (strcmp(args->output[0], "help") == 0) {
       ShowHelp(atomlog);
-    } else if ((strcmp(args->output[0], "exit") == 0) && (args->count == 1)) {
+    } else if ((strcmp(args->output[0], "exit") == 0 || 
+                strcmp(args->output[0], "quit") == 0) && (args->count == 1)) {
       flag = true;
     } else if ((strcmp(args->output[0], "ls") == 0) && (args->count == 1)) {
       List(atomlog, curfolder, 0);
@@ -47,7 +48,7 @@ int32_t AtomFS::Navigate(void) {
         delete path;
         path = 0;
       }
-    } else if ((strcmp(args->output[0], "cp") == 0) && (args->count == 3)) {
+    } else if ((strcmp(args->output[0], "cp") == 0 || strcmp(args->output[0], "copy") == 0) && (args->count == 3)) {
       Copy(atomlog, this, curfolder, args->output[1], args->output[2]);
     } else {
       atomlog->SetLastWrn(WARNING_CORE_FS, WARNING_WRONG_COMMAND);
@@ -75,11 +76,13 @@ int32_t AtomFS::Navigate(void) {
 void ShowHelp(AtomLog *atomlog) {
   char help[] = "Available commands:\n\
 \tcd [name]\t\tmove to the 'name' directory\n\
+\tcopy [name1] [name2]\tcopy file 'name1' to 'name2' to disc\n\
 \tcp [name1] [name2]\tcopy file 'name1' to 'name2' to disc\n\
 \tdir\t\t\tlist current directory's contents more verbose\n\
 \texit\t\t\tquit navigation mode\n\
 \thelp\t\t\tshow this help\n\
-\tls\t\t\tlist current directory's contents\n";
+\tls\t\t\tlist current directory's contents\n\
+\tquit\t\t\tquit navigation mode\n";
 
   atomlog->DebugMessage(help);
   fprintf(stderr, help);
@@ -149,7 +152,7 @@ int32_t List(AtomLog *atomlog, TREE_FOLDER *curfolder, uint8_t mode) {
         i++;
       }
       snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
-               "%d%d%s %8.f %s %s\n",
+               "%d%d%s %8.2f %s %s\n",
                flag, permission, priority, size, sizeformat[i],
                tempfile->name);
     }
@@ -173,7 +176,7 @@ int32_t List(AtomLog *atomlog, TREE_FOLDER *curfolder, uint8_t mode) {
           i++;
         }
         snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
-                "%d%d%s %8.f %s %s\n", flag, permission, priority, size,
+                "%d%d%s %8.2f %s %s\n", flag, permission, priority, size,
                 sizeformat[i], tempfile->name);
       }
       atomlog->DebugMessage(atomlog->MsgBuf);
