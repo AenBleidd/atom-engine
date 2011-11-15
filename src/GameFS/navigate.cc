@@ -237,12 +237,12 @@ int32_t Copy(AtomLog *atomlog, AtomFS *atomfs, TREE_FOLDER *curfolder, char *in,
 // Open the file
   FILE *src = atomfs->Open(in, curfolder);
   if (src == 0) {
-    atomlog->DebugMessage("Source file can not be opened");
+    atomlog->DebugMessage("Source file can not be opened\n");
     return -1;
   }
 // Save the file
   if (atomfs->Save(src, out) != 0) {
-    atomlog->DebugMessage("File can not be written");
+    atomlog->DebugMessage("File can not be written\n");
     atomfs->Close(src);
     return -1;
   }

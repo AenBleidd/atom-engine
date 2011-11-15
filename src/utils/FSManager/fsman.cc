@@ -13,7 +13,7 @@ int main(int arg, char *argc[]) {
 // input parameters processing
   uint32_t *key = 0;
   atomlog = new AtomLog("fsman");
-  snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Start fsman version %s",
+  snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Start fsman version %s\n",
            _FSMAN_VERSION_);
   atomlog->LogMessage(atomlog->MsgBuf);
   char *descr[] = {
@@ -24,7 +24,7 @@ int main(int arg, char *argc[]) {
   };
   int8_t byteorder = BYTEORDER;
   if ((byteorder >= 0) && (byteorder < 4)) {
-    snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s %s",
+    snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s %s\n",
              "Used byteorder is", descr[byteorder]);
     atomlog->DebugMessage(atomlog->MsgBuf);
   }
@@ -46,7 +46,7 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
   }
 // Testing filesystem
   else if (strcmp(argc[1], "-t") == 0 || strcmp(argc[1], "--test") == 0) {
-    atomlog->DebugMessage("Test file system");
+    atomlog->DebugMessage("Test file system\n");
     if (arg == 2) {
       atomfs->Mount("mount");
     }
@@ -156,13 +156,13 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
       if (error == false) {
         if (type == 0)
           snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
-                   "Create new standard file %s", output);
+                   "Create new standard file %s\n", output);
         else if (type == 1)
           snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
-                   "Create new addon file %s", output);
+                   "Create new addon file %s\n", output);
         else if (type == 0xFF)
           snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
-                   "Create new critical file %s", output);
+                   "Create new critical file %s\n", output);
         atomlog->DebugMessage(atomlog->MsgBuf);
 // Key input
 // key is not predefined
@@ -181,7 +181,7 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
   }
   else if (strcmp(argc[1], "-o") == 0 || strcmp(argc[1], "--open") == 0) {
     if (arg == 3) {
-      snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Open file %s",
+      snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Open file %s\n",
                argc[2]);
 // we need a key to open the file
 /*      if (key == 0)
@@ -200,7 +200,7 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
   if (key != 0)
     delete [] key;
   delete atomfs;
-  atomlog->LogMessage("End fsman...");
+  atomlog->LogMessage("End fsman...\n");
   delete atomlog;
   return 0;
 }
