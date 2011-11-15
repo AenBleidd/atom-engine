@@ -1,8 +1,8 @@
 #include "gamefs.h"
 #include "strings.h"
 int32_t AtomFS::Mount(char* filename) {
-  atomlog->DebugMessage("Begin mounting filesystem...");
-  atomlog->DebugMessage("Reading mount file...");
+  atomlog->DebugMessage("Begin mounting filesystem...\n");
+  atomlog->DebugMessage("Reading mount file...\n");
 // open configuration file for reading
   FILE *conf = fopen(filename, "rb");
 // error while opening the file
@@ -53,7 +53,7 @@ int32_t AtomFS::Mount(char* filename) {
           mountpoint = args->output[i];
           if (Mount(file, mountpoint) != 0) {
             atomlog->SetLastErr(ERROR_CORE_FS, ERROR_MOUNT_FS);
-            snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Error mount %s",
+            snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Error mount %s\n",
                      file);
             atomlog->LogMessage(atomlog->MsgBuf);
 // Release memory
@@ -121,7 +121,7 @@ int32_t AtomFS::Mount(char* filename, char* mountfolder, uint32_t *key) {
   mountfolder = "/\0";
   }
 // Print some info...
-  snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Mounting %s to %s",
+  snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Mounting %s to %s\n",
            filename, mountfolder);
   atomlog->DebugMessage(atomlog->MsgBuf);
 // create name of the file
@@ -443,7 +443,7 @@ temprecord = new RECORD;
       }
       temprecord->name[temprecord->namelen] = '\0';
 /************************* D E B U G ****************************************/
-      snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE, "Open file %s", temprecord->name);
+      snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE, "Open file %s\n", temprecord->name);
       atomlog->DebugMessage(atomlog->MsgBuf);
 /************************* D E B U G   E N D*********************************/
 // Get the size
@@ -500,7 +500,7 @@ temprecord = new RECORD;
       } else {
         if (strcmp(current->tree_file->name, temprecord->name) == 0) {
           snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
-                   "Overwtiting the file %s", temprecord->name);
+                   "Overwtiting the file %s\n", temprecord->name);
           atomlog->LogMessage(atomlog->MsgBuf);
           if ((tempfile->priority == type_critical) ||
               (header.type < tempfile->priority)) {
@@ -538,7 +538,7 @@ temprecord = new RECORD;
           while (tempfile->tree_file != 0) {
             if (strcmp(tempfile->name, temprecord->name) == 0) {
               snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
-                       "Overwtiting the file %s", temprecord->name);
+                       "Overwtiting the file %s\n", temprecord->name);
               atomlog->LogMessage(atomlog->MsgBuf);
               if ((tempfile->priority == type_critical) ||
                   (header.type < tempfile->priority)) {
@@ -625,7 +625,7 @@ temprecord = new RECORD;
       }
       temprecord->name[temprecord->namelen] = '\0';
 /************************* D E B U G ****************************************/
-      snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE, "Open folder %s", temprecord->name);
+      snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE, "Open folder %s\n", temprecord->name);
       atomlog->DebugMessage(atomlog->MsgBuf);
 /************************* D E B U G   E N D*********************************/
 // Search for this folder
@@ -688,7 +688,7 @@ temprecord = new RECORD;
 // we will move to the one level up
 // TODO(Lawliet): Add check for the superfluous of the flag
 /************************* D E B U G ****************************************/
-      snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE, "Close folder");
+      snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE, "Close folder\n");
       atomlog->DebugMessage(atomlog->MsgBuf);
 /************************* D E B U G   E N D*********************************/
       if (current->parent_folder != 0) {
@@ -705,7 +705,7 @@ temprecord = new RECORD;
     }
   }
   snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
-           "%s was successfully mounted", filename);
+           "%s was successfully mounted\n", filename);
   atomlog->DebugMessage(atomlog->MsgBuf);
   return 0;
 }
