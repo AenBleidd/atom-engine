@@ -156,10 +156,10 @@ void AtomLog::LogMsg(const char *string, uint8_t lvl, const char *file,
                      int32_t line) {
   if (lvl <= verbose_level) {
 #ifdef ATOM_DEBUG
-    fprintf(stderr, "%s %s:%i\t%s\n", CurTime(), file, line, string);
+    fprintf(stderr, "%s %s:%i\t%s", CurTime(), file, line, string);
 #endif  // ATOM_DEBUG
     if (logfile != 0) {
-      fprintf(logfile, "%s %s:%i\t%s\n", CurTime(), file, line, string);
+      fprintf(logfile, "%s %s:%i\t%s", CurTime(), file, line, string);
       fflush(logfile);
     }
   }
@@ -167,10 +167,10 @@ void AtomLog::LogMsg(const char *string, uint8_t lvl, const char *file,
 }
 void AtomLog::LogMsg(const char *string) {
 #ifdef ATOM_DEBUG
-  fprintf(stderr, "%s %s\n", CurTime(), string);
+  fprintf(stderr, "%s %s", CurTime(), string);
 #endif  // ATOM_DEBUG
   if (logfile != 0) {
-    fprintf(logfile, "%s %s\n", CurTime(), string);
+    fprintf(logfile, "%s %s", CurTime(), string);
     fflush(logfile);
   }
   return;

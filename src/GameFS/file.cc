@@ -42,7 +42,7 @@ FILE* AtomFS::Open(char *name, TREE_FOLDER *current) {
 // file that we create
   if (curfile->id == 0) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-    atomlog->LogMessage("Binary file is closed");
+    atomlog->LogMessage("Binary file is closed\n");
     return 0;
   }
 // find the data
@@ -196,7 +196,7 @@ void AtomFS::Close(FILE *file) {
 int AtomFS::Save(FILE *input, char *output) {
   if (input == 0) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-    atomlog->DebugMessage("File pointer can't be equal 0");
+    atomlog->DebugMessage("File pointer can't be equal 0\n");
     return -1;
   }
   rewind(input);
@@ -217,7 +217,7 @@ int AtomFS::Save(FILE *input, char *output) {
   if ((args == 0) || (args->count == 0)) {
 // wrong path
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-    atomlog->DebugMessage("Output filename can't be empty");
+    atomlog->DebugMessage("Output filename can't be empty\n");
     for (int32_t i = 0; i < args->count; i++)
       if (args->output[i] != 0)
         delete [] args->output[i];
@@ -239,7 +239,7 @@ int AtomFS::Save(FILE *input, char *output) {
 // strange errorcode
         if (errno != ERANGE) {
           atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FOLDER);
-          snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s: %i",
+          snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s: %i\n",
                    "Can't get current folder. Error code is", errno);
           atomlog->DebugMessage(atomlog->MsgBuf);
           delete [] curworkdir;
@@ -263,7 +263,7 @@ int AtomFS::Save(FILE *input, char *output) {
       if (result == 0) {
 // strange error
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FOLDER);
-        snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s: %i",
+        snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s: %i\n",
                  "Can't get current folder. Error code is", GetLastError());
         atomlog->DebugMessage(atomlog->MsgBuf);
         delete [] curworkdir;
@@ -303,7 +303,7 @@ int AtomFS::Save(FILE *input, char *output) {
 #endif  // WINDOWS
 // we can't create directory cause we have another file with this name
           atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FOLDER);
-          snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s",
+          snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s\n",
                    "Can't open or create directory: there is a file \
                    with the same name");
           atomlog->DebugMessage(atomlog->MsgBuf);
@@ -368,7 +368,7 @@ int AtomFS::Save(FILE *input, char *output) {
   FILE *out = fopen(output, "wb");
   if (out == 0) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FILE);
-    atomlog->DebugMessage("Couldn't open destination file");
+    atomlog->DebugMessage("Couldn't open destination file\n");
     return -1;  // nothing was written
   }
   char *buffer = new char[size];

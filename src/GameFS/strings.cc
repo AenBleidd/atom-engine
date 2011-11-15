@@ -316,7 +316,7 @@ TREE_FILE* FindFileFromPath(AtomLog *atomlog, TREE_FOLDER *root,
   if (root == 0) {
 // if root not exist
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_FUNCTION_ARGUMENTS);
-    atomlog->DebugMessage("Root folder must exist!");
+    atomlog->DebugMessage("Root folder must exist!\n");
     for (int32_t i = 0; i < path->count; i++)
       if (path->output[i] != 0)
         delete [] path->output[i];

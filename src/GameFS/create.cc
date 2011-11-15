@@ -48,7 +48,7 @@ int32_t AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level = 0) {
     }
 // set new datasize
     datsize += (sizeof(record.flag) + sizeof(record.namelen) + record.namelen);
-    snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE, "Write folder %s", ch);
+    snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE, "Write folder %s\n", ch);
     atomlog->DebugMessage(atomlog->MsgBuf);
     char *curdir = 0;
 #ifdef UNIX
@@ -116,7 +116,7 @@ int32_t AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level = 0) {
           int64_t fsize = (st.nFileSizeHigh * (MAXDWORD+1)) + st.nFileSizeLow;
 #endif  // WINDOWS
           snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE,
-                   "Writing file %s (%ld bytes)", curdir, fsize);
+                   "Writing file %s (%ld bytes)\n", curdir, fsize);
           atomlog->DebugMessage(atomlog->MsgBuf);
 #ifdef WINDOWS
           const uint32_t st_size = strlen(ch) + strlen(st.cFileName) + 2;
@@ -158,7 +158,7 @@ int32_t AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level = 0) {
       }
 // Update datsize
           datsize += sizeof(record.flag);
-          snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s %s",
+          snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s %s\n",
             "Leaving folder", ch);
           atomlog->DebugMessage(atomlog->MsgBuf);
 #ifdef UNIX
@@ -166,7 +166,7 @@ int32_t AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level = 0) {
     free(eps);
     } else {
       snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE,
-               "Couldn't open the directory %s",  eps[n]->d_name);
+               "Couldn't open the directory %s\n",  eps[n]->d_name);
       atomlog->LogMessage(atomlog->MsgBuf);
       return -1;
     }
@@ -237,6 +237,7 @@ int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin, char *shortname) {
   r[2] = wake_key[2];
   r[3] = wake_key[3];
   uint64_t t = 0;
+  uint64_t tempsize = record.size;
   while (alreadyRead < record.size) {
     if ((record.size - alreadyRead) >= MAX_READ_LEN)
       currentRead = MAX_READ_LEN;
@@ -278,6 +279,10 @@ int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin, char *shortname) {
       delete [] tempbuf;
       return -1;
     }
+// Show progress
+    double dd = (double)alreadyRead / (double)record.size * 100;
+    snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Written: %3.f %%\r", dd);
+    atomlog->LogMessage(atomlog->MsgBuf);
   }
   delete [] buf;
   buf = 0;
@@ -318,7 +323,7 @@ int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin, char *shortname) {
 
   binsize += t;
   snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE,
-           "File %s was successfully written", in);
+           "File %s was successfully written\n", in);
   atomlog->DebugMessage(atomlog->MsgBuf);
   return 0;
 }
@@ -480,7 +485,7 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
       int64_t size = (st.nFileSizeHigh * (MAXDWORD+1)) + st.nFileSizeLow;
 #endif  // WINDOWS
       snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE,
-        "Writing file %s (%ld bytes)", input[i], size);
+        "Writing file %s (%ld bytes)\n", input[i], size);
       atomlog->DebugMessage(atomlog->MsgBuf);
       if (Write(input[i], datfile, binfile, st.cFileName) != 0) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
