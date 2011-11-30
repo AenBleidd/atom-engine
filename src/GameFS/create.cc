@@ -280,8 +280,8 @@ int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin, char *shortname) {
       return -1;
     }
 // Show progress
-    double dd = (double)alreadyRead / (double)record.size * 100;
-    snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Written: %3.f %%\r", dd);
+    snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Written: %3.f %%\r",
+             (double)alreadyRead / (double)record.size * 100);
     atomlog->LogMessage(atomlog->MsgBuf);
   }
   delete [] buf;
