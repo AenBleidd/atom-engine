@@ -24,30 +24,27 @@ inline static int32_t dot_exclude(const WIN32_FIND_DATA *dir) {
 #endif  // WINDOWS
 #endif  // _FSMAN_
 #ifdef _FSMAN_
-int32_t AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level = 0) {
+int32_t AtomFS::FolderScan(char *ch, RECORD *list, FILE *bin, int32_t level = 0) {
   if (ch != NULL) {
+    if (list == 0) {
+      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_ADD_FILE);
+      return -1;
+    }
+// find last record
+    while (list->next != 0)
+      list = list->next;
 // Write folder info
-    RECORD record;
-    record.flag = flag_folder;
-    record.namelen = strlen(ch);
-    record.name = ch;
-    record.size = 0;
-    record.offset = 0;
-    record.crc = 0;
-    if (fwrite(&record.flag, sizeof(record.flag), 1, dat) != 1) {
-      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-      return -1;
-    }
-    if (fwrite(&record.namelen, sizeof(record.namelen), 1, dat) != 1) {
-      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-      return -1;
-    }
-    if (fwrite(record.name, 1, record.namelen, dat) != record.namelen) {
-      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-      return -1;
-    }
+    RECORD *record = new RECORD;
+    list->next = record;
+    record->flag = flag_folder;
+    record->namelen = strlen(ch);
+    record->name = ch;
+    record->size = 0;
+    record->offset = 0;
+    record->crc = 0;
+    record->next = 0;
 // set new datasize
-    datsize += (sizeof(record.flag) + sizeof(record.namelen) + record.namelen);
+    datsize += (sizeof(record->flag) + sizeof(record->namelen) + record->namelen);
     snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE, "Write folder %s\n", ch);
     atomlog->DebugMessage(atomlog->MsgBuf);
     char *curdir = 0;
@@ -72,7 +69,6 @@ int32_t AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level = 0) {
       hf = FindFirstFile(tmp, &st);
       if (hf == INVALID_HANDLE_VALUE) {  // there is some error
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FILE);
-        fclose(dat);
         fclose(bin);
         FindClose(hf);
         delete [] tmp;
@@ -92,7 +88,7 @@ int32_t AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level = 0) {
           curdir = new char[fsize];
           snprintf(curdir, fsize, "%s\\%s", ch, st.cFileName);
 #endif  // WINDOWS
-          if (FolderScan(curdir, dat, bin, level+1) == -1) {
+          if (FolderScan(curdir, record, bin, level+1) == -1) {
 #ifdef WINDOWS
             delete [] curdir;
             curdir = 0;
@@ -123,7 +119,7 @@ int32_t AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level = 0) {
           curdir = new char[st_size];
           snprintf(curdir, st_size, "%s\\%s", ch, st.cFileName);
 #endif  // WINDOWS
-          if (Write(curdir, dat, bin, st.cFileName) == -1) {
+          if (Write(curdir, record, bin, st.cFileName) == -1) {
 #ifdef WINDOWS
             delete [] curdir;
             curdir = 0;
@@ -145,19 +141,23 @@ int32_t AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level = 0) {
       tmp = 0;
 #endif  // WINDOWS
 // End of folder
-// TODO(Lawliet): Check recurse in this function
-      record.flag = flag_eoc;
-      record.namelen = 0;
-      record.name = 0;
-      record.size = 0;
-      record.offset = 0;
-      record.crc = 0;
-      if (fwrite(&record.flag, sizeof(record.flag), 1, dat) != 1) {
-        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
+      if (record == 0) {
+        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_ADD_FILE);
         return -1;
       }
+      while (record->next != 0)
+        record = record->next;
+      RECORD *eof = new RECORD;
+      record->next = eof;
+      eof->flag = flag_eoc;
+      eof->namelen = 0;
+      eof->name = 0;
+      eof->size = 0;
+      eof->offset = 0;
+      eof->crc = 0;
+      eof->next = 0;
 // Update datsize
-          datsize += sizeof(record.flag);
+          datsize += sizeof(eof->flag);
           snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE, "%s %s\n",
             "Leaving folder", ch);
           atomlog->DebugMessage(atomlog->MsgBuf);
@@ -177,7 +177,14 @@ int32_t AtomFS::FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level = 0) {
 }
 #endif  // _FSMAN_
 #ifdef _FSMAN_
-int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin, char *shortname) {
+int32_t AtomFS::Write(char *in, RECORD *list, FILE *bin, char *shortname) {
+  if (list == 0) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_ADD_FILE);
+    return -1;
+  }
+// find last record
+  while (list->next != 0)
+    list = list->next;  
   FILE *file = fopen(in, "rb");
   if (file == 0) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FILE);
@@ -195,18 +202,20 @@ int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin, char *shortname) {
     }
   }
 // Collect info about file
-  RECORD record;
-  record.flag = flag_file;
-  record.namelen = strlen(shortname);
-  record.name = shortname;
+  RECORD *record = new RECORD;
+  list->next = record;
+  record->flag = flag_file;
+  record->namelen = strlen(shortname);
+  record->name = shortname;
+  record->next = 0;
 // check filesize
   if (fseek(file, 0, SEEK_END) != 0) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
     fclose(file);
     return -1;
   }
-  record.size = ftell(file);
-  if (record.size == -1L) {
+  record->size = ftell(file);
+  if (record->size == -1L) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
     fclose(file);
     return -1;
@@ -214,8 +223,8 @@ int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin, char *shortname) {
   rewind(file);
 // encrypt
   uint64_t count;
-  if ((bytescrypt == 0xFFFF) || (bytescrypt > record.size))
-    count = record.size;
+  if ((bytescrypt == 0xFFFF) || (bytescrypt > record->size))
+    count = record->size;
   else
     count = bytescrypt;
   count = (count & ~3) / 4;
@@ -237,12 +246,12 @@ int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin, char *shortname) {
   r[2] = wake_key[2];
   r[3] = wake_key[3];
   uint64_t t = 0;
-  uint64_t tempsize = record.size;
-  while (alreadyRead < record.size) {
-    if ((record.size - alreadyRead) >= MAX_READ_LEN)
+  uint64_t tempsize = record->size;
+  while (alreadyRead < record->size) {
+    if ((record->size - alreadyRead) >= MAX_READ_LEN)
       currentRead = MAX_READ_LEN;
     else
-      currentRead = record.size - alreadyRead;
+      currentRead = record->size - alreadyRead;
 // Read the piece of file
     if (fread(buf, 1, currentRead, file) != currentRead) {
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
@@ -281,7 +290,7 @@ int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin, char *shortname) {
     }
 // Show progress
     snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Written: %3.f %%\r",
-             (double)alreadyRead / (double)record.size * 100);
+             (double)alreadyRead / (double)record->size * 100);
     atomlog->LogMessage(atomlog->MsgBuf);
   }
   delete [] buf;
@@ -291,35 +300,11 @@ int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin, char *shortname) {
 // TODO(Lawliet): We really need this string?
   fflush(file);
   fclose(file);
-  record.crc = crc;
-  record.offset = binsize;
+  record->crc = crc;
+  record->offset = binsize;
 // Write data
-  if (fwrite(&record.flag, sizeof(record.flag), 1, dat) != 1) {
-    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-    return -1;
-  }
-  if (fwrite(&record.namelen, sizeof(record.namelen), 1, dat) != 1) {
-    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-    return -1;
-  }
-  if (fwrite(record.name, 1, record.namelen, dat) != record.namelen) {
-    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-    return -1;
-  }
-  if (fwrite(&record.size, sizeof(record.size), 1, dat) != 1) {
-    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-    return -1;
-  }
-  if (fwrite(&record.offset, sizeof(record.offset), 1, dat) != 1) {
-    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-    return -1;
-  }
-  if (fwrite(&record.crc, sizeof(record.crc), 1, dat) != 1) {
-    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-    return -1;
-  }
-  datsize += (sizeof(record.flag) + sizeof(record.namelen) + record.namelen +
-             sizeof(record.size) + sizeof(record.offset) + sizeof(record.crc));
+  datsize += (sizeof(record->flag) + sizeof(record->namelen) + record->namelen +
+             sizeof(record->size) + sizeof(record->offset) + sizeof(record->crc));
 
   binsize += t;
   snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE,
@@ -331,7 +316,7 @@ int32_t AtomFS::Write(char *in,  FILE *dat, FILE *bin, char *shortname) {
 #ifdef _FSMAN_
 int32_t AtomFS::Create(char **input, uint32_t count, char *file,
                    uint16_t encrypt, uint32_t *key, uint8_t type) {
-  FILE *binfile, *datfile, *bintempfile;
+  FILE *binfile, *bintempfile;
   datsize = 0;
 // set random number generator
   srand(time(NULL));
@@ -348,18 +333,7 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
     bytescrypt = encrypt;
 // Create name of the output files
   char *bin = file;
-  char *dat = GetCGUID();
 // check if output files exist
-  datfile = fopen(dat, "r");
-  if (datfile != NULL) {
-// What the ???
-    do {
-      delete [] dat;
-      fclose(datfile);
-      dat = GetCGUID();
-      datfile = fopen(dat, "r");
-    } while (datfile != NULL);
-  }
   binfile = fopen(bin, "r");
   if (binfile != NULL) {
 // file exist
@@ -388,9 +362,8 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
       delete [] bintemp;
     }
   }
-// open files for writing
+// open file for writing
   binfile = fopen(bin, "wb");
-  datfile = fopen(dat, "wb");
 
 // Create file (NIGHTMARE!!!)
 // set static header information
@@ -411,44 +384,21 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
 // write empty header to file
   if (fwrite("0", sizeof(header), 1, binfile) != 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-    fclose(datfile);
     fclose(binfile);
     return -1;
   }
 // write root directory
-  RECORD record;
-  record.flag = flag_folder;
-  record.namelen = 1;
-  record.name = new char[record.namelen + 1];
-  snprintf(record.name, record.namelen + 1, "%s", "/");
-  record.size = 0;
-  record.offset = 0;
-  record.crc = 0;
-  if (fwrite(&record.flag, sizeof(record.flag), 1, datfile) != 1) {
-        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-        fclose(datfile);
-        fclose(binfile);
-        delete [] record.name;
-        return -1;
-  }
-  if (fwrite(&record.namelen, sizeof(record.namelen), 1, datfile) != 1) {
-        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-        fclose(datfile);
-        fclose(binfile);
-        delete [] record.name;
-        return -1;
-  }
-  if (fwrite(record.name, 1, record.namelen, datfile) != record.namelen) {
-        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-        fclose(datfile);
-        fclose(binfile);
-        delete [] record.name;
-        return -1;
-  }
+  RECORD *root = new RECORD;
+  root->next = 0;
+  root->flag = flag_folder;
+  root->namelen = 1;
+  root->name = new char[root->namelen + 1];
+  snprintf(root->name, root->namelen + 1, "%s", "/");
+  root->size = 0;
+  root->offset = 0;
+  root->crc = 0;
 // set new datasize
-  datsize += (sizeof(record.flag)+sizeof(record.namelen)+record.namelen);
-  delete [] record.name;
-  record.name = 0;
+  datsize += (sizeof(root->flag)+sizeof(root->namelen)+root->namelen);
 // Scanning...
   for (int32_t i = 0; i < count; i++) {
 #ifdef UNIX
@@ -462,7 +412,6 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
     hf = FindFirstFile(input[i], &st);
     if (hf == INVALID_HANDLE_VALUE) {  // there is some error
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FILE);
-      fclose(datfile);
       fclose(binfile);
       FindClose(hf);
       return -1;
@@ -470,9 +419,8 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
     FindClose(hf);
     if (st.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY) {
 #endif  // WINDOWS
-      if (FolderScan(input[i], datfile, binfile, 0) == -1) {
-        fclose(datfile);
-		fclose(binfile);
+      if (FolderScan(input[i], root, binfile, 0) == -1) {
+		      fclose(binfile);
         return -1;
       }
     }
@@ -487,29 +435,28 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
       snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE,
         "Writing file %s (%ld bytes)\n", input[i], size);
       atomlog->DebugMessage(atomlog->MsgBuf);
-      if (Write(input[i], datfile, binfile, st.cFileName) != 0) {
+      if (Write(input[i], root, binfile, st.cFileName) != 0) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-        fclose(datfile);
         fclose(binfile);
         return -1;
       }
     }
   }
 // Write end of folder flag
-  record.flag = flag_eoc;
-  record.namelen = 0;
-  record.name = 0;
-  record.size = 0;
-  record.offset = 0;
-  record.crc = 0;
-  if (fwrite(&record.flag, sizeof(record.flag), 1, datfile) != 1) {
-    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-    fclose(datfile);
-    fclose(binfile);
-    return -1;
-  }
+  RECORD *record = root;
+  while (record->next != 0)
+    record = record->next;
+  RECORD *eof = new RECORD;
+  record->next = eof;
+  eof->next = 0;
+  eof->flag = flag_eoc;
+  eof->namelen = 0;
+  eof->name = 0;
+  eof->size = 0;
+  eof->offset = 0;
+  eof->crc = 0;
 // Update datsize
-  datsize += sizeof(record.flag);
+  datsize += sizeof(eof->flag);
 // Would we store the key?
 // this is an addon?
   if (type == type_addon) {
@@ -517,14 +464,12 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
 // write the flag
     if (fwrite(&flag_key, sizeof(flag_key), 1, binfile) != 1) {
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-      fclose(datfile);
       fclose(binfile);
       return -1;
     }
 // write the key
     if (fwrite(wake_key, 4, 4, binfile) != 4) {
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-      fclose(datfile);
       fclose(binfile);
       return -1;
     }
@@ -537,35 +482,78 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
     return -1;
   }
 // let collect all data to one file
-// reopen file
-  fclose(datfile);
-  datfile = fopen(dat, "rb");
-  char *tempbuf = new char[datsize];
-  if (fread(tempbuf, 1, datsize, datfile) != datsize) {
-      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-      fclose(datfile);
+  for (;;) {
+    if (root == 0) {
+      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_ADD_FILE);
       fclose(binfile);
       return -1;
+    }
+    if (root->flag == flag_file) {
+      if (fwrite(&root->flag, sizeof(root->flag), 1, binfile) != 1) {
+        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
+        fclose(binfile);
+        return -1;
+      }
+      if (fwrite(&root->namelen, sizeof(root->namelen), 1, binfile) != 1) {
+        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
+        fclose(binfile);
+        return -1;
+      }
+      if (fwrite(root->name, 1, root->namelen, binfile) != root->namelen) {
+        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
+        fclose(binfile);
+        return -1;
+      }
+      if (fwrite(&root->size, sizeof(root->size), 1, binfile) != 1) {
+        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
+        fclose(binfile);
+        return -1;
+      }
+      if (fwrite(&root->offset, sizeof(root->offset), 1, binfile) != 1) {
+        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
+        fclose(binfile);
+        return -1;
+      }
+      if (fwrite(&root->crc, sizeof(root->crc), 1, binfile) != 1) {
+        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
+        fclose(binfile);
+        return -1;
+      }
+    } else if (root->flag == flag_folder) {
+      if (fwrite(&root->flag, sizeof(root->flag), 1, binfile) != 1) {
+        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
+        fclose(binfile);
+        return -1;
+      }
+      if (fwrite(&root->namelen, sizeof(root->namelen), 1, binfile) != 1) {
+        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
+        fclose(binfile);
+        return -1;
+      }
+      if (fwrite(root->name, 1, root->namelen, binfile) != root->namelen) {
+        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
+        fclose(binfile);
+        return -1;
+      }
+    } else if (root->flag == flag_eoc) {
+      if (fwrite(&root->flag, sizeof(root->flag), 1, binfile) != 1) {
+        atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
+        fclose(binfile);
+        return -1;
+      }
+    }
+    if (root->next == 0)
+      break;
+    else
+      root = root->next;
   }
-  if (fwrite(tempbuf, 1, datsize, binfile) != datsize) {
-      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-      fclose(datfile);
-      fclose(binfile);
-      return -1;
-  }
-// we've finished the work with dat file
-  fclose(datfile);
-  remove(dat);
-// Program crashes here... But why???
-//  delete [] dat;
-  dat = 0;
-  delete [] tempbuf;
+
+//  delete [] tempbuf;
 // rewind the file to write the header
   rewind(binfile);
 // writing the header
   if (fwrite(&header, sizeof(header), 1, binfile) != 1) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-    fclose(datfile);
     fclose(binfile);
     return -1;
   }
