@@ -147,7 +147,8 @@ enum {
   ERROR_INCORRECT_PATH,
   ERROR_INCORRECT_CRC32,
   ERROR_FUNCTION_ARGUMENTS,
-  ERROR_OLD_FSMAN
+  ERROR_OLD_FSMAN,
+  ERROR_ADD_FILE
 };
 /* GameFS Error Descriptions */
 static char *gamefserrorcodes[] = {
@@ -168,7 +169,8 @@ static char *gamefserrorcodes[] = {
 "Path incorrect or directory or file don't exist.",
 "Crc check is failed. File is broken.",
 "Function was called with wrong arguments.",
-"FSMan version is too old or file is from the future."
+"FSMan version is too old or file is from the future.",
+"Couldn't add the file."
 };
 // Warning codes
 static int32_t WARNING_CORE_FS;
@@ -237,6 +239,8 @@ struct RECORD {
   uint64_t offset;
 // control check sum (0 if it is a folder)
   uint64_t crc;
+// link to the next record;
+  RECORD *next;
 };
 // It is Windows ?
 #ifdef WINDOWS
@@ -380,9 +384,9 @@ class AtomFS {
   void Crypt(uint32_t *data, int32_t lenght, uint32_t k[4],
              uint32_t r[4], uint32_t *t);
 // Scan for all files and directories to add to the packed file
-  int32_t FolderScan(char *ch, FILE *dat, FILE *bin, int32_t level);
+  int32_t FolderScan(char *ch, RECORD *list, FILE *bin, int32_t level);
 // Write data from added files
-  int32_t Write(char *in, FILE *dat, FILE *bin, char *shortname = 0);
+  int32_t Write(char *in, RECORD *list, FILE *bin, char *shortname = 0);
 #endif  // _FSMAN_
   OPENALLOC *openalloc;
 };
