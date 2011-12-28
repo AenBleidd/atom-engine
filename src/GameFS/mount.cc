@@ -500,7 +500,7 @@ temprecord = new RECORD;
       } else {
         if (strcmp(current->tree_file->name, temprecord->name) == 0) {
           snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
-                   "Overwtiting the file %s\n", temprecord->name);
+                   "Overwriting the file %s\n", temprecord->name);
           atomlog->LogMessage(atomlog->MsgBuf);
           if ((tempfile->priority == type_critical) ||
               (header.type < tempfile->priority)) {
