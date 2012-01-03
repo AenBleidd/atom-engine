@@ -167,10 +167,16 @@ void AtomLog::LogMsg(const char *string, uint8_t lvl, const char *file,
 }
 void AtomLog::LogMsg(const char *string) {
 #ifdef ATOM_DEBUG
-  fprintf(stderr, "%s %s", CurTime(), string);
+  if (string[strlen(string)] == '\n')
+    fprintf(stderr, "%s %s", CurTime(), string);
+  else
+    fprintf(stderr, "%s %s\n", CurTime(), string);
 #endif  // ATOM_DEBUG
   if (logfile != 0) {
-    fprintf(logfile, "%s %s", CurTime(), string);
+    if (string[strlen(string)] == '\n')
+      fprintf(logfile, "%s %s", CurTime(), string);
+    else
+      fprintf(logfile, "%s %s\n", CurTime(), string);
     fflush(logfile);
   }
   return;
@@ -211,6 +217,7 @@ void AtomLog::SetLastError(uint32_t code, uint32_t subcode,
   snprintf(global_error.description, errlen, "%s:%i\tERROR: %s\t%s",
            file, line, errorcode[global_error.code],
            errorsubcode[global_error.code][global_error.sub_code]);
+  snprintf(MsgBuf, MSG_BUFFER_SIZE, "%s\n", global_error.code);
   if (verbose_level >= SHOWSYSTEMERRORS) {
     snprintf(MsgBuf, MSG_BUFFER_SIZE, "%s: %x", "Last system error is",
              global_error.system_code);
