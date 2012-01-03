@@ -11,6 +11,8 @@ int32_t AtomFS::Navigate(void) {
     buffer = new char[buffer_len];
 // get the command
     fgets(buffer, buffer_len, stdin);
+    snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE, "User command: %s", buffer);
+    atomlog->DebugMessage(atomlog->MsgBuf);
 // parse it
     ARGUMENTS *args = ParseArgs(atomlog, buffer);
 // look the commands

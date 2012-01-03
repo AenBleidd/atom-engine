@@ -37,15 +37,25 @@ int32_t AtomFS::FolderScan(char *ch, RECORD *list, FILE *bin, int32_t level = 0)
     RECORD *record = new RECORD;
     list->next = record;
     record->flag = flag_folder;
-    record->namelen = strlen(ch);
-    record->name = ch;
+    uint32_t name_size = 0;
+    for (uint32_t i = strlen(ch) - 1; i != 0; i--) {
+      if (ch[i] != '\\' && ch[i] != '/')
+        name_size++;
+      else
+        break;
+    }
+    uint32_t pos = strlen(ch) - name_size;
+    record->namelen = name_size + 1;
+    record->name = new char[record->namelen];
+    strncpy(record->name, ch + pos, record->namelen);
+    record->name[record->namelen] = '\0';
     record->size = 0;
     record->offset = 0;
     record->crc = 0;
     record->next = 0;
 // set new datasize
     datsize += (sizeof(record->flag) + sizeof(record->namelen) + record->namelen);
-    snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE, "Write folder %s\n", ch);
+    snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE, "Write folder %s\n", record->name);
     atomlog->DebugMessage(atomlog->MsgBuf);
     char *curdir = 0;
 #ifdef UNIX
@@ -206,7 +216,9 @@ int32_t AtomFS::Write(char *in, RECORD *list, FILE *bin, char *shortname) {
   list->next = record;
   record->flag = flag_file;
   record->namelen = strlen(shortname);
-  record->name = shortname;
+  record->name = new char[record->namelen+1];
+  strncpy(record->name, shortname, record->namelen);
+  record->name[record->namelen] = '\0';
   record->next = 0;
 // check filesize
   if (fseek(file, 0, SEEK_END) != 0) {
@@ -308,7 +320,7 @@ int32_t AtomFS::Write(char *in, RECORD *list, FILE *bin, char *shortname) {
 
   binsize += t;
   snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE,
-           "File %s was successfully written\n", in);
+           "File %s was successfully written\n", shortname);
   atomlog->DebugMessage(atomlog->MsgBuf);
   return 0;
 }
@@ -433,7 +445,7 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
       int64_t size = (st.nFileSizeHigh * (MAXDWORD+1)) + st.nFileSizeLow;
 #endif  // WINDOWS
       snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE,
-        "Writing file %s (%ld bytes)\n", input[i], size);
+        "Writing file %s (%ld bytes)\n", st.cFileName, size);
       atomlog->DebugMessage(atomlog->MsgBuf);
       if (Write(input[i], root, binfile, st.cFileName) != 0) {
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
