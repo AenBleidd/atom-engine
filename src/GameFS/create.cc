@@ -330,8 +330,6 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
                    uint16_t encrypt, uint32_t *key, uint8_t type) {
   FILE *binfile, *bintempfile;
   datsize = 0;
-// set random number generator
-  srand(time(NULL));
 // Generate crypt key
 // If crypt key is predefined new key is ignored
   if (wake_key == 0) {
