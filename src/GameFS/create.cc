@@ -129,11 +129,15 @@ int32_t AtomFS::FolderScan(char *ch, RECORD *list, FILE *bin, int32_t level = 0)
           curdir = new char[st_size];
           snprintf(curdir, st_size, "%s\\%s", ch, st.cFileName);
 #endif  // WINDOWS
-          if (Write(curdir, record, bin, st.cFileName) == -1) {
 #ifdef WINDOWS
+          if (Write(curdir, record, bin, st.cFileName) == -1) {
             delete [] curdir;
             curdir = 0;
 #endif  // WINDOWS
+#ifdef UNIX
+// TODO(Lawliet): Check this string for correct file name written to the filetable
+          if (Write(curdir, record, bin, curdir) == -1) {
+#endif  // UNIX
             return -1;
           }
 #ifdef WINDOWS
@@ -194,7 +198,7 @@ int32_t AtomFS::Write(char *in, RECORD *list, FILE *bin, char *shortname) {
   }
 // find last record
   while (list->next != 0)
-    list = list->next;  
+    list = list->next;
   FILE *file = fopen(in, "rb");
   if (file == 0) {
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_OPEN_FILE);
@@ -441,11 +445,20 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
 #ifdef WINDOWS
     else {
       int64_t size = (st.nFileSizeHigh * (MAXDWORD+1)) + st.nFileSizeLow;
-#endif  // WINDOWS
       snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE,
         "Writing file %s (%ld bytes)\n", st.cFileName, size);
+#endif  // WINDOWS
+#ifdef UNIX
+      snprintf(atomlog->MsgBuf, MSG_BUFFER_SIZE,
+        "Writing file %s (%ld bytes)\n", input[i], size);
+#endif  // UNIX
       atomlog->DebugMessage(atomlog->MsgBuf);
+#ifdef WINDOWS
       if (Write(input[i], root, binfile, st.cFileName) != 0) {
+#endif  // WINDOWS
+#ifdef UNIX
+      if (Write(input[i], root, binfile, input[i]) != 0) {
+#endif  // UNIX
         atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
         fclose(binfile);
         return -1;
