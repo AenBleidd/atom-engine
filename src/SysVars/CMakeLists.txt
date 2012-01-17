@@ -8,8 +8,15 @@
 SET ( MODULE_PATH "${${PROJECT_NAME}_SOURCE_DIR}/../cmake_modules" )
 INCLUDE ( "${MODULE_PATH}/modules.cmake" )
 
+IF ( WIN32 )
+	SET ( SV_PREFIX "Windows" )
+ENDIF ( WIN32 )
+IF ( UNIX )
+	SET ( SV_PREFIX "Unix" )
+ENDIF ( UNIX )
+
 # Create a static library which will be used by the engine
-ADD_LIBRARY ( ${SYSVARS_MODULE} STATIC byteorderdetect guid )
+ADD_LIBRARY ( ${SYSVARS_MODULE} STATIC byteorderdetect ${SV_PREFIX}/guid )
 IF ( UNIX )
 TARGET_LINK_LIBRARIES ( ${SYSVARS_MODULE} uuid )
 ELSEIF ( WIN32 )

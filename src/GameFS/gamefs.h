@@ -302,6 +302,10 @@ class AtomFS {
   uint32_t *wake_key;
 // additional keys
   ADDON_KEY addon_key;
+#ifdef _FSMAN_
+  uint64_t datsize;  // size of data in file
+  uint64_t binsize;  // size of bin in file
+#endif  // _FSMAN_
 // Add new addon key and return it's number
   uint32_t AddAddonKey(uint32_t *key);
   uint32_t* GenKey(uint32_t k0, uint32_t k1,
@@ -309,6 +313,12 @@ class AtomFS {
   void Decrypt(uint32_t *data, int32_t lenght, uint32_t k[4],
                uint32_t r[4], uint32_t *t);
 #ifdef _FSMAN_
+#ifdef UNIX
+  int32_t dot_exclude(const struct dirent64 *dir);
+#endif  // UNIX
+#ifdef WINDOWS
+  int32_t dot_exclude(const WIN32_FIND_DATA *dir);
+#endif  // WINDOWS
   void Crypt(uint32_t *data, int32_t lenght, uint32_t k[4],
              uint32_t r[4], uint32_t *t);
 // Scan for all files and directories to add to the packed file
