@@ -8,10 +8,17 @@
 SET ( MODULE_PATH "${${PROJECT_NAME}_SOURCE_DIR}/../cmake_modules" )
 INCLUDE ( "${MODULE_PATH}/modules.cmake" )
 
+IF ( WIN32 )
+	SET ( GFS_PREFIX "Windows" )
+ENDIF ( WIN32 )
+IF ( UNIX )
+	SET ( GFS_PREFIX "Unix" )
+ENDIF ( UNIX )
+
 # Create a static library which will be used by the engine
 # As well as static library to be linked to fsman utility
-ADD_LIBRARY ( ${GAMEFS_MODULE} STATIC gamefs crypt mount strings file )
-ADD_LIBRARY ( ${GAMEFS_FSMAN_MODULE} STATIC gamefs crypt mount create navigate strings file crc32 )
+ADD_LIBRARY ( ${GAMEFS_MODULE} STATIC gamefs crypt mount strings file ${GFS_PREFIX}/SysDepend_file )
+ADD_LIBRARY ( ${GAMEFS_FSMAN_MODULE} STATIC gamefs crypt mount create ${GFS_PREFIX}/SysDepend_create navigate strings file crc32 ${GFS_PREFIX}/SysDepend_file )
 SET_TARGET_PROPERTIES ( ${GAMEFS_FSMAN_MODULE} PROPERTIES
 	COMPILE_FLAGS "-D_FSMANAGER_"
 )
