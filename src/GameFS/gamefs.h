@@ -313,12 +313,6 @@ class AtomFS {
   void Decrypt(uint32_t *data, int32_t lenght, uint32_t k[4],
                uint32_t r[4], uint32_t *t);
 #ifdef _FSMAN_
-#ifdef UNIX
-  int32_t dot_exclude(const struct dirent64 *dir);
-#endif  // UNIX
-#ifdef WINDOWS
-  int32_t dot_exclude(const WIN32_FIND_DATA *dir);
-#endif  // WINDOWS
   void Crypt(uint32_t *data, int32_t lenght, uint32_t k[4],
              uint32_t r[4], uint32_t *t);
 // Scan for all files and directories to add to the packed file
