@@ -2,7 +2,7 @@
 #include "../strings.h"
 #ifdef _FSMAN_
 // Remove folder links
-int32_t AtomFS::dot_exclude(const WIN32_FIND_DATA *dir) {
+inline static int32_t dot_exclude(const WIN32_FIND_DATA *dir) {
   if ((strcmp(dir->cFileName, ".") == 0) ||
       (strcmp(dir->cFileName, "..") == 0))
     return 0;
