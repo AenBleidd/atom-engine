@@ -21,5 +21,6 @@ TREE_FILE* FindFileFromPath(AtomLog *atomlog, TREE_FOLDER *root,
                             TREE_FOLDER *current, ARGUMENTS *path);
 // 16-byte password input function
 uint32_t* PassPrint(void);
+void PassInput(char *input);
 
 #endif  // _GAMEFS_STRINGS_H_

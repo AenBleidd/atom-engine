@@ -18,7 +18,7 @@ ENDIF ( UNIX )
 # Create a static library which will be used by the engine
 # As well as static library to be linked to fsman utility
 ADD_LIBRARY ( ${GAMEFS_MODULE} STATIC gamefs crypt mount strings file ${GFS_PREFIX}/SysDepend_file )
-ADD_LIBRARY ( ${GAMEFS_FSMAN_MODULE} STATIC gamefs crypt mount create ${GFS_PREFIX}/SysDepend_create navigate strings file crc32 ${GFS_PREFIX}/SysDepend_file )
+ADD_LIBRARY ( ${GAMEFS_FSMAN_MODULE} STATIC gamefs crypt mount create ${GFS_PREFIX}/SysDepend_create navigate strings ${GFS_PREFIX}/SysDepend_strings file crc32 ${GFS_PREFIX}/SysDepend_file )
 SET_TARGET_PROPERTIES ( ${GAMEFS_FSMAN_MODULE} PROPERTIES
 	COMPILE_FLAGS "-D_FSMANAGER_"
 )
