@@ -431,14 +431,15 @@ uint32_t* PassPrint(void) {
   char *input = new char[17];  // input string
 // password input cycle
   while (true) {
-    printf("%s:\n", "Print 16-symbol password");
-    fgets(input, 17, stdin);
+    printf("%s: ", "Print 16-symbol password");
+    PassInput(input);
     if (strlen(input) == 16)
       break;
-    else
+    else if (strlen(input) < 16)
       fprintf(stderr, "%s\n", "Password is too short! Try again");
+    else
+      fprintf(stderr, "%s\n", "Password is too long! Try again");
   }
-  input[16] = '\0';
 // processing input string
   key[0] = 0, key[1] = 0, key[2] = 0, key[3] = 0;
   for (int32_t i = 0; i < 4; i++) {
