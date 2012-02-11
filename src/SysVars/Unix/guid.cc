@@ -1,4 +1,4 @@
-#include "guid.h"
+#include "../guid.h"
 AGUID* GetAGUID(char *guid) {
   AGUID *aguid = new AGUID;
   aguid->data0 = 0;
