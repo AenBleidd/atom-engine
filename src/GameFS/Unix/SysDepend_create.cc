@@ -2,7 +2,7 @@
 #include "../strings.h"
 #ifdef _FSMAN_
 // Remove folder links
-inline static int32_t dot_exclude(const struct dirent64 *dir) {
+inline static int32_t dot_exclude(const dirent64 *dir) {
   if ((dir->d_name[0] == '.') && (dir->d_name[1] == 0)) return 0;
   if ((dir->d_name[0] == '.') && (dir->d_name[1] == '.') &&
       (dir->d_name[2] == 0)) return 0;
@@ -105,7 +105,7 @@ int32_t AtomFS::FolderScan(char *ch, RECORD *list, FILE *bin, int32_t level = 0)
   }
   return 0;
 }
-#endif  // _FSMAN_                                                                                                  
+#endif  // _FSMAN_
 #ifdef _FSMAN_
 int32_t AtomFS::Create(char **input, uint32_t count, char *file,
                    uint16_t encrypt, uint32_t *key, uint8_t type) {

@@ -33,6 +33,15 @@
 FILE* fmemopen(void *s, size_t len, const char *modes);
 #endif  // WINDOWS
 
+#ifdef _FSMAN_
+#ifdef UNIX
+inline static int32_t dot_exclude(const struct dirent64 *dir);
+#endif  // UNIX
+#ifdef WINDOWS
+inline static int32_t dot_exclude(const WIN32_FIND_DATA *dir);
+#endif  // WINDOWS
+#endif  // _FSMAN_
+
 // main constants
 static const uint32_t magic = 0x41454653;  // Magic number ("AEFS")
 static const uint8_t version = 0x01;  // current version (1)
