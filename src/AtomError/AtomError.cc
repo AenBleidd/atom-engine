@@ -19,7 +19,7 @@ char* AtomLog::CurTime() {
   return timebuf;
 }
 AtomLog::AtomLog(char *name, bool alone, uint8_t lvl) {
-  ptimeinfo = new tm;;
+  ptimeinfo = new tm;
   logfile = 0;
   verbose_level = lvl;
   if (name != 0) {
