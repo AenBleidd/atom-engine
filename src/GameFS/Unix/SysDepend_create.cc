@@ -228,23 +228,6 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
   eof->crc = 0;
 // Update datsize
   datsize += sizeof(eof->flag);
-// Would we store the key?
-// this is an addon?
-  if (type == type_addon) {
-// yes it is...
-// write the flag
-    if (fwrite(&flag_key, sizeof(flag_key), 1, binfile) != 1) {
-      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-      fclose(binfile);
-      return -1;
-    }
-// write the key
-    if (fwrite(wake_key, 4, 4, binfile) != 4) {
-      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
-      fclose(binfile);
-      return -1;
-    }
-  }
 // find the address of future filetable
   header.filetable = ftell(binfile);
   if (header.filetable == -1L) {
