@@ -59,12 +59,15 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
   }
 // Create new file
   else if (strcmp(argc[1], "-n") == 0 || strcmp(argc[1], "--new") == 0) {
-    if (arg > 9) {
-      char **input = new char*[arg - 9];
+// default params
+    uint16_t encbytes = 0xFFFF;
+    uint8_t type = type_standard;
+// input files count
+    int32_t param = 0;
+    if (arg > 5) {
+      char **input = new char*[arg - 5];
       int32_t encrypted = 0;
       char *output = 0;
-      uint16_t encbytes = 0xFFFF;
-      uint8_t type = type_addon;
 // Flags
       bool error = false;
       int8_t flag_enc = 0;
@@ -97,9 +100,16 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
             flag_in = 1;
           }
 // type flag
-          else if ((strcmp(argc[i], "-t") == 0) && (flag_type == 0) &&
-                   (flag_enc != 1) && (flag_out != 1) && (flag_in != 1)) {
-            flag_type = 1;
+          else if ((strcmp(argc[i], "-tc") == 0 || strcmp(argc[i], "-ts") == 0)
+                   && (flag_type == 0) && (flag_enc != 1) && (flag_out != 1) &&
+                   (flag_in != 1)) {
+            flag_type = -1;
+            if (strcmp(argc[i], "-tc") == 0) {
+              type = type_critical;
+            }
+            else if (strcmp(argc[i], "-ts") == 0) {
+              type = type_standard;
+            }
             if (flag_in == 2)
               flag_in = -1;
           }
@@ -110,7 +120,7 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
             flag_enc = -1;
             encrypted = atoi(argc[i]);
 // wrong diapasone
-            if ((encrypted == 0) || (encrypted < -1) || (encrypted > 65535))
+            if ((encrypted == 0) || (encrypted < -1) || (encrypted > 0xFFFF))
               error = true;
             else
 // -1 or 65535 - all file will be encrypted (must be 0xFFFF)
@@ -127,22 +137,7 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
 // this is at least first input file
             flag_in = 2;
             input[j++] = argc[i];
-          }
-// type
-          else if (flag_type == 1) {
-            flag_type = -1;
-            if (strcmp(argc[i], "critical") == 0) {
-              type = type_critical;
-            }
-            else if (strcmp(argc[i], "standard") == 0) {
-              type = type_standart;
-            }
-            else if (strcmp(argc[i], "addon") == 0) {
-              type = type_addon;
-            } else {
-// wrong type
-              error = true;
-            }
+            param = j;
           } else {
 // some error
             error = true;
@@ -154,13 +149,10 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
         }
       }
       if (error == false) {
-        if (type == 0)
+        if (type == type_standard)
           snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
                    "Create new standard file %s\n", output);
-        else if (type == 1)
-          snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
-                   "Create new addon file %s\n", output);
-        else if (type == 0xFF)
+        else if (type == type_critical)
           snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE,
                    "Create new critical file %s\n", output);
         atomlog->DebugMessage(atomlog->MsgBuf);
@@ -168,8 +160,6 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
 // key is not predefined
         if (key == 0)
           key = PassPrint();
-// input files count
-        int32_t param = arg - 9;
         atomfs->Create(input, param, output, encbytes, key, type);
       }
 // Make clean

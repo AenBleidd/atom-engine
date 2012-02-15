@@ -176,8 +176,7 @@ int32_t AtomFS::Mount(char* filename, char* mountfolder, uint32_t *key) {
     return -1;
   }
 // Check this type
-  if ((header.type != type_critical) && (header.type != type_standart) &&
-       (header.type != type_addon)) {
+  if ((header.type != type_critical) && (header.type != type_standard)) {
 // Hmm... Strange type...
     atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
     fclose(pak);
@@ -208,48 +207,14 @@ int32_t AtomFS::Mount(char* filename, char* mountfolder, uint32_t *key) {
     fclose(pak);
     return -1;
   }
-// Check for key
-  if (header.type == type_addon) {
-    if (key == 0) {
-      key = new uint32_t[4];
-    }
-// go to the key
-    if (fseek(pak, header.filetable - 17, SEEK_SET) != 0) {
-      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-      fclose(pak);
-      return -1;
-    }
-// get the key flag
-    uint8_t flagkey = 0;
-    if (fread(&flagkey, sizeof(flag_key), 1, pak) != 1) {
-      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-      fclose(pak);
-      return -1;
-    }
-// Check the flag
-    if (flagkey != flag_key) {
-      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_INCORRECT_FILE);
-      fclose(pak);
-      return -1;
-    }
-// TODO(Lawliet): Do smth with this. Store predefined key somewhere!
-// if key is predefined it would be lost... for ever...
-// Ok, let's get the key...
-    if (fread(key, 4, 4, pak) != 4) {
-      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-      fclose(pak);
-      return -1;
-    }
-  } else {
 // go to the filetable
-    if (fseek(pak, header.filetable, SEEK_SET) != 0) {
-      atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
-      fclose(pak);
-      return -1;
-    }
-    if (key == 0)
-      key = PassPrint();
+  if (fseek(pak, header.filetable, SEEK_SET) != 0) {
+    atomlog->SetLastErr(ERROR_CORE_FS, ERROR_READ_FILE);
+    fclose(pak);
+    return -1;
   }
+  if (key == 0)
+    key = PassPrint();
 // add the key and get the working table
     int ii = AddAddonKey(key);
     table = addon_key.addon_table[ii];
@@ -490,9 +455,6 @@ temprecord = new RECORD;
         current->tree_file->file = 0;
         current->tree_file->descriptor = 0;
         current->tree_file->key = 0;
-        if (header.type == type_addon) {
-          current->tree_file->key = key;
-        }
         current->tree_file->table = table;
 // Clean
         delete temprecord;
@@ -524,9 +486,6 @@ temprecord = new RECORD;
             tempfile->file = 0;
             tempfile->tree_file->descriptor = 0;
             tempfile->tree_file->key = 0;
-            if (header.type == type_addon) {
-              tempfile->tree_file->key = key;
-            }
             tempfile->tree_file->table = table;
 // Clean
             delete temprecord;
@@ -562,9 +521,6 @@ temprecord = new RECORD;
                 tempfile->file = 0;
                 tempfile->tree_file->descriptor = 0;
                 tempfile->tree_file->key = 0;
-                if (header.type == type_addon) {
-                  tempfile->tree_file->key = key;
-                }
                 tempfile->tree_file->table = table;
 // Clean
                 delete temprecord;
@@ -594,9 +550,6 @@ temprecord = new RECORD;
           tempfile->tree_file->file = 0;
           tempfile->tree_file->descriptor = 0;
           tempfile->tree_file->key = 0;
-          if (header.type == type_addon) {
-            tempfile->tree_file->key = key;
-          }
           tempfile->tree_file->table = table;
 // Clean
           delete temprecord;
