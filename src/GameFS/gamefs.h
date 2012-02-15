@@ -54,13 +54,12 @@ static const uint8_t flag_file = 0x0F;  // file
 static const uint8_t flag_folder = 0x0C;  // folder
 static const uint8_t flag_folder_deleted = 0xDC;  // deleted folder
 static const uint8_t flag_file_deleted = 0xDF;  // deleted file
-static const uint8_t flag_key = 0x0E;  // it's wake addon key
 // unicode
 static const uint8_t flag_ascii = 0x00;
 static const uint8_t flag_utf8 = 0xFF;
 // archive types
-static const uint8_t type_standart = 0x00;
-static const uint8_t type_addon = 0x01;
+static const uint8_t type_standard = 0x00;
+//static const uint8_t type_addon = 0x01;
 static const uint8_t type_critical = 0xFF;
 // Error codes
 static int32_t ERROR_CORE_FS;
@@ -143,7 +142,7 @@ struct HEADER {
   AGUID guid;
 // version of the paked file
   uint8_t version;
-// type (critical, standart or addon)
+// type (critical, standard)
   uint8_t type;
 // encoding of the symlols
   uint8_t encoding;
