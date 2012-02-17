@@ -126,16 +126,15 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
   datsize = 0;
   binsize = 0;
 // Generate crypt key
-// If crypt key is predefined new key is ignored
-  if (wake_key == 0) {
+  if (encrypt != 0 && key != 0) {
     wake_key = key;
     wake_table = GenKey(wake_key[0], wake_key[1], wake_key[2], wake_key[3]);
-  }
 // set encrypt bytes count
-  if (encrypt > 4 && encrypt != 0xFFFF && encrypt % 4 != 0)
-    bytescrypt = encrypt - (encrypt % 4) + 4;
-  else
-    bytescrypt = encrypt;
+    if (encrypt > 4 && encrypt != 0xFFFF && encrypt % 4 != 0)
+      bytescrypt = encrypt - (encrypt % 4) + 4;
+    else
+      bytescrypt = encrypt;
+  }
 // Create name of the output files
   char *bin = file;
 // check if output files exist

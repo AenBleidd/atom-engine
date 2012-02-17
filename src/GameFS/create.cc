@@ -49,13 +49,15 @@ int32_t AtomFS::Write(char *in, RECORD *list, FILE *bin, char *shortname) {
   rewind(file);
 // encrypt
   uint64_t count;
-  if ((bytescrypt == 0xFFFF) || (bytescrypt > record->size))
-    count = record->size;
-  else
-    count = bytescrypt;
-  count = (count & ~3) / 4;
-  if (count % 4 != 0)
-    count++;
+  if (bytescrypt != 0) {
+    if ((bytescrypt == 0xFFFF) || (bytescrypt > record->size))
+      count = record->size;
+    else
+      count = bytescrypt;
+    count = (count & ~3) / 4;
+    if (count % 4 != 0)
+      count++;
+  }
   uint64_t alreadyRead = 0;
   uint64_t currentRead = 0;
   uint64_t crypted = 0;
@@ -64,7 +66,9 @@ int32_t AtomFS::Write(char *in, RECORD *list, FILE *bin, char *shortname) {
   uint64_t crc = 0;
 // Alloc buffer for reading
   uint8_t *buf = new uint8_t[MAX_READ_LEN];
-  uint32_t *tempbuf = new uint32_t[MAX_READ_LEN / 4];
+  uint32_t *tempbuf;
+  if (bytescrypt != 0)
+    tempbuf = new uint32_t[MAX_READ_LEN / 4];
   uint32_t r[4];
 // TODO(Lawliet): Optimize this
   r[0] = wake_key[0];
@@ -91,22 +95,26 @@ int32_t AtomFS::Write(char *in, RECORD *list, FILE *bin, char *shortname) {
     if (currentRead % 4 != 0)
       t++;
 // copy this piece of file
-    memcpy(tempbuf, buf, currentRead);
-    if ((count - crypted) >= MAX_READ_LEN)
-      crypting = MAX_READ_LEN;
-    else
-      crypting = count - crypted;
-    realcrypting = (crypting & ~3) / 4;
-    if (crypting % 4 != 0)
-      realcrypting++;
-    Crypt(tempbuf, realcrypting, r, r, wake_table);
-    crypted += crypting;
-    t *= 4;
+    if (bytescrypt != 0) {
+      memcpy(tempbuf, buf, currentRead);
+      if ((count - crypted) >= MAX_READ_LEN)
+        crypting = MAX_READ_LEN;
+      else
+        crypting = count - crypted;
+      realcrypting = (crypting & ~3) / 4;
+      if (crypting % 4 != 0)
+        realcrypting++;
+      Crypt(tempbuf, realcrypting, r, r, wake_table);
+      crypted += crypting;
+      t *= 4;
 // copy crypted piece of file
-    memcpy(buf, tempbuf, t);
+      memcpy(buf, tempbuf, t);
+    }
 // calculating crc
-    crc = GenCRC32(buf, t, crc);
+      crc = GenCRC32(buf, t, crc);
 // write to disk crypted data
+    if (bytescrypt == 0)
+      t *= 4;
     if (fwrite(buf, 1, t, bin) != t) {
       atomlog->SetLastErr(ERROR_CORE_FS, ERROR_WRITE_FILE);
       fclose(file);
