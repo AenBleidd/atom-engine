@@ -30,12 +30,12 @@ int main(int arg, char *argc[]) {
   }
 
   char help[] = "File System Manager - utility to work with Atom \
-File System\nOptions:\n\t-t, --test\t\tTest default file system with standart \
+File System\nOptions:\n\t-t, --test\t\tTest default file system with standard \
 mount file\n\t-t, --test [mountfile]\tTest file system\n\t-n, --new\t\tCreate \
 new file\n\t\t-o [output]\t\tOutput file name\n\t\t-i [input]\t\tInput file \
-and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
-[type]\t\tType of new file (critical, standart, addon)\n\t-o, --open \
-[input]\tOpen file for reading\n";
+and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-ts \
+\t\t\tType of new file (standard)\n\t\t-tc\t\t\tType of new file (critical)\n\
+\t-o, --open [input]\tOpen file for reading\n";
   try { atomfs = new AtomFS(atomlog); }
   catch(int32_t i) { }
   if (arg == 1 || strcmp(argc[1], "-h") == 0 || \
@@ -60,7 +60,7 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
 // Create new file
   else if (strcmp(argc[1], "-n") == 0 || strcmp(argc[1], "--new") == 0) {
 // default params
-    uint16_t encbytes = 0xFFFF;
+    uint16_t encbytes = 0;
     uint8_t type = type_standard;
 // input files count
     int32_t param = 0;
@@ -158,7 +158,7 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-t \
         atomlog->DebugMessage(atomlog->MsgBuf);
 // Key input
 // key is not predefined
-        if (key == 0)
+        if (encbytes != 0)
           key = PassPrint();
         atomfs->Create(input, param, output, encbytes, key, type);
       }
