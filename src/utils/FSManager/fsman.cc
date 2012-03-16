@@ -6,12 +6,10 @@
 
 #include <stdio.h>
 
-AtomLog *atomlog;
-AtomFS *atomfs;
-
 int main(int arg, char *argc[]) {
-// input parameters processing
   uint32_t *key = 0;
+  AtomLog *atomlog;
+  AtomFS *atomfs;
   atomlog = new AtomLog("fsman");
   snprintf((char*)atomlog->MsgBuf, MSG_BUFFER_SIZE, "Start fsman version %s\n",
            _FSMAN_VERSION_);
@@ -38,6 +36,7 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-ts \
 \t-o, --open [input]\tOpen file for reading\n";
   try { atomfs = new AtomFS(atomlog); }
   catch(int32_t i) { }
+// input parameters processing
   if (arg == 1 || strcmp(argc[1], "-h") == 0 || \
       strcmp(argc[1], "--help") == 0 || strcmp(argc[1], "-help") == 0 || \
       strcmp(argc[1], "/?") == 0) {
