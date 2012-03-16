@@ -60,7 +60,7 @@ int32_t AtomFS::FolderScan(char *ch, RECORD *list, FILE *bin, int32_t level = 0)
       return -1;
     }
     do {
-      if ((st.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY) &&
+      if ((st.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) &&
           (dot_exclude(&st) == 1)) {
         const uint32_t fsize = sizeof(ch) + sizeof(st.cFileName) + 2;
         curdir = new char[fsize];
@@ -215,7 +215,7 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
       return -1;
     }
     FindClose(hf);
-    if (st.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY) {
+    if (st.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
       if (FolderScan(input[i], root, binfile, 0) == -1) {
 		      fclose(binfile);
         return -1;

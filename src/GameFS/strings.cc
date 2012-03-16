@@ -431,7 +431,7 @@ uint32_t* PassPrint(void) {
   char *input = new char[17];  // input string
 // password input cycle
   while (true) {
-    printf("%s: ", "Print 16-symbol password");
+//    printf("%s: ", "Print 16-symbol password");
     PassInput(input);
     if (strlen(input) == 16)
       break;
