@@ -7,6 +7,7 @@
 # Configure modules path
 SET ( MODULE_PATH "${${PROJECT_NAME}_SOURCE_DIR}/../cmake_modules" )
 INCLUDE ( "${MODULE_PATH}/modules.cmake" )
+INCLUDE ( "${MODULE_PATH}/functions.cmake" )
 
 # Command line options, their defaults and checks
 
@@ -17,6 +18,8 @@ SET ( GUI_TYPES SDL; Native )
 IF ( NOT GUI )
 	SET ( GUI Native )
 ENDIF()
+
+CreateMessagesFile("messages.msg" "WindowManager" "ENGINE_WM")
 
 # Add "OWindow.h" and "AtomError.h" directories to the include path
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${WM_MODULE}" )

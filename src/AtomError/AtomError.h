@@ -56,10 +56,12 @@ class AtomLog {
 // get verbose level
   inline uint8_t GetLogVerbosity() { return verbose_level; }
 // some verbosity levels
+// errors will be written only into system journal (good for release project)
+#define LOGONLYINTOSYSTEMJOURNAL 0xFD
 // show only last system error codes
-#define SHOWSYSTEMERRORS        0xFE
+#define SHOWSYSTEMERRORS         0xFE
 // show last system error codes and their description
-#define SHOWSYSTEMERRORSDESCR   0xFF
+#define SHOWSYSTEMERRORSDESCR    0xFF
 // write last error and warning into the log
   void SetLastError(uint32_t code, uint32_t subcode,
                     const char* file, int32_t line);

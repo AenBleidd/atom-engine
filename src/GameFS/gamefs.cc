@@ -9,7 +9,7 @@ AtomFS::AtomFS(AtomLog *log, unsigned int *key) {
   ERROR_CORE_FS = atomlog->LoadStrings(ATOMERROR, gamefserrorcodes,
                                        gamefs_error_description);
   WARNING_CORE_FS = atomlog->LoadStrings(ATOMWARNING, gamefswarncodes,
-                                       gamefs_warn_descr);
+                                       gamefs_warn_description);
   if (ERROR_CORE_FS == -1 || WARNING_CORE_FS == -1) {
 // Why ???
     throw -1;
