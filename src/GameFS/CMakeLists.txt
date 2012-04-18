@@ -7,6 +7,7 @@
 # Configure modules path
 SET ( MODULE_PATH "${${PROJECT_NAME}_SOURCE_DIR}/../cmake_modules" )
 INCLUDE ( "${MODULE_PATH}/modules.cmake" )
+INCLUDE ( "${MODULE_PATH}/functions.cmake" )
 
 IF ( WIN32 )
 	SET ( GFS_PREFIX "Windows" )
@@ -14,6 +15,8 @@ ENDIF ( WIN32 )
 IF ( UNIX )
 	SET ( GFS_PREFIX "Unix" )
 ENDIF ( UNIX )
+
+CreateMessagesFile("messages.msg" "GameFS" "CORE_FS")
 
 # Create a static library which will be used by the engine
 # As well as static library to be linked to fsman utility

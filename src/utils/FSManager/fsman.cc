@@ -35,10 +35,16 @@ and/or folders\n\t\t-e [crypt bytes]\tCount of bytes to encrypt\n\t\t-ts \
 \t\t\tType of new file (standard)\n\t\t-tc\t\t\tType of new file (critical)\n\
 \t-o, --open [input]\tOpen file for reading\n";
   try { atomfs = new AtomFS(atomlog); }
-  catch(int32_t i) { }
+  catch(int32_t i) {
+    switch (i) {
+    case -1:
+      fprintf(stderr, "Error in AtomError\n");
+      return 0;
+    }
+  }
 // input parameters processing
   if (arg == 1 || strcmp(argc[1], "-h") == 0 || \
-      strcmp(argc[1], "--help") == 0 || strcmp(argc[1], "-help") == 0 || \
+      strcmp(argc[1], "--help") == 0 || strcmp(argc[1], "-help") == 0 || 
       strcmp(argc[1], "/?") == 0) {
     atomlog->DebugMessage(help);
     fprintf(stderr, "%s", help);
