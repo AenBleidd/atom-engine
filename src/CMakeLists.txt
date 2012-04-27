@@ -71,6 +71,8 @@ ADD_SUBDIRECTORY ( SysVars )
 ADD_SUBDIRECTORY ( utils )
 ADD_SUBDIRECTORY ( ResourceManager )
 
+source_group ("Header Files" FILES ${HEADERS})
+source_group ("Source Files" FILES ${SOURCES})
 
 # Cache some of the command-line parameters
 SET ( CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING "The build type for the project" FORCE )
