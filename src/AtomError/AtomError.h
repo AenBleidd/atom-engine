@@ -3,6 +3,9 @@
 
 #ifdef WINDOWS
 #include <windows.h>
+#ifdef SYSJOURNAL
+#include "Windows\SystemJournal.h"
+#endif  // SYSJOURNAL
 #ifdef __BORLANDC__
 #include <time.h>
 #endif  // __BORLANDC__
@@ -34,6 +37,9 @@ class AtomLog {
   char MsgBuf[MSG_BUFFER_SIZE];
  private:
 // global last error and warning
+#ifdef SYSJOURNAL
+  AtomSystemJournal *sysjrn;
+#endif // SYSJOURNAL
   ERR global_error;
   ERR global_warning;
 // errors and warnings

@@ -124,6 +124,13 @@ AtomLog::AtomLog(char *name, bool alone, uint8_t lvl) {
       throw -1;
     }
   }
+  sysjrn = 0;
+#ifdef SYSJOURNAL
+    try { sysjrn = new AtomSystemJournal; }
+    catch (...) {
+      throw -1;
+    }
+#endif  // SYSJOURNAL
   errorcode = 0;
   errorsubcode = 0;
   warningcode = 0;
@@ -151,6 +158,10 @@ AtomLog::~AtomLog() {
     delete [] global_warning.description;
     global_warning.description = 0;
   }
+#ifdef SYSJOURNAL
+  if(sysjrn)
+    delete sysjrn;
+#endif  // SYSJOURNAL
 }
 void AtomLog::LogMsg(const char *string, uint8_t lvl, const char *file,
                      int32_t line) {

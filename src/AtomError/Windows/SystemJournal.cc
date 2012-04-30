@@ -15,13 +15,13 @@ AtomSystemJournal::AtomSystemJournal(char *appName, char *msgFileName, int CatCo
     len = strlen(msgFileName);
   }
   HKEY hKey, hRootKey = HKEY_LOCAL_MACHINE;
-  const char cStPath[] = "\\SYSTEM\\CurrentControlSet\Services\\Eventlog\\Application\\";
+  const char cStPath[] = "\\SYSTEM\\CurrentControlSet\\Services\\Eventlog\\Application\\";
   const char cCatMessFile[] = "CategoryMessageFile";
   const char cEvMessFile[] = "EventMessageFile";
   const char cParMessFile[] = "ParameterMessageFile";
   const char cCatCount[] = "CategoryCount";
   const char cTypSupp[] = "TypeSupported";
-  const uint32_t TypeSupported = EVENTLOG_ERROR_TYPE | EVENTLOG_INFORMATION_TYPE | EVENTLOG_WARNING_TYPE;
+  const uint32_t TypeSupported = EVENTLOG_ERROR_TYPE | EVENTLOG_WARNING_TYPE;
   uint32_t AppRegPathLen = strlen(cStPath) + strlen(appName) + 1;
   char *appRegPath = new char[AppRegPathLen];
   snprintf(appRegPath, AppRegPathLen, "%s%s", cStPath, appName);
@@ -54,7 +54,26 @@ AtomSystemJournal::AtomSystemJournal(char *appName, char *msgFileName, int CatCo
   delete [] appRegPath;
   if (bCreatemsgFileName == true)
     delete [] msgFileName;
+// register event source
+  hEventSource = RegisterEventSourceA(NULL, appName);
+  if (hEventSource == NULL)
+    throw;
 }
 
 AtomSystemJournal::~AtomSystemJournal() {
+// deregister event source
+  DeregisterEventSource(hEventSource);
+}
+
+void AtomSystemJournal::ReportEvent(uint32_t cat, uint32_t mess, uint16_t type, const char* file, int32_t line) {
+  char **msg = new char*[2];  
+  uint32_t file_len = strlen(file) + 7;
+  uint32_t line_len = 17;
+  msg[0] = new char[file_len];
+  msg[1] = new char[line_len];
+  snprintf(msg[0], file_len, "File: %s", file);
+  snprintf(msg[1], line_len, "Line: %i", line);
+  if(!::ReportEvent(hEventSource, type, cat, mess, NULL, 2, 0, (LPCSTR*)msg, NULL)) {
+    throw;
+  }
 }
