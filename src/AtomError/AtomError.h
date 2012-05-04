@@ -28,6 +28,15 @@ struct ERR {
   uint32_t system_code;
   char *description;
 };
+// some verbosity levels
+enum {
+// errors will be written only into system journal (good for release project)
+  LOGONLYINTOSYSTEMJOURNAL = 0xFD,
+// show only last system error codes
+  SHOWSYSTEMERRORS = 0xFE,
+// show last system error codes and their description
+  SHOWSYSTEMERRORSDESCR = 0xFF
+};
 
 class AtomLog {
  public:
@@ -61,13 +70,6 @@ class AtomLog {
   inline void SetLogVerbosity(uint8_t lvl) { verbose_level = lvl; }
 // get verbose level
   inline uint8_t GetLogVerbosity() { return verbose_level; }
-// some verbosity levels
-// errors will be written only into system journal (good for release project)
-#define LOGONLYINTOSYSTEMJOURNAL 0xFD
-// show only last system error codes
-#define SHOWSYSTEMERRORS         0xFE
-// show last system error codes and their description
-#define SHOWSYSTEMERRORSDESCR    0xFF
 // write last error and warning into the log
   void SetLastError(uint32_t code, uint32_t subcode,
                     const char* file, int32_t line);
