@@ -51,6 +51,8 @@ AtomLog::AtomLog(char *name, bool alone, uint8_t lvl) {
 #ifdef WINDOWS
     if (SetCurrentDirectory("log") == 0) {
 #endif  // WINDOWS
+// TODO(Lawliet): Also we can create log file in the directory /var/log/
+
 // One by one, We will fall, down down...
 // Wait a minute ! We have last hope!
 // Lets save logfile into the temp directory.
@@ -270,7 +272,7 @@ void AtomLog::SetLastWarning(uint32_t code, uint32_t subcode,
   return;
 }
 
-int32_t AtomLog::LoadStrings(bool type, char **subcodes, 
+int32_t AtomLog::LoadStrings(bool type, char **subcodes,
   char *module_description) {
   if (type == ATOMERROR) {
 // load errors
