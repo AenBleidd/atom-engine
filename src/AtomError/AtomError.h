@@ -17,6 +17,9 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <errno.h>
+#ifdef SYSJOURNAL
+#include "Unix/SystemJournal.h"
+#endif  // SYSJOURNAL
 #endif  // UNIX
 
 #include "../preproc.h"
