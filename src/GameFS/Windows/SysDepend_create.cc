@@ -204,7 +204,7 @@ int32_t AtomFS::Create(char **input, uint32_t count, char *file,
 // set new datasize
   datsize += (sizeof(root->flag)+sizeof(root->namelen)+root->namelen);
 // Scanning...
-  for (int32_t i = 0; i < count; i++) {
+  for (uint32_t i = 0; i < count; i++) {
     WIN32_FIND_DATA st;
     HANDLE hf;
     hf = FindFirstFile(input[i], &st);
