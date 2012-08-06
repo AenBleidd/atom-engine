@@ -2,7 +2,7 @@
 
 function (CreateMessagesFile filename ModuleName VarName)
   string(REGEX REPLACE ".msg" ".h" out ${filename})
-  message(STATUS "Create file ${out}")
+  message(STATUS "Create file ${ModuleName}/${out}")
   file(STRINGS ${filename} file_text)
   foreach(line ${file_text})
     if (${line} MATCHES "^<.*>$")

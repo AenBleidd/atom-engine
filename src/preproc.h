@@ -8,7 +8,8 @@
 #endif  // _FSMANAGER_
 
 // Microsoft Security File
-#include "banned.h"
+// TODO(Lawliet): I don't want to use it now. 
+// #include "banned.h"
 
 // Check environment
 #ifdef WINDOWS
@@ -19,15 +20,17 @@
 // we compile engine using Borland Builder
 #else
 // unsupported compiler
-#error "Unsupported compiler. A.T.O.M Engine can be compiled using \
-Microsoft Visual C++ or Borland C++ Builder"
+#warning "Unsupported compiler. A.T.O.M Engine can be built using \
+Microsoft Visual C++ or Borland C++ Builder. You can build it \
+with another compiler on your own risk without any guaranties."
 #endif  // windows compiler
 #elif UNIX
 // we works on linux
 #else
 // we can't work here
-#error "Unsupported system. \
-A.T.O.M Engine can be compiled only on Windows or Unix"
+#warning "Unsupported system. \
+A.T.O.M Engine can be built only on Windows or Unix. \
+You can build it on other system at you own risk without any guaranties"
 #endif  // system
 
 // If it will be compiled on Windows
