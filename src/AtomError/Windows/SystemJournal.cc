@@ -15,7 +15,7 @@ AtomSystemJournal::AtomSystemJournal(char *appName, char *msgFileName, int CatCo
     len = strlen(msgFileName);
   }
   HKEY hKey, hRootKey = HKEY_LOCAL_MACHINE;
-  const char cStPath[] = "\\SYSTEM\\CurrentControlSet\\Services\\Eventlog\\Application\\";
+  const char cStPath[] = "SYSTEM\\CurrentControlSet\\Services\\Eventlog\\Application\\";
   const char cCatMessFile[] = "CategoryMessageFile";
   const char cEvMessFile[] = "EventMessageFile";
   const char cParMessFile[] = "ParameterMessageFile";
