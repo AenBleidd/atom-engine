@@ -1,6 +1,9 @@
 #ifndef _ATOM_ERROR_H_
 #define _ATOM_ERROR_H_
 
+#include "../preproc.h"
+#include "OAtomError.h"
+
 #ifdef WINDOWS
 #include <windows.h>
 #ifdef SYSJOURNAL
@@ -12,7 +15,6 @@
 #endif  // WINDOWS
 #include <string.h>
 #include <stdio.h>
-#include <ctime>
 #ifdef UNIX
 #include <unistd.h>
 #include <sys/stat.h>
@@ -22,15 +24,6 @@
 #endif  // SYSJOURNAL
 #endif  // UNIX
 
-#include "../preproc.h"
-#define MSG_BUFFER_SIZE 1024
-
-struct ERR {
-  uint32_t code;
-  uint32_t sub_code;
-  uint32_t system_code;
-  char *description;
-};
 // some verbosity levels
 enum {
 // errors will be written only into system journal (good for release project)
@@ -41,7 +34,7 @@ enum {
   SHOWSYSTEMERRORSDESCR = 0xFF
 };
 
-class AtomLog {
+class AtomLog : public OAtomLog{
  public:
   explicit AtomLog(char *name = "atom", bool alone = false,
                     uint8_t lvl = 0xFF);
@@ -62,10 +55,6 @@ class AtomLog {
 // logfile
   FILE *logfile;
  public:
-// Current date and time
-  char* CurDateTime();
-// Current time
-  char* CurTime();
 // get last error and warning
   inline ERR GetLastErr() { return global_error; }
   inline ERR GetLastWrn() { return global_warning; }
@@ -95,11 +84,6 @@ class AtomLog {
 // modules count
   uint32_t module_error_count;
   uint32_t module_warning_count;
-// for datetime functions
-  char datetimebuf[20];
-  char timebuf[10];
-  tm *ptimeinfo;
-
 // write log message
   void LogMsg(const char *string);
 // write debug log message
