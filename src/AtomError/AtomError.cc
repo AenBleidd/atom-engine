@@ -3,75 +3,34 @@ AtomLog::AtomLog(char *name, bool alone, uint8_t lvl) {
   logfile = 0;
   verbose_level = lvl;
   if (name != 0) {
-    const uint16_t s = 355;
-    char *plogfilename  = new char[s];
+    char *plogfilename = new char[MAX_PATH];
 // get current date and time
-    const uint8_t t = 255;
-    char *temppath = new char[t];
-#ifdef UNIX
-#ifndef ATOM_DEBUG
-    snprintf(temppath, t, "%s", "/tmp/");
-#else
-    snprintf(temppath, t, "%s", "log/");
-#endif  // ATOM_DEBUG
-#endif  // UNIX
+    char *temppath = GetLogPath();
+    if (temppath == 0) {
+// We can't write tj the log... But we must work! The Show Must Go On!
 #ifdef WINDOWS
-#ifndef ATOM_DEBUG
-    GetTempPath(t, temppath);
-#else
-    snprintf(temppath, t, "%s", "log\\");
-#endif  // ATOM_DEBUG
+      snprintf(plogfilename, MAX_PATH, "%s", "nul");
 #endif  // WINDOWS
-
-// Check log folder
-#ifdef ATOM_DEBUG
 #ifdef UNIX
-    if (chdir("log") != 0) {
+      snprintf(plogfilename, MAX_PATH, "%s", "/dev/null");
 #endif  // UNIX
-#ifdef WINDOWS
-    if (SetCurrentDirectory("log") == 0) {
-#endif  // WINDOWS
-// TODO(Lawliet): Also we can create log file in the directory /var/log/
-
-// One by one, We will fall, down down...
-// Wait a minute ! We have last hope!
-// Lets save logfile into the temp directory.
-// At least this directory MUST be exist...
-#ifdef UNIX
-      if (mkdir("log", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
-        snprintf(temppath, t, "%s", "/tmp/");
-#endif  // UNIX
-#ifdef WINDOWS
-      if (CreateDirectory("log", NULL) == 0) {
-        GetTempPath(t, temppath);
-#endif  // WINDOWS
-        fprintf(stderr, "Can't create log directory\n");
-      }
     } else {
-#ifdef UNIX
-      chdir("..");
-#endif  // UNIX
-#ifdef WINDOWS
-      SetCurrentDirectory("..");
-#endif  // WINDOWS
-    }
-#endif  // ATOM_DEBUG
-
-    if (alone == false) {
-      if (strcmp(name, "atom") != 0) {
-        snprintf(plogfilename, s, "%s%s_%s%s",
-                 temppath, name, CurDateTime(), ".log");
+      if (alone == false) {
+        if (strcmp(name, "atom") != 0) {
+          snprintf(plogfilename, MAX_PATH, "%s%s_%s%s",
+                   temppath, name, CurDateTime(), ".log");
+        } else {
+          snprintf(plogfilename, MAX_PATH, "%s%s_%s%s",
+                   temppath, "atom", CurDateTime(), ".log");
+        }
       } else {
-        snprintf(plogfilename, s, "%s%s_%s%s",
-                 temppath, "atom", CurDateTime(), ".log");
-      }
-    } else {
-      if (strcmp(name, "atom") != 0) {
-        snprintf(plogfilename, s, "%s%s%s",
-                 temppath, name, ".log");
-      } else {
-        snprintf(plogfilename, s, "%s%s%s",
-                 temppath, "atom", ".log");
+        if (strcmp(name, "atom") != 0) {
+          snprintf(plogfilename, MAX_PATH, "%s%s%s",
+                   temppath, name, ".log");
+        } else {
+          snprintf(plogfilename, MAX_PATH, "%s%s%s",
+                   temppath, "atom", ".log");
+        }
       }
     }
 
@@ -83,17 +42,23 @@ AtomLog::AtomLog(char *name, bool alone, uint8_t lvl) {
     if (logfile == 0) {
 // Another last hope...
 // Try to use standard name
-      snprintf(plogfilename, s, "%s%s_%s%s",
+      snprintf(plogfilename, MAX_PATH, "%s%s_%s%s",
                temppath, "atom", CurDateTime(), ".log");
       if (alone == false)
         logfile = fopen(plogfilename, "wt");
       else
         logfile = fopen(plogfilename, "at");
       if (logfile == 0) {
-        delete [] temppath;
-        delete [] plogfilename;
-// We can't do this...
-        throw -1;
+// We can't do this... Then we will write to nowhere!
+#ifdef WINDOWS
+        logfile = fopen("nul", "wt");
+#endif  // WINDOWS
+#ifdef UNIX
+        logfile = fopen("/dev/null", "wt");
+#endif  // UNIX
+        if (logfile == 0) {
+          fprintf(stderr, "We can't write log\n");
+        }
       }
       snprintf((char*)MsgBuf, MSG_BUFFER_SIZE, "Given filename '%s' is wrong",
                name);
@@ -103,6 +68,7 @@ AtomLog::AtomLog(char *name, bool alone, uint8_t lvl) {
     delete [] plogfilename;
     if (logfile == 0) {
 // We can't do this...
+// TODO (Lawliet): Maybe we can do this withou ariting the log?
       throw -1;
     }
   }
