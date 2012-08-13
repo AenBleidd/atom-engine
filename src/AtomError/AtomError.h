@@ -88,6 +88,8 @@ class AtomLog : public OAtomLog{
   void LogMsg(const char *string);
 // write debug log message
   void DebugMsg(const char *string);
+// find some path where we can place our log file
+  char* GetLogPath(void);
 };
 
 #define SetLastErr(code,subcode) SetLastError(code,subcode,__FILE__,__LINE__);

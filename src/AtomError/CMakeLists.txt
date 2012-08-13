@@ -25,9 +25,9 @@ IF ( SYSTEM_JOURNAL STREQUAL "ON" )
 	ENDIF ( UNIX )
 	ADD_DEFINITIONS ( "-DSYSJOURNAL" )
 # Create a static library
-        ADD_LIBRARY ( ${ATOMERROR_MODULE} STATIC OAtomError AtomError ${AE_PREFIX}/SystemJournal )
+        ADD_LIBRARY ( ${ATOMERROR_MODULE} STATIC OAtomError AtomError ${AE_PREFIX}/logpath ${AE_PREFIX}/SystemJournal )
 ELSE ()
-        ADD_LIBRARY ( ${ATOMERROR_MODULE} STATIC OAtomError AtomError )
+        ADD_LIBRARY ( ${ATOMERROR_MODULE} STATIC OAtomError AtomError ${AE_PREFIX}/logpath)
 ENDIF ( SYSTEM_JOURNAL STREQUAL "ON" )
 
 # Send SYSTEM_JOURNAL to cache
