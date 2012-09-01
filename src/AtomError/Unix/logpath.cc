@@ -8,7 +8,7 @@ char* AtomLog::GetLogPath(void) {
   if (chdir("log") != 0) {
 // TODO(Lawliet): Also we can create log file in the directory /var/log/
     if (mkdir("log", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
-        snprintf(temppath, t, "%s", "/var/log/");
+        snprintf(temppath, MAX_PATH, "%s", "/var/log/");
     } else {
       chdir("..");
     }
