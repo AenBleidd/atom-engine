@@ -27,3 +27,13 @@ char* OAtomLog::CurTime() {
 //  delete timeinfo;
   return timebuf;
 }
+
+// send message
+int32_t OAtomLog::SendMessage(OAtomEngine *recipient, uint32_t message, ...) {
+  return 0;
+}
+
+// get message
+int32_t OAtomLog::GetMessage(OAtomEngine *sender, uint32_t message, ...) {
+  return 0;
+}

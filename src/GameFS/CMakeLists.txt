@@ -16,6 +16,9 @@ IF ( UNIX )
 	SET ( GFS_PREFIX "Unix" )
 ENDIF ( UNIX )
 
+INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}" )
+INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${OATOMENGINE}" )
+
 CreateMessagesFile("messages.msg" "GameFS" "CORE_FS")
 
 # Create a static library which will be used by the engine

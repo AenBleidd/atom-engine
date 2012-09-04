@@ -15,6 +15,9 @@ IF ( UNIX )
 	SET ( SV_PREFIX "Unix" )
 ENDIF ( UNIX )
 
+INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}" )
+INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${OATOMENGINE}" )
+
 # Create a static library which will be used by the engine
 ADD_LIBRARY ( ${SYSVARS_MODULE} STATIC byteorderdetect ${SV_PREFIX}/guid )
 IF ( UNIX )

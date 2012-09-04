@@ -21,6 +21,8 @@ ENDIF()
 
 CreateMessagesFile("messages.msg" "WindowManager" "ENGINE_WM")
 
+INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}" )
+INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${OATOMENGINE}" )
 # Add "OWindow.h" and "AtomError.h" directories to the include path
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${WM_MODULE}" )
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${ATOMERROR_MODULE}" )

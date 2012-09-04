@@ -1,13 +1,13 @@
 #ifndef _ATOM_ERROR_H_
 #define _ATOM_ERROR_H_
 
-#include "../preproc.h"
+#include <preproc.h>
 #include "OAtomError.h"
 
 #ifdef WINDOWS
 #include <windows.h>
 #ifdef SYSJOURNAL
-#include "Windows\SystemJournal.h"
+#include <SystemJournal.h>
 #endif  // SYSJOURNAL
 #ifdef __BORLANDC__
 #include <time.h>
@@ -20,7 +20,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 #ifdef SYSJOURNAL
-#include "Unix/SystemJournal.h"
+#include <Unix/SystemJournal.h>
 #endif  // SYSJOURNAL
 #endif  // UNIX
 

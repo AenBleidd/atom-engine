@@ -8,6 +8,9 @@
 SET ( MODULE_PATH "${${PROJECT_NAME}_SOURCE_DIR}/../cmake_modules" )
 INCLUDE ( "${MODULE_PATH}/modules.cmake" )
 
+INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}" )
+INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${OATOMENGINE}" )
+
 # Some nessessary definitions
 ADD_DEFINITIONS ( "-D_FSMANAGER_" )
 

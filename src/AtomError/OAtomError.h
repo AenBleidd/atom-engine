@@ -1,7 +1,7 @@
 #ifndef _OATOMERROR_H_
 #define _OATOMERROR_H_
 
-#include "../preproc.h"
+#include <preproc.h>
 
 #ifdef WINDOWS
 #include <windows.h>
@@ -12,6 +12,8 @@
 #include <ctime>
 #include <stdio.h>
 
+#include <OAtomEngine.h>
+
 #define MSG_BUFFER_SIZE 1024
 
 struct ERR {
@@ -21,7 +23,14 @@ struct ERR {
   char *description;
 };
 
-class OAtomLog {
+enum AtomLogMessages{
+  SET_LAST_ERROR,
+  SET_LAST_WARNING,
+  DEBUG_MESSAGE,
+  LOG_MESSAGE,
+};
+
+class OAtomLog : public OAtomEngine {
  public:
    explicit OAtomLog();
    ~OAtomLog();
@@ -47,6 +56,10 @@ class OAtomLog {
 // write debug log message
   virtual void DebugMsg(const char *string, uint8_t lvl, const char *file,
                         int32_t line) = 0;
+// send message
+  virtual int32_t SendMessage(OAtomEngine *recipient, uint32_t message, ...);
+// get message
+  virtual int32_t GetMessage(OAtomEngine *sender, uint32_t message, ...);
  private:
 // for datetime functions
   char datetimebuf[20];

@@ -19,3 +19,6 @@ SET ( SYSVARS_MODULE "SysVars" )
 # ResourceManager module name
 # Needed to manage memory
 SET ( RESOURCEMANAGER_MODULE "ResourceManager" )
+
+# Main ancestor class for all engine
+SET ( OATOMENGINE "AtomEngine" )

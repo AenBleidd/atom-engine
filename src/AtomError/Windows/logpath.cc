@@ -1,5 +1,5 @@
-#include "../../preproc.h"
-#include "../AtomError.h"
+#include <preproc.h>
+#include <AtomError.h>
 
 char* AtomLog::GetLogPath(void) {
   char *temppath = new char[MAX_PATH];

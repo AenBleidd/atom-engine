@@ -7,7 +7,7 @@ AtomLog::AtomLog(char *name, bool alone, uint8_t lvl) {
 // get current date and time
     char *temppath = GetLogPath();
     if (temppath == 0) {
-// We can't write tj the log... But we must work! The Show Must Go On!
+// We can't write to the log... But we must work! The Show Must Go On!
 #ifdef WINDOWS
       snprintf(plogfilename, MAX_PATH, "%s", "nul");
 #endif  // WINDOWS

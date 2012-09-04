@@ -24,6 +24,9 @@ SET ( ${PROJECT_NAME}_VERSION "${${PROJECT_NAME}_MAJOR_VERSION}.${${PROJECT_NAME
 # Add definition of project version
 ADD_DEFINITIONS ( -D_ATOM_VERSION_="${${PROJECT_NAME}_VERSION}" )
 
+INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}" )
+INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${OATOMENGINE}" )
+
 # Command line options, their defaults and checks
 
 # Project configuration types
