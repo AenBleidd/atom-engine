@@ -8,7 +8,7 @@
 #endif  // _FSMANAGER_
 
 // Microsoft Security File
-// TODO(Lawliet): I don't want to use it now. 
+// TODO(Lawliet): I don't want to use it now.
 // #include "banned.h"
 
 // Check environment
@@ -82,5 +82,12 @@ localtime (timep), sizeof (*(result))) : 0)
 #ifndef HIBYTE
 #define HIBYTE(w) ((uint8_t)(((uint16_t)(w) >> 8) & 0xFF))
 #endif
+
+#ifdef UNIX
+#ifndef MAX_PATH
+#include <limits.h>
+#define MAX_PATH PATH_MAX
+#endif  // MAX_PATH
+#endif  // UNIX
 
 #endif  // _PREPROC_H_
