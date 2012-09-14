@@ -21,4 +21,7 @@ SET ( SYSVARS_MODULE "SysVars" )
 SET ( RESOURCEMANAGER_MODULE "ResourceManager" )
 
 # Main ancestor class for all engine
-SET ( OATOMENGINE "AtomEngine" )
+SET ( OATOMENGINE "OAtomEngine" )
+
+# Main class
+SET ( ATOMENGINE_MODULE "AtomEngine" )
