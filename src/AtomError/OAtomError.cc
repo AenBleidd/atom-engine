@@ -28,12 +28,7 @@ char* OAtomLog::CurTime() {
   return timebuf;
 }
 
-// send message
-int32_t OAtomLog::SendMessage(OAtomEngine *recipient, uint32_t message, va_list vl) {
-  return 0;
-}
-
 // get message
-int32_t OAtomLog::GetMessage(OAtomEngine *sender, uint32_t message, va_list vl) {
+int32_t OAtomLog::GetMessage(OAtomEngine *sender, uint32_t message, MESSAGE_PRIORITY prior, uint32_t vl_count, va_list vl) {
   return 0;
 }
