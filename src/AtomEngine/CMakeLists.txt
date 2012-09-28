@@ -44,3 +44,5 @@ ELSEIF ( WIN32 )
 		ARCHIVE DESTINATION lib/static/
 	)
 ENDIF()
+
+ADD_SUBDIRECTORY ( tests )

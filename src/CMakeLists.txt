@@ -74,6 +74,8 @@ ADD_SUBDIRECTORY ( SysVars )
 ADD_SUBDIRECTORY ( utils )
 ADD_SUBDIRECTORY ( ResourceManager )
 ADD_SUBDIRECTORY ( AtomEngine )
+# Compile Google Test Framework
+ADD_SUBDIRECTORY ( ../googletest googletest )
 
 # Cache some of the command-line parameters
 SET ( CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING "The build type for the project" FORCE )
