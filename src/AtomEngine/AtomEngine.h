@@ -5,6 +5,7 @@
 
 #include <unordered_set>
 #include <queue>
+#include <vector>
 
 typedef std::unordered_multiset<MODULE_TYPE, OAtomEngine*> MODULE_PARAM;
 
@@ -27,7 +28,7 @@ class AtomEngine : public OAtomEngine {
     int32_t LoadModule (char *name);
   private:
     MODULE_PARAM modules; // loaded modules and their types
-    std::priority_queue<MESSAGE_QUEUE> msg_queue;
+    std::priority_queue<MESSAGE_QUEUE, std::vector<MESSAGE_QUEUE>> msg_queue;
 
 };
 
