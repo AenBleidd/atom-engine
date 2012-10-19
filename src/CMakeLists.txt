@@ -75,7 +75,16 @@ ADD_SUBDIRECTORY ( utils )
 ADD_SUBDIRECTORY ( ResourceManager )
 ADD_SUBDIRECTORY ( AtomEngine )
 # Compile Google Test Framework
-ADD_SUBDIRECTORY ( ../googletest googletest )
+IF ( NOT GOOGLE_TEST )
+  SET ( GOOGLE_TEST:BOOL OFF )
+ENDIF()
+
+IF ( GOOGLE_TEST AND GOOGLE_TEST_PATH)
+#  ADD_SUBDIRECTORY ( ${GOOGLE_TEST_PATH} googletest )
+  ADD_SUBDIRECTORY ( tests )
+ENDIF()
 
 # Cache some of the command-line parameters
 SET ( CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING "The build type for the project" FORCE )
+OPTION ( GOOGLE_TEST "Build tests with Google Test Framework" OFF )
+SET ( GOOGLE_TEST_PATH "../googletest" CACHE STRING "Path to Google Test Framework" )

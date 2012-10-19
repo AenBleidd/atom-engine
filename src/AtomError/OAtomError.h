@@ -57,7 +57,7 @@ class OAtomLog : public OAtomEngine {
   virtual void DebugMsg(const char *string, uint8_t lvl, const char *file,
                         int32_t line) = 0;
 // get message
-  virtual int32_t GetMessage(OAtomEngine *sender, uint32_t message, MESSAGE_PRIORITY prior, uint32_t vl_count, va_list vl);
+  virtual int32_t GetMessage(OAtomEngine *sender, uint32_t message, unsigned char prior, uint32_t vl_count, va_list vl);
  private:
 // for datetime functions
   char datetimebuf[20];

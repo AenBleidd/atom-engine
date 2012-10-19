@@ -17,17 +17,19 @@ enum MODULE_TYPE {
 };
 
 enum MESSAGE_PRIORITY {
-  LOW,
-  BELOW_NORMAL,
-  NORMAL,
-  ABOVE_NORMAL,
-  HIGH,
-  CRITICAL
+  LOW           = 255,
+  BELOW_NORMAL  = 200,
+  NORMAL        = 150,
+  ABOVE_NORMAL  = 100,
+  HIGH          = 50,
+  CRITICAL      = 0
 };
 
 class OAtomEngine {
   public:
-    virtual int32_t GetMessage(OAtomEngine *sender, uint32_t message, MESSAGE_PRIORITY prior, uint32_t vl_count, va_list vl) = 0;
+    virtual int32_t GetMessage(OAtomEngine *sender, uint32_t message, 
+                               unsigned char prior, uint32_t vl_count, 
+                               va_list vl) = 0;
 };
 
 #endif  // _OATOMENGINE_H_
