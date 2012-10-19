@@ -29,6 +29,6 @@ char* OAtomLog::CurTime() {
 }
 
 // get message
-int32_t OAtomLog::GetMessage(OAtomEngine *sender, uint32_t message, MESSAGE_PRIORITY prior, uint32_t vl_count, va_list vl) {
+int32_t OAtomLog::GetMessage(OAtomEngine *sender, uint32_t message, unsigned char prior, uint32_t vl_count, va_list vl) {
   return 0;
 }

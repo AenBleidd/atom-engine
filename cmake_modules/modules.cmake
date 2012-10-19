@@ -25,3 +25,6 @@ SET ( OATOMENGINE "OAtomEngine" )
 
 # Main class
 SET ( ATOMENGINE_MODULE "AtomEngine" )
+
+# Test modules
+SEt ( TESTS_MODULE "AtomEngineTests" )
