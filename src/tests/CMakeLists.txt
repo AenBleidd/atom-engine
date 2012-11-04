@@ -13,6 +13,17 @@ INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}/include
 # Ensure that those targets are built before current one
 SET ( ${TESTS_MODULE}_DEPENDS "AtomEngine" "GoogleTestFramework")
 
+IF ( NOT DISABLE_PTHREADS )
+# Defines CMAKE_USE_PTHREADS_INIT and CMAKE_THREAD_LIBS_INIT.
+  FIND_PACKAGE ( Threads )
+endif()
+
+IF ( CMAKE_USE_PTHREADS_INIT )  # The pthreads library is available and allowed.
+  ADD_DEFINITIONS ( -DGTEST_HAS_PTHREAD=1 )
+else()
+  ADD_DEFINITIONS ( -DGTEST_HAS_PTHREAD=0 )
+endif()
+
 # Make fsman utility
 ADD_EXECUTABLE ( ${TESTS_MODULE} ${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}/src/gtest-all test_exec AtomEngine_PriorityQueue_Test )
 
@@ -39,3 +50,4 @@ ELSEIF ( WIN32 )
 	)
 ENDIF()
 
+OPTION ( DISABLE_PTHREADS "Do not use pthreads" OFF )
