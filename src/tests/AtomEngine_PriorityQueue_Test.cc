@@ -1,4 +1,4 @@
-#include <gtest\gtest.h>
+#include <gtest/gtest.h>
 #include <AtomEngine.h>
 
 #ifdef ATOM_DEBUG
