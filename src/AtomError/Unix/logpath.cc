@@ -1,20 +1,20 @@
 #include "../../preproc.h"
 #include "../AtomError.h"
 
-char* AtomLog::GetLogPath(void) {
-  char *temppath = new char[MAX_PATH];
+char* AtomLog::GetLogPath(char* temppath, uint32_t size) {
 // Check log folder
 #ifdef ATOM_DEBUG
+snprintf(temppath, size, "%s", "log/");
   if (chdir("log") != 0) {
 // TODO(Lawliet): Also we can create log file in the directory /var/log/
     if (mkdir("log", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) {
-        snprintf(temppath, MAX_PATH, "%s", "/var/log/");
+        snprintf(temppath, size, "%s", "/var/log/");
     } else {
       chdir("..");
     }
   }
 #else
-  snprintf(temppath, t, "%s", "/var/log/");
+  snprintf(temppath, size, "%s", "/var/log/");
 #endif  // ATOM_DEBUG
   return temppath;
 }

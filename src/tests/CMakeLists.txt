@@ -8,10 +8,11 @@ INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}" )
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${ATOMENGINE_MODULE}" )
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}" )
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}/include" )
+INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${ATOMERROR_MODULE}" )
 
 # Module dependencies
 # Ensure that those targets are built before current one
-SET ( ${TESTS_MODULE}_DEPENDS "AtomEngine" "GoogleTestFramework")
+SET ( ${TESTS_MODULE}_DEPENDS "AtomEngine" "GoogleTestFramework" "AtomError")
 
 IF ( NOT DISABLE_PTHREADS )
 # Defines CMAKE_USE_PTHREADS_INIT and CMAKE_THREAD_LIBS_INIT.
@@ -25,10 +26,10 @@ else()
 endif()
 
 # Make fsman utility
-ADD_EXECUTABLE ( ${TESTS_MODULE} ${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}/src/gtest-all test_exec AtomEngine_PriorityQueue_Test )
+ADD_EXECUTABLE ( ${TESTS_MODULE} ${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}/src/gtest-all test_exec AtomEngine_PriorityQueue_Test AtomError_GetLogPath_Test )
 
 # TODO: Library names should be taken from variables
-TARGET_LINK_LIBRARIES ( ${TESTS_MODULE} ${ATOMENGINE_MODULE} )
+TARGET_LINK_LIBRARIES ( ${TESTS_MODULE} ${ATOMENGINE_MODULE} ${ATOMERROR_MODULE} )
 
 # Installation instructions for the FSMan module
 # Please specify the installation instructions sprcific

@@ -24,6 +24,10 @@
 #endif  // SYSJOURNAL
 #endif  // UNIX
 
+#ifdef ATOM_TEST
+#include <gtest/gtest.h>
+#endif  // ATOM_TEST
+
 // some verbosity levels
 enum {
 // errors will be written only into system journal (good for release project)
@@ -35,6 +39,12 @@ enum {
 };
 
 class AtomLog : public OAtomLog{
+// Declare friend class for testing AtomLog
+#ifdef ATOM_TEST
+//  friend TestGetLogPath;
+ private:
+  FRIEND_TEST(AtomErrorTest, Test_GetLogPath);
+#endif  // ATOM_TEST
  public:
   explicit AtomLog(char *name = "atom", bool alone = false,
                     uint8_t lvl = 0xFF);
@@ -43,7 +53,7 @@ class AtomLog : public OAtomLog{
  private:
 // global last error and warning
 #ifdef SYSJOURNAL
-  AtomSystemJournal *sysjrn;
+//  AtomSystemJournal *sysjrn;
 #endif // SYSJOURNAL
   ERR global_error;
   ERR global_warning;
@@ -89,7 +99,7 @@ class AtomLog : public OAtomLog{
 // write debug log message
   void DebugMsg(const char *string);
 // find some path where we can place our log file
-  char* GetLogPath(void);
+  char* GetLogPath(char* path, uint32_t size);
 };
 
 #define SetLastErr(code,subcode) SetLastError(code,subcode,__FILE__,__LINE__);
