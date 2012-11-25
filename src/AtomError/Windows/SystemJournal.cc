@@ -26,17 +26,17 @@ AtomSystemJournal::AtomSystemJournal(char *appName, char *msgFileName, int CatCo
   char *appRegPath = new char[AppRegPathLen];
   snprintf(appRegPath, AppRegPathLen, "%s%s", cStPath, appName);
   uint64_t disp;
-  if (RegCreateKeyExA(hRootKey, appRegPath, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, (LPDWORD)&disp) == ERROR_SUCCESS) {
+  if (RegCreateKeyEx(hRootKey, appRegPath, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, (LPDWORD)&disp) == ERROR_SUCCESS) {
     try {
-      if (RegSetValueExA(hKey, cCatMessFile, NULL, REG_EXPAND_SZ, (LPBYTE)msgFileName, len + 1) != ERROR_SUCCESS)
+      if (RegSetValueEx(hKey, cCatMessFile, NULL, REG_EXPAND_SZ, (LPBYTE)msgFileName, len + 1) != ERROR_SUCCESS)
         throw;
-      if (RegSetValueExA(hKey, cEvMessFile, NULL, REG_EXPAND_SZ, (LPBYTE)msgFileName, len + 1) != ERROR_SUCCESS)
+      if (RegSetValueEx(hKey, cEvMessFile, NULL, REG_EXPAND_SZ, (LPBYTE)msgFileName, len + 1) != ERROR_SUCCESS)
         throw;
-      if (RegSetValueExA(hKey, cParMessFile, NULL, REG_EXPAND_SZ, (LPBYTE)msgFileName, len + 1) != ERROR_SUCCESS)
+      if (RegSetValueEx(hKey, cParMessFile, NULL, REG_EXPAND_SZ, (LPBYTE)msgFileName, len + 1) != ERROR_SUCCESS)
         throw;
-      if (RegSetValueExA(hKey, cCatCount, NULL, REG_DWORD, (LPBYTE)&CatCount, sizeof(CatCount)) != ERROR_SUCCESS)
+      if (RegSetValueEx(hKey, cCatCount, NULL, REG_DWORD, (LPBYTE)&CatCount, sizeof(CatCount)) != ERROR_SUCCESS)
         throw;
-      if (RegSetValueExA(hKey, cTypSupp, NULL, REG_DWORD, (LPBYTE)&TypeSupported, sizeof(TypeSupported)) != ERROR_SUCCESS)
+      if (RegSetValueEx(hKey, cTypSupp, NULL, REG_DWORD, (LPBYTE)&TypeSupported, sizeof(TypeSupported)) != ERROR_SUCCESS)
         throw;
     } catch (...) {
       delete [] appRegPath;
@@ -55,7 +55,7 @@ AtomSystemJournal::AtomSystemJournal(char *appName, char *msgFileName, int CatCo
   if (bCreatemsgFileName == true)
     delete [] msgFileName;
 // register event source
-  hEventSource = RegisterEventSourceA(NULL, appName);
+  hEventSource = RegisterEventSource(NULL, appName);
   if (hEventSource == NULL)
     throw;
 }

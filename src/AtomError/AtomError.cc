@@ -5,9 +5,13 @@ AtomLog::AtomLog(char *name, bool alone, uint8_t lvl) {
   if (name != 0) {
     char *plogfilename = new char[MAX_PATH];
 // get current date and time
-    char *temppath = GetLogPath();
-    if (temppath == 0) {
+    char *temppath = new char[MAX_PATH];
+    if (GetLogPath(temppath, MAX_PATH) == 0) {
 // We can't write to the log... But we must work! The Show Must Go On!
+      if (temppath != 0) {
+		  delete [] temppath;
+		  temppath = 0;
+	  }
 #ifdef WINDOWS
       snprintf(plogfilename, MAX_PATH, "%s", "nul");
 #endif  // WINDOWS
@@ -16,23 +20,13 @@ AtomLog::AtomLog(char *name, bool alone, uint8_t lvl) {
 #endif  // UNIX
     } else {
       if (alone == false) {
-        if (strcmp(name, "atom") != 0) {
-          snprintf(plogfilename, MAX_PATH, "%s%s_%s%s",
-                   temppath, name, CurDateTime(), ".log");
-        } else {
-          snprintf(plogfilename, MAX_PATH, "%s%s_%s%s",
-                   temppath, "atom", CurDateTime(), ".log");
-        }
+        snprintf(plogfilename, MAX_PATH, "%s%s_%s%s",
+                 temppath, name, CurDateTime(), ".log");
       } else {
-        if (strcmp(name, "atom") != 0) {
-          snprintf(plogfilename, MAX_PATH, "%s%s%s",
-                   temppath, name, ".log");
-        } else {
-          snprintf(plogfilename, MAX_PATH, "%s%s%s",
-                   temppath, "atom", ".log");
+        snprintf(plogfilename, MAX_PATH, "%s%s%s",
+                 temppath, name, ".log");
         }
       }
-    }
 
 // open log file
     if (alone == false)
@@ -68,16 +62,16 @@ AtomLog::AtomLog(char *name, bool alone, uint8_t lvl) {
     delete [] plogfilename;
     if (logfile == 0) {
 // We can't do this...
-// TODO (Lawliet): Maybe we can do this withou ariting the log?
+// TODO (Lawliet): Maybe we can do this without writing the log?
       throw -1;
     }
   }
-  sysjrn = 0;
+//  sysjrn = 0;
 #ifdef SYSJOURNAL
-    try { sysjrn = new AtomSystemJournal; }
+/*    try { sysjrn = new AtomSystemJournal; }
     catch (...) {
       throw -1;
-    }
+    }*/
 #endif  // SYSJOURNAL
   errorcode = 0;
   errorsubcode = 0;
@@ -106,8 +100,8 @@ AtomLog::~AtomLog() {
     global_warning.description = 0;
   }
 #ifdef SYSJOURNAL
-  if(sysjrn)
-    delete sysjrn;
+/*  if(sysjrn)
+    delete sysjrn;*/
 #endif  // SYSJOURNAL
 }
 void AtomLog::LogMsg(const char *string, uint8_t lvl, const char *file,

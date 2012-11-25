@@ -3,6 +3,10 @@
 
 #include "OAtomEngine.h"
 
+#ifdef ATOM_TEST
+#include <gtest/gtest.h>
+#endif  // ATOM_TEST
+
 #include <unordered_set>
 #include <queue>
 #include <vector>
@@ -37,6 +41,12 @@ public:
 };
 
 class AtomEngine : public OAtomEngine {
+// Declare friend class for testing AtomEngine
+#ifdef ATOM_TEST
+//  friend TestCorrectPriority;
+ private:
+  FRIEND_TEST(AtomEngine, TestCorrectPriority);
+#endif  // ATOM_TEST
   public:
     AtomEngine();
     ~AtomEngine();
