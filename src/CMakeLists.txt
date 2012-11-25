@@ -76,7 +76,16 @@ IF ( CMAKE_BUILD_TYPE STREQUAL "Debug" )
   ADD_DEFINITIONS ( "-DATOM_DEBUG" )
 ENDIF()
 
+IF ( NOT GOOGLE_TEST )
+  SET ( GOOGLE_TEST:BOOL OFF )
+ENDIF()
+
 # Recurse into subdirectory
+# Compile Google Test Framework
+IF ( GOOGLE_TEST AND GOOGLE_TEST_PATH)
+  ADD_DEFINITIONS ( "-DATOM_TEST" )
+  ADD_SUBDIRECTORY ( tests )
+ENDIF()
 ADD_SUBDIRECTORY ( WindowManager )
 ADD_SUBDIRECTORY ( AtomError )
 ADD_SUBDIRECTORY ( GameFS )
@@ -84,15 +93,6 @@ ADD_SUBDIRECTORY ( SysVars )
 ADD_SUBDIRECTORY ( utils )
 ADD_SUBDIRECTORY ( ResourceManager )
 ADD_SUBDIRECTORY ( AtomEngine )
-# Compile Google Test Framework
-IF ( NOT GOOGLE_TEST )
-  SET ( GOOGLE_TEST:BOOL OFF )
-ENDIF()
-
-IF ( GOOGLE_TEST AND GOOGLE_TEST_PATH)
-#  ADD_SUBDIRECTORY ( ${GOOGLE_TEST_PATH} googletest )
-  ADD_SUBDIRECTORY ( tests )
-ENDIF()
 
 # Cache some of the command-line parameters
 SET ( CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING "The build type for the project" FORCE )
