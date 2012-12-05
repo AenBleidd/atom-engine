@@ -16,7 +16,6 @@ IF ( UNIX )
 ENDIF ( UNIX )
 
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}" )
-INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${ATOMENGINE_MODULE}" )
 
 # Create a static library which will be used by the engine
 ADD_LIBRARY ( ${SYSVARS_MODULE} STATIC byteorderdetect ${SV_PREFIX}/guid )

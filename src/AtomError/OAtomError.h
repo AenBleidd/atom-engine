@@ -12,8 +12,6 @@
 #include <ctime>
 #include <stdio.h>
 
-#include <OAtomEngine.h>
-
 #define MSG_BUFFER_SIZE 1024
 
 struct ERR {
@@ -30,7 +28,7 @@ enum AtomLogMessages{
   LOG_MESSAGE,
 };
 
-class OAtomLog : public OAtomEngine {
+class OAtomLog {
  public:
    explicit OAtomLog();
    ~OAtomLog();
@@ -56,15 +54,11 @@ class OAtomLog : public OAtomEngine {
 // write debug log message
   virtual void DebugMsg(const char *string, uint8_t lvl, const char *file,
                         int32_t line) = 0;
-// get message
-  virtual int32_t GetMessage(OAtomEngine *sender, uint32_t message, unsigned char prior, uint32_t vl_count, va_list vl);
  private:
 // for datetime functions
   char datetimebuf[20];
   char timebuf[10];
   tm *ptimeinfo;
-  ERR global_error;
-  ERR global_warning;
 };
 
 #endif  // _OATOMERROR_H_
