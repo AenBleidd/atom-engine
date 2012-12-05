@@ -16,31 +16,45 @@ IF ( UNIX )
 ENDIF ( UNIX )
 
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}" )
-INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${ATOMENGINE_MODULE}" )
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${ATOMERROR_MODULE}" )
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${ATOMERROR_MODULE}/${AE_PREFIX}" )
-IF ( GOOGLE_TEST AND GOOGLE_TEST_PATH)
+IF ( GOOGLE_TEST AND GOOGLE_TEST_PATH )
   INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}/include" )
 ENDIF()
 
 # Command line options, their defaults and checks
 
+LIST ( APPEND ${ATOMERROR_MODULE}_SRC OAtomError )
+
+# set AtomError parameter by default
+IF ( NOT ATOMLOG_ATOMERROR )
+  SET ( ATOMLOG_ATOMERROR:BOOL ON )
+ENDIF ()
+
 # set System Journal parameter by default
-IF ( NOT SYSTEM_JOURNAL )
-	SET ( SYSTEM_JOURNAL "ON" )
+IF ( NOT ATOMLOG_SYSTEM_JOURNAL )
+  SET ( ATOMLOG_SYSTEM_JOURNAL:BOOL OFF )
 ENDIF()       
 
-# Set correct defines and include correct files
-IF ( SYSTEM_JOURNAL STREQUAL "ON" )
-	ADD_DEFINITIONS ( "-DSYSJOURNAL" )
-# Create a static library
-        ADD_LIBRARY ( ${ATOMERROR_MODULE} STATIC ${${PROJECT_NAME}_SOURCE_DIR}/${ATOMENGINE_MODULE}/OAtomEngine OAtomError AtomError ${AE_PREFIX}/logpath ${AE_PREFIX}/SystemJournal )
-ELSE ()
-        ADD_LIBRARY ( ${ATOMERROR_MODULE} STATIC ${${PROJECT_NAME}_SOURCE_DIR}/${ATOMENGINE_MODULE}/OAtomEngine OAtomError AtomError ${AE_PREFIX}/logpath)
-ENDIF ( SYSTEM_JOURNAL STREQUAL "ON" )
+IF ( NOT ATOMLOG_ATOMERROR AND NOT ATOMLOG_SYSTEM_JOURNAL )
+  MESSAGE ( FATAL_ERROR "Check at least one loging system: (ATOMLOG_ATOMERROR, ATOMLOG_SYSTEM_JOURNAL" )
+ENDIF ()
 
-# Send SYSTEM_JOURNAL to cache
-SET ( SYSTEM_JOURNAL "${SYSTEM_JOURNAL}" CACHE STRING "The library responsible for system loggong events. Possible values are: ON; OFF" FORCE )
+# Set correct defines and include correct files
+IF ( ATOMLOG_ATOMERROR )
+  ADD_DEFINITIONS ( "-DATOMERROR" )
+  LIST ( APPEND ${ATOMERROR_MODULE}_SRC AtomError ${AE_PREFIX}/logpath )
+ENDIF ()
+
+IF ( ATOMLOG_SYSTEM_JOURNAL )
+  ADD_DEFINITIONS ( "-DSYSJOURNAL" )
+  LIST ( APPEND ${ATOMERROR_MODULE}_SRC ${AE_PREFIX}/SystemJournal )
+ENDIF ()
+# Create a static library
+ADD_LIBRARY ( ${ATOMERROR_MODULE} STATIC ${${ATOMERROR_MODULE}_SRC})
+
+OPTION ( ATOMLOG_ATOMERROR "The library responsible for loggong events." ON )
+OPTION ( ATOMLOG_SYSTEM_JOURNAL "The library responsible for system loggong events." OFF )
 
 # Installation instructions for the AtomError module
 # Please specify the installation instructions sprcific 

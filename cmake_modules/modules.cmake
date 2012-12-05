@@ -20,11 +20,5 @@ SET ( SYSVARS_MODULE "SysVars" )
 # Needed to manage memory
 SET ( RESOURCEMANAGER_MODULE "ResourceManager" )
 
-# Main ancestor class for all engine
-SET ( OATOMENGINE "OAtomEngine" )
-
-# Main class
-SET ( ATOMENGINE_MODULE "AtomEngine" )
-
 # Test modules
 SEt ( TESTS_MODULE "AtomEngineTests" )
