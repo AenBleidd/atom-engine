@@ -38,10 +38,9 @@ enum {
   SHOWSYSTEMERRORSDESCR = 0xFF
 };
 
-class AtomLog : public OAtomLog{
+class AtomLog : public OAtomLog {
 // Declare friend class for testing AtomLog
 #ifdef ATOM_TEST
-//  friend TestGetLogPath;
  private:
   FRIEND_TEST(AtomErrorTest, Test_GetLogPath);
 #endif  // ATOM_TEST
