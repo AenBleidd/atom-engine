@@ -9,6 +9,8 @@ INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}" )
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}/include" )
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${ATOMERROR_MODULE}" )
 
+OPTION ( DISABLE_PTHREADS "Do not use pthreads" OFF )
+
 # Module dependencies
 # Ensure that those targets are built before current one
 SET ( ${TESTS_MODULE}_DEPENDS "GoogleTestFramework" "AtomError")
@@ -24,7 +26,13 @@ else()
   ADD_DEFINITIONS ( -DGTEST_HAS_PTHREAD=0 )
 endif()
 
-ADD_EXECUTABLE ( ${TESTS_MODULE} ${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}/src/gtest-all test_exec AtomError_GetLogPath_Test )
+LIST ( APPEND ${TESTS_MODULE}_SRC ${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}/src/gtest-all test_exec )
+
+# AtomError tests
+
+LIST ( APPEND ${TESTS_MODULE}_SRC  AtomError/AtomError_GetLogPath_Test )
+
+ADD_EXECUTABLE ( ${TESTS_MODULE}  ${${TESTS_MODULE}_SRC} )
 
 # TODO: Library names should be taken from variables
 TARGET_LINK_LIBRARIES ( ${TESTS_MODULE} ${ATOMENGINE_MODULE} ${ATOMERROR_MODULE} )
@@ -48,5 +56,3 @@ ELSEIF ( WIN32 )
 		ARCHIVE DESTINATION lib/static/
 	)
 ENDIF()
-
-OPTION ( DISABLE_PTHREADS "Do not use pthreads" OFF )

@@ -15,7 +15,6 @@ char* OAtomLog::CurDateTime() {
           ptimeinfo->tm_year+1900, ptimeinfo->tm_mon+1,
           ptimeinfo->tm_mday, ptimeinfo->tm_hour,
           ptimeinfo->tm_min, ptimeinfo->tm_sec);
-//  delete timeinfo;
   return datetimebuf;
 }
 
@@ -24,6 +23,5 @@ char* OAtomLog::CurTime() {
   ptimeinfo = (tm*) localtime_r(&seconds, ptimeinfo);
   snprintf(timebuf, sizeof(timebuf), "%02i:%02i:%02i", ptimeinfo->tm_hour,
           ptimeinfo->tm_min, ptimeinfo->tm_sec);
-//  delete timeinfo;
   return timebuf;
 }

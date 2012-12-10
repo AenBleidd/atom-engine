@@ -14,6 +14,13 @@
 
 #define MSG_BUFFER_SIZE 1024
 
+#define SetLastErr(code,subcode) SetLastError(code,subcode,__FILE__,__LINE__);
+#define SetLastWrn(code,subcode) SetLastWarning(code,subcode,__FILE__,__LINE__);
+#define LogMessage(string) LogMsg(string,0,__FILE__,__LINE__);
+#define DebugMessage(string) DebugMsg(string,0,__FILE__,__LINE__);
+#define LogMessageV(string,lvl) LogMsg(string,lvl,__FILE__,__LINE__);
+#define DebugMessageV(string,lvl) DebugMsg(string,lvl,__FILE__,__LINE__);
+
 struct ERR {
   uint32_t code;
   uint32_t sub_code;

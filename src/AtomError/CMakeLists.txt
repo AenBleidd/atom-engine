@@ -24,6 +24,9 @@ ENDIF()
 
 # Command line options, their defaults and checks
 
+OPTION ( ATOMLOG_ATOMERROR "The library responsible for loggong events." ON )
+OPTION ( ATOMLOG_SYSTEM_JOURNAL "The library responsible for system loggong events." OFF )
+
 LIST ( APPEND ${ATOMERROR_MODULE}_SRC OAtomError )
 
 # set AtomError parameter by default
@@ -52,9 +55,6 @@ IF ( ATOMLOG_SYSTEM_JOURNAL )
 ENDIF ()
 # Create a static library
 ADD_LIBRARY ( ${ATOMERROR_MODULE} STATIC ${${ATOMERROR_MODULE}_SRC})
-
-OPTION ( ATOMLOG_ATOMERROR "The library responsible for loggong events." ON )
-OPTION ( ATOMLOG_SYSTEM_JOURNAL "The library responsible for system loggong events." OFF )
 
 # Installation instructions for the AtomError module
 # Please specify the installation instructions sprcific 
