@@ -3,22 +3,16 @@ AtomLog::AtomLog(char *name, bool alone, uint8_t lvl) {
   logfile = 0;
   verbose_level = lvl;
   if (name != 0) {
-    char *plogfilename = new char[MAX_PATH];
+    char plogfilename[MAX_PATH];
 // get current date and time
-    char *temppath = new char[MAX_PATH];
-    if (GetLogPath(temppath, MAX_PATH) == 0) {
-// We can't write to the log... But we must work! The Show Must Go On!
-      if (temppath != 0) {
-		  delete [] temppath;
-		  temppath = 0;
-	  }
+    char temppath[MAX_PATH];
+    if (GetLogPath(temppath, MAX_PATH) != 0) {
 #ifdef WINDOWS
       snprintf(plogfilename, MAX_PATH, "%s", "nul");
 #endif  // WINDOWS
 #ifdef UNIX
       snprintf(plogfilename, MAX_PATH, "%s", "/dev/null");
 #endif  // UNIX
-    } else {
       if (alone == false) {
         snprintf(plogfilename, MAX_PATH, "%s%s_%s%s",
                  temppath, name, CurDateTime(), ".log");
@@ -58,8 +52,6 @@ AtomLog::AtomLog(char *name, bool alone, uint8_t lvl) {
                name);
       LogMessage(MsgBuf);
     }
-    delete [] temppath;
-    delete [] plogfilename;
     if (logfile == 0) {
 // We can't do this...
 // TODO (Lawliet): Maybe we can do this without writing the log?

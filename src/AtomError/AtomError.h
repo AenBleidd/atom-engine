@@ -101,11 +101,4 @@ class AtomLog : public OAtomLog {
   char* GetLogPath(char* path, uint32_t size);
 };
 
-#define SetLastErr(code,subcode) SetLastError(code,subcode,__FILE__,__LINE__);
-#define SetLastWrn(code,subcode) SetLastWarning(code,subcode,__FILE__,__LINE__);
-#define LogMessage(string) LogMsg(string,0,__FILE__,__LINE__);
-#define DebugMessage(string) DebugMsg(string,0,__FILE__,__LINE__);
-#define LogMessageV(string,lvl) LogMsg(string,lvl,__FILE__,__LINE__);
-#define DebugMessageV(string,lvl) DebugMsg(string,lvl,__FILE__,__LINE__);
-
 #endif  // _CORE_ERROR_H_
