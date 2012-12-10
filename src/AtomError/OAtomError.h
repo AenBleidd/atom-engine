@@ -12,12 +12,20 @@
 #include <ctime>
 #include <stdio.h>
 
+// some verbosity levels
+enum {
+// show only last system error codes
+  SHOW_ONLY_SYSTEM_ERRORS = 0xFE,
+// show last system error codes and their description
+  SHOW_ALL_ERRORS = 0xFF
+};
+
 #define MSG_BUFFER_SIZE 1024
 
 #define SetLastErr(code,subcode) SetLastError(code,subcode,__FILE__,__LINE__);
 #define SetLastWrn(code,subcode) SetLastWarning(code,subcode,__FILE__,__LINE__);
-#define LogMessage(string) LogMsg(string,0,__FILE__,__LINE__);
-#define DebugMessage(string) DebugMsg(string,0,__FILE__,__LINE__);
+#define LogMessage(string) LogMsg(string,SHOW_ALL_ERRORS,__FILE__,__LINE__);
+#define DebugMessage(string) DebugMsg(string,SHOW_ALL_ERRORS,__FILE__,__LINE__);
 #define LogMessageV(string,lvl) LogMsg(string,lvl,__FILE__,__LINE__);
 #define DebugMessageV(string,lvl) DebugMsg(string,lvl,__FILE__,__LINE__);
 
@@ -26,13 +34,6 @@ struct ERR {
   uint32_t sub_code;
   uint32_t system_code;
   char *description;
-};
-
-enum AtomLogMessages{
-  SET_LAST_ERROR,
-  SET_LAST_WARNING,
-  DEBUG_MESSAGE,
-  LOG_MESSAGE,
 };
 
 class OAtomLog {
