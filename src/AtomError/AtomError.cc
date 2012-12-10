@@ -162,12 +162,12 @@ void AtomLog::SetLastError(uint32_t code, uint32_t subcode,
            file, line, errorcode[global_error.code],
            errorsubcode[global_error.code][global_error.sub_code]);
   snprintf(MsgBuf, MSG_BUFFER_SIZE, "%s\n", global_error.code);
-  if (verbose_level >= SHOWSYSTEMERRORS) {
+  if (verbose_level >= SHOW_ONLY_SYSTEM_ERRORS) {
     snprintf(MsgBuf, MSG_BUFFER_SIZE, "%s: %x", "Last system error is",
              global_error.system_code);
     DebugMsg(MsgBuf);
   }
-  if (verbose_level >= SHOWSYSTEMERRORSDESCR) {
+  if (verbose_level >= SHOW_ALL_ERRORS) {
 #ifdef WINDOWS
     FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
                   NULL, global_error.system_code,
