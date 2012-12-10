@@ -1,5 +1,6 @@
 #include "SystemJournal.h"
-AtomSystemJournal::AtomSystemJournal(char *appName, char *msgFileName, int CatCount) {
+AtomSystemJournal::AtomSystemJournal(char *appName, char *msgFileName, 
+                                     int CatCount) {
   if (appName == 0) {
     throw;
   }
@@ -15,7 +16,8 @@ AtomSystemJournal::AtomSystemJournal(char *appName, char *msgFileName, int CatCo
     len = strlen(msgFileName);
   }
   HKEY hKey, hRootKey = HKEY_LOCAL_MACHINE;
-  const char cStPath[] = "SYSTEM\\CurrentControlSet\\Services\\Eventlog\\Application\\";
+  const char cStPath[] = 
+    "SYSTEM\\CurrentControlSet\\Services\\Eventlog\\Application\\";
   const char cCatMessFile[] = "CategoryMessageFile";
   const char cEvMessFile[] = "EventMessageFile";
   const char cParMessFile[] = "ParameterMessageFile";
@@ -26,17 +28,24 @@ AtomSystemJournal::AtomSystemJournal(char *appName, char *msgFileName, int CatCo
   char *appRegPath = new char[AppRegPathLen];
   snprintf(appRegPath, AppRegPathLen, "%s%s", cStPath, appName);
   uint64_t disp;
-  if (RegCreateKeyEx(hRootKey, appRegPath, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, (LPDWORD)&disp) == ERROR_SUCCESS) {
+  if (RegCreateKeyEx(hRootKey, appRegPath, 0, NULL, REG_OPTION_NON_VOLATILE,
+                     KEY_WRITE, NULL, &hKey, 
+                     (LPDWORD)&disp) == ERROR_SUCCESS) {
     try {
-      if (RegSetValueEx(hKey, cCatMessFile, NULL, REG_EXPAND_SZ, (LPBYTE)msgFileName, len + 1) != ERROR_SUCCESS)
+      if (RegSetValueEx(hKey, cCatMessFile, NULL, REG_EXPAND_SZ, 
+          (LPBYTE)msgFileName, len + 1) != ERROR_SUCCESS)
         throw;
-      if (RegSetValueEx(hKey, cEvMessFile, NULL, REG_EXPAND_SZ, (LPBYTE)msgFileName, len + 1) != ERROR_SUCCESS)
+      if (RegSetValueEx(hKey, cEvMessFile, NULL, REG_EXPAND_SZ, 
+          (LPBYTE)msgFileName, len + 1) != ERROR_SUCCESS)
         throw;
-      if (RegSetValueEx(hKey, cParMessFile, NULL, REG_EXPAND_SZ, (LPBYTE)msgFileName, len + 1) != ERROR_SUCCESS)
+      if (RegSetValueEx(hKey, cParMessFile, NULL, REG_EXPAND_SZ, 
+          (LPBYTE)msgFileName, len + 1) != ERROR_SUCCESS)
         throw;
-      if (RegSetValueEx(hKey, cCatCount, NULL, REG_DWORD, (LPBYTE)&CatCount, sizeof(CatCount)) != ERROR_SUCCESS)
+      if (RegSetValueEx(hKey, cCatCount, NULL, REG_DWORD, 
+          (LPBYTE)&CatCount, sizeof(CatCount)) != ERROR_SUCCESS)
         throw;
-      if (RegSetValueEx(hKey, cTypSupp, NULL, REG_DWORD, (LPBYTE)&TypeSupported, sizeof(TypeSupported)) != ERROR_SUCCESS)
+      if (RegSetValueEx(hKey, cTypSupp, NULL, REG_DWORD, 
+          (LPBYTE)&TypeSupported, sizeof(TypeSupported)) != ERROR_SUCCESS)
         throw;
     } catch (...) {
       delete [] appRegPath;
@@ -65,15 +74,35 @@ AtomSystemJournal::~AtomSystemJournal() {
   DeregisterEventSource(hEventSource);
 }
 
-void AtomSystemJournal::ReportEvent(uint32_t cat, uint32_t mess, uint16_t type, const char* file, int32_t line) {
-  char **msg = new char*[2];  
-  uint32_t file_len = strlen(file) + 7;
-  uint32_t line_len = 17;
-  msg[0] = new char[file_len];
-  msg[1] = new char[line_len];
-  snprintf(msg[0], file_len, "File: %s", file);
-  snprintf(msg[1], line_len, "Line: %i", line);
-  if(!::ReportEvent(hEventSource, type, cat, mess, NULL, 2, 0, (LPCSTR*)msg, NULL)) {
-    throw;
+void AtomSystemJournal::AtomReportEvent(uint32_t cat, uint32_t mess, uint16_t type,
+                                    uint8_t lvl, const char* file, 
+                                    int32_t line) {
+  char msg[2][MAX_PATH];
+  if (lvl <= verbose_level) {
+    snprintf(msg[0], MAX_PATH, "File: %s", file);
+    snprintf(msg[1], MAX_PATH, "Line: %i", line);
+    if(!::ReportEvent(hEventSource, type, cat, mess, NULL, 2, 0, 
+       (LPCSTR*)msg, NULL)) {
+      throw;
+    }
   }
+}
+
+void AtomSystemJournal::SetLastError(uint32_t code, uint32_t subcode,
+                                     const char* file, int32_t line) {
+  AtomReportEvent(code, subcode, EVENTLOG_ERROR_TYPE, SHOW_ALL_ERRORS, file, line);
+}
+void AtomSystemJournal::SetLastWarning(uint32_t code, uint32_t subcode,
+                                       const char* file, int32_t line) {
+  AtomReportEvent(code, subcode, EVENTLOG_WARNING_TYPE, SHOW_ALL_ERRORS, file, line);
+}
+
+void AtomSystemJournal::LogMsg(const char *string, uint8_t lvl, const char *file,
+                               int32_t line) {
+  return;
+}
+
+void AtomSystemJournal::DebugMsg(const char *string, uint8_t lvl, const char *file,
+                                 int32_t line) {
+  return;
 }

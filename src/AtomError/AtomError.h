@@ -28,16 +28,6 @@
 #include <gtest/gtest.h>
 #endif  // ATOM_TEST
 
-// some verbosity levels
-enum {
-// errors will be written only into system journal (good for release project)
-  LOGONLYINTOSYSTEMJOURNAL = 0xFD,
-// show only last system error codes
-  SHOWSYSTEMERRORS = 0xFE,
-// show last system error codes and their description
-  SHOWSYSTEMERRORSDESCR = 0xFF
-};
-
 class AtomLog : public OAtomLog {
 // Declare friend class for testing AtomLog
 #ifdef ATOM_TEST
