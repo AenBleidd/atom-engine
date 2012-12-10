@@ -39,6 +39,8 @@ INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${OATOMENGINE}" )
 
 # Command line options, their defaults and checks
 
+OPTION ( GOOGLE_TEST "Build tests with Google Test Framework" OFF )
+
 # Project configuration types
 SET ( CMAKE_CONFIGURATION_TYPES Release; Debug )
 
@@ -95,5 +97,4 @@ ADD_SUBDIRECTORY ( ResourceManager )
 
 # Cache some of the command-line parameters
 SET ( CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING "The build type for the project" FORCE )
-OPTION ( GOOGLE_TEST "Build tests with Google Test Framework" OFF )
 SET ( GOOGLE_TEST_PATH "../googletest" CACHE STRING "Path to Google Test Framework" )
