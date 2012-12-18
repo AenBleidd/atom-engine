@@ -67,6 +67,7 @@ class OAtomLog {
   char datetimebuf[20];
   char timebuf[10];
   tm *ptimeinfo;
+
 };
 
 #endif  // _OATOMERROR_H_

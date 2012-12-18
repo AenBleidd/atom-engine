@@ -31,6 +31,7 @@ LIST ( APPEND ${TESTS_MODULE}_SRC ${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PA
 # AtomError tests
 
 LIST ( APPEND ${TESTS_MODULE}_SRC  AtomError/AtomError_GetLogPath_Test )
+LIST ( APPEND ${TESTS_MODULE}_SRC  AtomError/AtomError_common_tests )
 
 ADD_EXECUTABLE ( ${TESTS_MODULE}  ${${TESTS_MODULE}_SRC} )
 
