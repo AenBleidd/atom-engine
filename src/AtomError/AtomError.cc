@@ -3,21 +3,21 @@ AtomLog::AtomLog(char *name, bool alone, uint8_t lvl) {
   logfile = 0;
   verbose_level = lvl;
   if (name != 0) {
-    char plogfilename[MAX_PATH];
-// get current date and time
-    char temppath[MAX_PATH];
-    if (GetLogPath(temppath, MAX_PATH) != 0) {
+    char plogfilename[MSG_BUFFER_SIZE];
+    char temppath[MSG_BUFFER_SIZE];
+    if (GetLogPath(temppath, MSG_BUFFER_SIZE) != 0) {
 #ifdef WINDOWS
-      snprintf(plogfilename, MAX_PATH, "%s", "nul");
+      snprintf(plogfilename, MSG_BUFFER_SIZE, "%s", "nul");
 #endif  // WINDOWS
 #ifdef UNIX
-      snprintf(plogfilename, MAX_PATH, "%s", "/dev/null");
+      snprintf(plogfilename, MSG_BUFFER_SIZE, "%s", "/dev/null");
 #endif  // UNIX
+// get current date and time
       if (alone == false) {
-        snprintf(plogfilename, MAX_PATH, "%s%s_%s%s",
+        snprintf(plogfilename, MSG_BUFFER_SIZE, "%s%s_%s%s",
                  temppath, name, CurDateTime(), ".log");
       } else {
-        snprintf(plogfilename, MAX_PATH, "%s%s%s",
+        snprintf(plogfilename, MSG_BUFFER_SIZE, "%s%s%s",
                  temppath, name, ".log");
         }
       }
@@ -30,7 +30,7 @@ AtomLog::AtomLog(char *name, bool alone, uint8_t lvl) {
     if (logfile == 0) {
 // Another last hope...
 // Try to use standard name
-      snprintf(plogfilename, MAX_PATH, "%s%s_%s%s",
+      snprintf(plogfilename, MSG_BUFFER_SIZE, "%s%s_%s%s",
                temppath, "atom", CurDateTime(), ".log");
       if (alone == false)
         logfile = fopen(plogfilename, "wt");
@@ -58,13 +58,6 @@ AtomLog::AtomLog(char *name, bool alone, uint8_t lvl) {
       throw -1;
     }
   }
-//  sysjrn = 0;
-#ifdef SYSJOURNAL
-/*    try { sysjrn = new AtomSystemJournal; }
-    catch (...) {
-      throw -1;
-    }*/
-#endif  // SYSJOURNAL
   errorcode = 0;
   errorsubcode = 0;
   warningcode = 0;
@@ -91,10 +84,6 @@ AtomLog::~AtomLog() {
     delete [] global_warning.description;
     global_warning.description = 0;
   }
-#ifdef SYSJOURNAL
-/*  if(sysjrn)
-    delete sysjrn;*/
-#endif  // SYSJOURNAL
 }
 void AtomLog::LogMsg(const char *string, uint8_t lvl, const char *file,
                      int32_t line) {
@@ -154,10 +143,9 @@ void AtomLog::SetLastError(uint32_t code, uint32_t subcode,
 #ifdef UNIX
   global_error.system_code = errno;
 #endif  // UNIX
-  uint32_t errlen = strlen(errorcode[global_error.code]) +
+  uint32_t errlen = 300 + strlen(errorcode[global_error.code]) +
              strlen(errorsubcode[global_error.code][global_error.sub_code]);
   global_error.description = new char[errlen];
-  errlen += 300;
   snprintf(global_error.description, errlen, "%s:%i\tERROR: %s\t%s",
            file, line, errorcode[global_error.code],
            errorsubcode[global_error.code][global_error.sub_code]);

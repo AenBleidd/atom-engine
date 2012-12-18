@@ -1,4 +1,5 @@
 #include "OAtomError.h"
+
 OAtomLog::OAtomLog() {
   ptimeinfo = new tm;
 }
