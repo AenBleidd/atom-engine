@@ -151,7 +151,7 @@ void AtomLog::SetLastError(uint32_t code, uint32_t subcode,
            errorsubcode[global_error.code][global_error.sub_code]);
   snprintf(MsgBuf, MSG_BUFFER_SIZE, "%s\n", global_error.code);
   if (verbose_level >= SHOW_ONLY_SYSTEM_ERRORS) {
-    snprintf(MsgBuf, MSG_BUFFER_SIZE, "%s: %x", "Last system error is",
+    snprintf(MsgBuf, MSG_BUFFER_SIZE, "%s: 0x%X", "Last system error",
              global_error.system_code);
     DebugMsg(MsgBuf);
   }
@@ -161,6 +161,7 @@ void AtomLog::SetLastError(uint32_t code, uint32_t subcode,
                   NULL, global_error.system_code,
                   MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), MsgBuf,
                   MSG_BUFFER_SIZE, NULL);
+    CharToOem((LPCSTR)MsgBuf, (LPSTR)MsgBuf);
 #endif  // WINDOWS
 #ifdef UNIX
     strerror_r(global_error.system_code, MsgBuf, MSG_BUFFER_SIZE);

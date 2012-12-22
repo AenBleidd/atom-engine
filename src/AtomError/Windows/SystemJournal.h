@@ -20,9 +20,9 @@ public:
   inline uint8_t GetLogVerbosity() { return verbose_level; }
 // write last error and warning into the log
   void SetLastError(uint32_t code, uint32_t subcode,
-                            const char* file, int32_t line);
+                            const char *file, int32_t line);
   void SetLastWarning(uint32_t code, uint32_t subcode,
-                              const char* file, int32_t line);
+                              const char *file, int32_t line);
 // write log message
   void LogMsg(const char *string, uint8_t lvl, const char *file,
                       int32_t line);
@@ -36,7 +36,7 @@ private:
   ERR global_warning;
 // verbose level
   uint8_t verbose_level;
-  void AtomReportEvent(uint32_t cat, uint32_t mess, uint16_t type, uint8_t lvl, const char* file, int32_t line);
+  void AtomReportEvent(uint32_t cat, uint32_t mess, uint16_t type, const char *message, const char *file, int32_t line);
 };
 
 #endif  // _SYSTEMJOURNAL_H_
