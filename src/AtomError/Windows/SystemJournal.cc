@@ -75,34 +75,59 @@ AtomSystemJournal::~AtomSystemJournal() {
 }
 
 void AtomSystemJournal::AtomReportEvent(uint32_t cat, uint32_t mess, uint16_t type,
-                                    uint8_t lvl, const char* file, 
+                                    const char *message, const char *file, 
                                     int32_t line) {
-  char msg[2][MAX_PATH];
-  if (lvl <= verbose_level) {
-    snprintf(msg[0], MAX_PATH, "File: %s", file);
-    snprintf(msg[1], MAX_PATH, "Line: %i", line);
-    if(!::ReportEvent(hEventSource, type, cat, mess, NULL, 2, 0, 
-       (LPCSTR*)msg, NULL)) {
-      throw;
+  if (type == EVENTLOG_ERROR_TYPE) {
+    global_error.code = cat;
+    global_error.sub_code = mess;
+  } else if (type == EVENTLOG_WARNING_TYPE) {
+    global_warning.code = cat;
+    global_warning.sub_code = mess;
+  }
+  char msg[5][MSG_BUFFER_SIZE];
+  snprintf(msg[0], MSG_BUFFER_SIZE, "File: %s", file);
+  snprintf(msg[1], MSG_BUFFER_SIZE, "Line: %i", line);
+  uint8_t msg_str_count = 2;
+  if (message != 0)
+    snprintf(msg[msg_str_count++], MSG_BUFFER_SIZE, "Message: %s", message);
+  if (type == EVENTLOG_ERROR_TYPE && verbose_level >= SHOW_ONLY_SYSTEM_ERRORS) {
+    global_error.system_code = GetLastError();
+    snprintf(msg[msg_str_count++], MSG_BUFFER_SIZE, "Last system error: 0x%X", global_error.system_code);
+    if (type >= SHOW_ALL_ERRORS) {
+      FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                  NULL, global_error.system_code,
+                  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), msg[msg_str_count++],
+                  MSG_BUFFER_SIZE, NULL);
     }
+  }
+  if(!::ReportEvent(hEventSource, type, cat, mess, NULL, msg_str_count, 0, 
+     (LPCSTR*)msg, NULL)) {
+    throw;
   }
 }
 
 void AtomSystemJournal::SetLastError(uint32_t code, uint32_t subcode,
                                      const char* file, int32_t line) {
-  AtomReportEvent(code, subcode, EVENTLOG_ERROR_TYPE, SHOW_ALL_ERRORS, file, line);
+  AtomReportEvent(code, subcode, EVENTLOG_ERROR_TYPE, 0, file, line);
 }
 void AtomSystemJournal::SetLastWarning(uint32_t code, uint32_t subcode,
                                        const char* file, int32_t line) {
-  AtomReportEvent(code, subcode, EVENTLOG_WARNING_TYPE, SHOW_ALL_ERRORS, file, line);
+  AtomReportEvent(code, subcode, EVENTLOG_WARNING_TYPE, 0, file, line);
 }
 
 void AtomSystemJournal::LogMsg(const char *string, uint8_t lvl, const char *file,
                                int32_t line) {
-  return;
+  if (lvl <= verbose_level) {
+    AtomReportEvent(0, 0, EVENTLOG_INFORMATION_TYPE, string, file, line);
+  }
 }
 
 void AtomSystemJournal::DebugMsg(const char *string, uint8_t lvl, const char *file,
                                  int32_t line) {
+#ifdef ATOM_DEBUG
+  if (lvl <= verbose_level) {
+    AtomReportEvent(0, 0, EVENTLOG_INFORMATION_TYPE, string, file, line);
+  }
+#endif  // ATOM_DEBUG
   return;
 }
