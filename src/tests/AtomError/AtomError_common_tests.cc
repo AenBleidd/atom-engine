@@ -10,6 +10,7 @@ TEST(AtomErrorTest, LoadStringsTest) {
   static char *descr = "Description";
   EXPECT_NO_THROW({
     AtomLog al;
+
     int code;
     EXPECT_GE((code = al.LoadStrings(ATOMERROR, codes, descr)), 0);
     al.SetLastErr(code, 0);
@@ -20,9 +21,7 @@ TEST(AtomErrorTest, LoadStringsTest) {
     ERR err1 = al.GetLastErr();
     EXPECT_EQ(err1.code, code);
     EXPECT_EQ(err1.sub_code, 1);
-  });
-  EXPECT_NO_THROW({
-    AtomLog al;
+
     int code1;
     EXPECT_GE((code1 = al.LoadStrings(ATOMWARNING, codes, descr)), 0);
     al.SetLastWrn(code1, 0);
@@ -33,5 +32,6 @@ TEST(AtomErrorTest, LoadStringsTest) {
     ERR err3 = al.GetLastWrn();
     EXPECT_EQ(err3.code, code1);
     EXPECT_EQ(err3.sub_code, 1);
+
   });
 }
