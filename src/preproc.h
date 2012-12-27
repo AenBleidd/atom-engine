@@ -84,10 +84,6 @@ localtime (timep), sizeof (*(result))) : 0)
 #endif
 
 #ifdef UNIX
-#ifndef MAX_PATH
-#include <limits.h>
-#define MAX_PATH PATH_MAX
-#endif  // MAX_PATH
 #include <stdarg.h>
 #endif  // UNIX
 

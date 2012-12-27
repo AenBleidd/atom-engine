@@ -1,30 +1,15 @@
-<ERROR>
-"Engine Error. WindowManager Error."
-<NOERRORS>
-"No Error"
-<ERROR_CLSREG_FAIL>
-"Fatal Error: Error registering the window class"
-<ERROR_WND_CR_FAIL>
-"Fatal Error: Couldn't create a window"
-<ERROR_INVALID_INPUT_PARAMETER>
-"Invalid input parameter"
-<ERROR_CLSUNREG_FAIL>
-"Error unregistering the window class"
-<ERROR_TITLE>
-"Error getting window title"
-<ERROR_WINDOWINFO_QUERY_FAIL>
-"Error getting the window info block"
-<ERROR_WINDOWINFO_SETTEXT>
-"Error setting the window text while applying the window info block"
-<ERROR_MVWIN_FAIL>
-"Error trying to change window size and dimentions"
-<ERROR_ADJUSTRECT_FAIL>
-"Error adjusting the client area for a window"
-<ERROR_BRING_TO_TOP>
-"Error trying to make window topmost"
-<ERROR_X11_CONNECTION>
-"No connection to X server established"
-<ERROR_X11_WM_HINTS>
-"Error getting WM hints: window size and position"
-<ERROR_X11_STRING_CONVERSION>
-"No memory for XLib string conversion"
+<ERROR> "Engine Error. WindowManager Error."
+<NOERRORS> "No Error"
+<ERROR_CLSREG_FAIL> "Fatal Error: Error registering the window class"
+<ERROR_WND_CR_FAIL> "Fatal Error: Couldn't create a window"
+<ERROR_INVALID_INPUT_PARAMETER> "Invalid input parameter"
+<ERROR_CLSUNREG_FAIL> "Error unregistering the window class"
+<ERROR_TITLE> "Error getting window title"
+<ERROR_WINDOWINFO_QUERY_FAIL> "Error getting the window info block"
+<ERROR_WINDOWINFO_SETTEXT> "Error setting the window text while applying the window info block"
+<ERROR_MVWIN_FAIL> "Error trying to change window size and dimentions"
+<ERROR_ADJUSTRECT_FAIL> "Error adjusting the client area for a window"
+<ERROR_BRING_TO_TOP> "Error trying to make window topmost"
+<ERROR_X11_CONNECTION> "No connection to X server established"
+<ERROR_X11_WM_HINTS> "Error getting WM hints: window size and position"
+<ERROR_X11_STRING_CONVERSION> "No memory for XLib string conversion"

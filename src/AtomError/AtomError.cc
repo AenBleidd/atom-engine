@@ -239,4 +239,5 @@ int32_t AtomLog::LoadStrings(bool type, char **subcodes,
     }
     return module_warning_count++;
   }
+  return -1;
 }
