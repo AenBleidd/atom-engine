@@ -48,6 +48,7 @@ class AtomLog : public OAtomLog {
   char ***errorsubcode;
   char **warningcode;
   char ***warningsubcode;
+
 // logfile
   FILE *logfile;
  public:
