@@ -1,23 +1,23 @@
 #include "sysvars.h"
-int8_t byte_order = 4;
 int8_t ByteOrderDetect(void) {
+  static int8_t byte_order = 4;
   if (byte_order != 4)
-	return byte_order;
+	  return byte_order;
 
   int8_t *ptest;
   int32_t test = 0x12345678;
   ptest = (int8_t*)&test;
   if (ptest[0] == 0x12)
-	byte_order = 0;
+    byte_order = BO_BE;
   else if (ptest[0] == 0x34)
-	byte_order = 2;
+    byte_order = BO_MBE;
   else if (ptest[0] == 0x56)
-	byte_order = 3;
+    byte_order = BO_MLE;
   else if (ptest[0] == 0x78)
-	byte_order = 1;
+    byte_order = BO_LE;
 // WTF??? O_o
   else
-	byte_order -1;
+	  byte_order = -1;
   return byte_order;
 }
 // convert from system byteorder to Little-Endian

@@ -33,10 +33,14 @@ LIST ( APPEND ${TESTS_MODULE}_SRC ${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PA
 LIST ( APPEND ${TESTS_MODULE}_SRC  AtomError/AtomError_GetLogPath_Test )
 LIST ( APPEND ${TESTS_MODULE}_SRC  AtomError/AtomError_common_tests )
 
+# SysVars tests
+
+LIST ( APPEND ${TESTS_MODULE}_SRC  SysVars/SysVars_common_tests )
+
 ADD_EXECUTABLE ( ${TESTS_MODULE}  ${${TESTS_MODULE}_SRC} )
 
 # TODO: Library names should be taken from variables
-TARGET_LINK_LIBRARIES ( ${TESTS_MODULE} ${ATOMENGINE_MODULE} ${ATOMERROR_MODULE} )
+TARGET_LINK_LIBRARIES ( ${TESTS_MODULE} ${ATOMENGINE_MODULE} ${ATOMERROR_MODULE} ${SYSVARS_MODULE} )
 
 # Installation instructions for the FSMan module
 # Please specify the installation instructions sprcific
