@@ -33,6 +33,7 @@ AGUID* GetAGUID(char *guid) {
   delete uuid;
   return aguid;
 }
+
 char* GetCGUID(AGUID *guid) {
   char *cguid = new char[37];
   if (guid == 0) {
@@ -65,12 +66,11 @@ char* GetCGUID(AGUID *guid) {
   guid->data2 = BoLE2Sys(guid->data2);
   guid->data3 = BoLE2Sys(guid->data3);
 
-  char **ccguid = new char*;
-  ccguid = &cguid;
-  if (UuidToString(uuid, (unsigned char**)ccguid) != RPC_S_OK) {
+  if (UuidToString(uuid, (unsigned char**)&cguid) != RPC_S_OK) {
     delete [] cguid;
     delete uuid;
     return 0;
   }
+  delete uuid;
   return cguid;
 }
