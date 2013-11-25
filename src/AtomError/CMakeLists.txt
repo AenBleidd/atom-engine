@@ -24,35 +24,10 @@ ENDIF()
 
 # Command line options, their defaults and checks
 
-OPTION ( ATOMLOG_ATOMERROR "The library responsible for loggong events." ON )
-OPTION ( ATOMLOG_SYSTEM_JOURNAL "The library responsible for system loggong events." OFF )
-
-LIST ( APPEND ${ATOMERROR_MODULE}_SRC OAtomError )
-
-# set AtomError parameter by default
-IF ( NOT ATOMLOG_ATOMERROR )
-  SET ( ATOMLOG_ATOMERROR:BOOL ON )
-ENDIF ()
-
-# set System Journal parameter by default
-IF ( NOT ATOMLOG_SYSTEM_JOURNAL )
-  SET ( ATOMLOG_SYSTEM_JOURNAL:BOOL OFF )
-ENDIF()       
-
-IF ( NOT ATOMLOG_ATOMERROR AND NOT ATOMLOG_SYSTEM_JOURNAL )
-  MESSAGE ( FATAL_ERROR "Check at least one loging system: (ATOMLOG_ATOMERROR, ATOMLOG_SYSTEM_JOURNAL" )
-ENDIF ()
-
 # Set correct defines and include correct files
-IF ( ATOMLOG_ATOMERROR )
-  ADD_DEFINITIONS ( "-DATOMERROR" )
-  LIST ( APPEND ${ATOMERROR_MODULE}_SRC AtomError ${AE_PREFIX}/logpath )
-ENDIF ()
+ADD_DEFINITIONS ( "-DATOMERROR" )
+LIST ( APPEND ${ATOMERROR_MODULE}_SRC AtomError ${AE_PREFIX}/logpath )
 
-IF ( ATOMLOG_SYSTEM_JOURNAL )
-  ADD_DEFINITIONS ( "-DSYSJOURNAL" )
-  LIST ( APPEND ${ATOMERROR_MODULE}_SRC ${AE_PREFIX}/SystemJournal )
-ENDIF ()
 # Create a static library
 ADD_LIBRARY ( ${ATOMERROR_MODULE} STATIC ${${ATOMERROR_MODULE}_SRC})
 
