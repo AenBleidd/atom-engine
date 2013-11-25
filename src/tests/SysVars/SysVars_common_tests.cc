@@ -17,5 +17,10 @@ TEST(SysVarsTest, GUID_Tests) {
   EXPECT_NE(*(int*)pnew_guid, 0);
   EXPECT_STRCASEEQ(pnew_guid, test_guid);
   delete pnew_aguid;
+#ifdef WINDOWS
   RpcStringFree((RPC_CSTR*)&pnew_guid);
+#endif  // WINDOWS
+#ifdef UNIX
+  delete [] pnew_guid;
+#endif  // UNIX
 }

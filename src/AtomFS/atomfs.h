@@ -5,8 +5,8 @@
 #include "messages.h"
 #include "OCryptEngine.h"
 #include "OControlSumEngine.h"
-#include <AtomError\AtomError.h>
-#include <SysVars\guid.h>
+#include <AtomError/AtomError.h>
+#include <SysVars/guid.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 /*
@@ -19,7 +19,7 @@
  Magic number                           - 4 bytes         (0x41454653)
  AtomFS version                         - 1 byte          (0x01)
  Filetable address                      - 8 bytes
- ---------- Crypt engine header         ----------    
+ ---------- Crypt engine header         ----------
  Crypt engine name length               - 1 byte          (0x0 if the atomfs is non-crypted)
  Crypt engine name                      - 1-255 bytes     (presence only if "Crypt engine name length" is not 0x0)
  Other specific parameters              - variable        (presence only if "Crypt engine name length" is not 0x0)
@@ -39,7 +39,7 @@
  Crypt engine specific parameters       - variable        (presence only if "Crypt engine name length" is not 0x0 and "Type of record" is 0x0F or 0xDF)
  Control Sum engine specific parameters - variable        (presence only if "Crypt engine name length" is not 0x0 and "Type of record" is 0x0F or 0xDF)
  ---------- End                         ----------
- 
+
 
 */
 ///////////////////////////////////////////////////////////////////////////////
