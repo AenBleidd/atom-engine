@@ -2,33 +2,49 @@
 #define _ATOM_ERROR_H_
 
 #include <preproc.h>
-#include "OAtomError.h"
 
 #ifdef WINDOWS
 #include <windows.h>
-#ifdef SYSJOURNAL
-#include <SystemJournal.h>
-#endif  // SYSJOURNAL
 #ifdef __BORLANDC__
 #include <time.h>
 #endif  // __BORLANDC__
 #endif  // WINDOWS
 #include <string.h>
+#include <ctime>
 #include <stdio.h>
 #ifdef UNIX
 #include <unistd.h>
 #include <sys/stat.h>
 #include <errno.h>
-#ifdef SYSJOURNAL
-#include <Unix/SystemJournal.h>
-#endif  // SYSJOURNAL
 #endif  // UNIX
 
 #ifdef ATOM_TEST
 #include <gtest/gtest.h>
-#endif  // ATOM_TEST
+#endif  // ATOM_TEST// some verbosity levels
+enum {
+  // show only last system error codes
+  SHOW_ONLY_SYSTEM_ERRORS = 0xFE,
+  // show last system error codes and their description
+  SHOW_ALL_ERRORS = 0xFF
+};
 
-class AtomLog : public OAtomLog {
+#define MSG_BUFFER_SIZE 1024
+
+#define SetLastErr(code,subcode) SetLastError(code,subcode,__FILE__,__LINE__);
+#define SetLastWrn(code,subcode) SetLastWarning(code,subcode,__FILE__,__LINE__);
+#define LogMessage(string) LogMsg(string,SHOW_ALL_ERRORS,__FILE__,__LINE__);
+#define DebugMessage(string) DebugMsg(string,SHOW_ALL_ERRORS,__FILE__,__LINE__);
+#define LogMessageV(string,lvl) LogMsg(string,lvl,__FILE__,__LINE__);
+#define DebugMessageV(string,lvl) DebugMsg(string,lvl,__FILE__,__LINE__);
+
+struct ERR {
+  uint32_t code;
+  uint32_t sub_code;
+  uint32_t system_code;
+  char *description;
+};
+
+class AtomLog {
 // Declare friend class for testing AtomLog
 #ifdef ATOM_TEST
  private:
@@ -52,6 +68,10 @@ class AtomLog : public OAtomLog {
 // logfile
   FILE *logfile;
  public:
+// Current date and time
+   virtual char* CurDateTime();
+// Current time
+   virtual char* CurTime();
 // get last error and warning
   inline ERR GetLastErr() { return global_error; }
   inline ERR GetLastWrn() { return global_warning; }
@@ -87,6 +107,10 @@ class AtomLog : public OAtomLog {
   void DebugMsg(const char *string);
 // find some path where we can place our log file
   char* GetLogPath(char* path, uint32_t size);
+// for datetime functions
+  char datetimebuf[20];
+  char timebuf[10];
+  tm *ptimeinfo;
 };
 
 #endif  // _CORE_ERROR_H_
