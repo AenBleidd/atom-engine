@@ -10,6 +10,9 @@ SET ( ATOMERROR_MODULE "AtomError" )
 SET ( GAMEFS_MODULE "GameFS" )                        # Module which will be used by the engine
 SET ( GAMEFS_FSMAN_MODULE "${GAMEFS_MODULE}_FSMan" )  # Module which will be used to build fsman utility
 
+# AtomFS module name
+SET ( ATOMFS_MODULE "AtomFS" )
+
 # FSMan module name
 SET ( FSMAN_MODULE "FSMan" )
 # SysVars module name
