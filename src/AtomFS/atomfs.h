@@ -4,11 +4,7 @@
 #include <preproc.h>
 #include "OCryptEngine.h"
 #include "OControlSumEngine.h"
-<<<<<<< local
-#include <AtomError/AtomError.h>
-=======
 #include <AtomLog/AtomLog.h>
->>>>>>> other
 #include <SysVars/guid.h>
 
 ///////////////////////////////////////////////////////////////////////////////
