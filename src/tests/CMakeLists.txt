@@ -7,7 +7,7 @@ INCLUDE ( "${MODULE_PATH}/modules.cmake" )
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}" )
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}" )
 INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}/include" )
-INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${ATOMERROR_MODULE}" )
+INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${ATOMLOG_MODULE}" )
 
 OPTION ( DISABLE_PTHREADS "Do not use pthreads" OFF )
 
@@ -28,10 +28,9 @@ endif()
 
 LIST ( APPEND ${TESTS_MODULE}_SRC ${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}/src/gtest-all test_exec )
 
-# AtomError tests
+# AtomLog tests
 
-LIST ( APPEND ${TESTS_MODULE}_SRC  AtomError/AtomError_GetLogPath_Test )
-LIST ( APPEND ${TESTS_MODULE}_SRC  AtomError/AtomError_common_tests )
+LIST ( APPEND ${TESTS_MODULE}_SRC  AtomLog/AtomLog_GetLogPath_Test )
 
 # SysVars tests
 
@@ -40,7 +39,7 @@ LIST ( APPEND ${TESTS_MODULE}_SRC  SysVars/SysVars_common_tests )
 ADD_EXECUTABLE ( ${TESTS_MODULE}  ${${TESTS_MODULE}_SRC} )
 
 # TODO: Library names should be taken from variables
-TARGET_LINK_LIBRARIES ( ${TESTS_MODULE} ${ATOMENGINE_MODULE} ${ATOMERROR_MODULE} ${SYSVARS_MODULE} )
+TARGET_LINK_LIBRARIES ( ${TESTS_MODULE} ${ATOMENGINE_MODULE} ${ATOMLOG_MODULE} ${SYSVARS_MODULE} )
 
 # Installation instructions for the FSMan module
 # Please specify the installation instructions sprcific

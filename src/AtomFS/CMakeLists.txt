@@ -14,8 +14,6 @@ IF ( GOOGLE_TEST AND GOOGLE_TEST_PATH)
   INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}/include" )
 ENDIF()
 
-CreateMessagesFile("messages.msg" "AtomFS" "CORE_FS")
-
 # Create a static library which will be used by the engine
 ADD_LIBRARY ( ${ATOMFS_MODULE} STATIC atomfs OControlSumEngine OCryptEngine )
 

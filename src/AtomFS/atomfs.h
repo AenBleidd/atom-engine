@@ -2,11 +2,10 @@
 #define _ATOMFS_H_
 
 #include <preproc.h>
-#include "messages.h"
 #include "OCryptEngine.h"
 #include "OControlSumEngine.h"
-#include <AtomError\AtomError.h>
-#include <SysVars\guid.h>
+#include <AtomLog/AtomLog.h>
+#include <SysVars/guid.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 /*

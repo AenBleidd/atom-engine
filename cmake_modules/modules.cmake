@@ -4,9 +4,14 @@
 SET ( WM_MODULE "WindowManager" )
 
 # AtomError module name
+# Deprecated: delete
 SET ( ATOMERROR_MODULE "AtomError" )
 
+# AtomLog module name
+SET ( ATOMLOG_MODULE "AtomLog" )
+
 # GameFS module name
+# Deprecated: delete
 SET ( GAMEFS_MODULE "GameFS" )                        # Module which will be used by the engine
 SET ( GAMEFS_FSMAN_MODULE "${GAMEFS_MODULE}_FSMan" )  # Module which will be used to build fsman utility
 

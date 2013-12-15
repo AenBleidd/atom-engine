@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
-#include <AtomError.h>
+#include <AtomLog.h>
 
-TEST(AtomErrorTest, Test_GetLogPath_Correct_CurDir) {
+TEST(AtomLogTest, Test_GetLogPath_Correct_CurDir) {
 // TODO(Lawliet): Write here test code for *nix
   char curdir[MAX_PATH];
   char curdir_new[MAX_PATH];
@@ -23,7 +23,7 @@ TEST(AtomErrorTest, Test_GetLogPath_Correct_CurDir) {
 #endif  // UNIX
 }
 
-TEST(AtomErrorTest, Test_GetLogPath) {
+TEST(AtomLogTest, Test_GetLogPath) {
   char path[MAX_PATH];
   EXPECT_NO_THROW({
     AtomLog al;
