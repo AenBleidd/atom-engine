@@ -56,6 +56,10 @@ static const uint8_t flag_file_deleted = 0xDF;  // deleted file
 static const uint8_t ff_ro = 0x00;  // read-only
 static const uint8_t ff_rw = 0x01;  // read-write
 
+static const AGUID root_guid = { 0x6CAFA79F, 0x2ECD4734, 0x8E7AE2F6, 0x62E59116 };
+static const AGUID null_guid = { 0x00000000, 0x00000000, 0x00000000, 0x00000000 };
+static const char root_name[] = "/";
+
 struct AtomFSHeader {
 // main
   uint32_t magic;
@@ -70,6 +74,10 @@ struct AtomFSHeader {
 // service
   AtomFSHeader *prev;
   AtomFSHeader *next;
+
+  explicit AtomFSHeader(uint32_t _magic, uint32_t _fsVersion, uint64_t _fileTableAddress, uint8_t _cryprEngineNameLength = 0,
+                        char *_cryptEngineName = 0, OCryptEngine *_cryptEngine = 0, uint8_t _controlSumEngineNameLength = 0,
+                        char *_controlSumEngineName = 0, OControlSumEngine *_controlSumEngine = 0, AtomFSHeader *_prev = 0, AtomFSHeader *_next = 0);
 };
 
 struct AtomFSFiletableRecord {
@@ -89,6 +97,14 @@ struct AtomFSFiletableRecord {
   AtomFSHeader *header;
   AtomFSFiletableRecord *prev;
   AtomFSFiletableRecord *next;
+  AtomFSFiletableRecord *parent;
+  AtomFSFiletableRecord *child;
+
+  explicit AtomFSFiletableRecord(uint8_t _recordType, uint16_t _recordNameLength, char *_recordName, AGUID _recordID, 
+                                 AGUID _recordParentID = null_guid, AtomFSFiletableRecord *_parent = 0, uint64_t _filesize = 0, 
+                                 uint64_t _offset = 0, uint8_t _recordMode = ff_ro, OCryptEngine *_cryptEngine = 0, 
+                                 OControlSumEngine *_controlSumEngine = 0, AtomFSHeader *_header = 0, 
+                                 AtomFSFiletableRecord *_prev = 0, AtomFSFiletableRecord *_next = 0, AtomFSFiletableRecord *_child = 0);
 };
 
 class AtomFS {
