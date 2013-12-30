@@ -14,8 +14,15 @@ IF ( GOOGLE_TEST AND GOOGLE_TEST_PATH)
   INCLUDE_DIRECTORIES ( "${${PROJECT_NAME}_SOURCE_DIR}/${GOOGLE_TEST_PATH}/include" )
 ENDIF()
 
+IF ( WIN32 )
+	SET ( AFS_PREFIX "Windows" )
+ENDIF ( WIN32 )
+IF ( UNIX )
+	SET ( AFS_PREFIX "Unix" )
+ENDIF ( UNIX )
+
 # Create a static library which will be used by the engine
-ADD_LIBRARY ( ${ATOMFS_MODULE} STATIC atomfs OControlSumEngine OCryptEngine )
+ADD_LIBRARY ( ${ATOMFS_MODULE} STATIC atomfs OControlSumEngine OCryptEngine ${AFS_PREFIX}/create)
 
 # Installation instructions for the AtomFS module
 # Please specify the installation instructions specific
