@@ -7,6 +7,17 @@
 #include <AtomLog/AtomLog.h>
 #include <SysVars/guid.h>
 
+#ifdef WINDOWS
+#elif UNIX
+#endif
+
+#ifdef WINDOWS
+#define AtomFSFile HANDLE
+#elif
+#define AtomFSFile FILE*
+#endif
+
+
 ///////////////////////////////////////////////////////////////////////////////
 /*
  AtomFS bin file structure (version 1)
@@ -74,10 +85,13 @@ struct AtomFSHeader {
 // service
   AtomFSHeader *prev;
   AtomFSHeader *next;
+  AtomFSFile file;
 
-  explicit AtomFSHeader(uint32_t _magic, uint32_t _fsVersion, uint64_t _fileTableAddress, uint8_t _cryprEngineNameLength = 0,
+  AtomFSHeader(AtomFSFile *_file, uint32_t _magic, uint32_t _fsVersion, uint64_t _filetableAddress, uint8_t _cryptEngineNameLength = 0,
                         char *_cryptEngineName = 0, OCryptEngine *_cryptEngine = 0, uint8_t _controlSumEngineNameLength = 0,
                         char *_controlSumEngineName = 0, OControlSumEngine *_controlSumEngine = 0, AtomFSHeader *_prev = 0, AtomFSHeader *_next = 0);
+  AtomFSHeader(void);
+  ~AtomFSHeader(void);
 };
 
 struct AtomFSFiletableRecord {
@@ -100,16 +114,21 @@ struct AtomFSFiletableRecord {
   AtomFSFiletableRecord *parent;
   AtomFSFiletableRecord *child;
 
-  explicit AtomFSFiletableRecord(uint8_t _recordType, uint16_t _recordNameLength, char *_recordName, AGUID _recordID, 
+  AtomFSFiletableRecord(uint8_t _recordType, uint16_t _recordNameLength, char *_recordName, AGUID _recordID, 
                                  AGUID _recordParentID = null_guid, AtomFSFiletableRecord *_parent = 0, uint64_t _filesize = 0, 
                                  uint64_t _offset = 0, uint8_t _recordMode = ff_ro, OCryptEngine *_cryptEngine = 0, 
                                  OControlSumEngine *_controlSumEngine = 0, AtomFSHeader *_header = 0, 
                                  AtomFSFiletableRecord *_prev = 0, AtomFSFiletableRecord *_next = 0, AtomFSFiletableRecord *_child = 0);
+  AtomFSFiletableRecord(void);
+  ~AtomFSFiletableRecord(void);
 };
 
 class AtomFS {
 public:
   explicit AtomFS(AtomLog *log);
+  ~AtomFS(void);
+
+  bool Create(char **input, uint64_t count, char *filename);
 
 private:
   AtomFSHeader *listAtomFSHeader;
