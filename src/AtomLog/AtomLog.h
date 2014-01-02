@@ -20,8 +20,9 @@
 
 #ifdef ATOM_TEST
 #include <gtest/gtest.h>
-#endif  // ATOM_TEST// some verbosity levels
+#endif  // ATOM_TEST
 
+// some verbosity levels
 enum {
   // show only last system error codes
   SHOW_ONLY_ATOM_ERRORS = 0xFE,
@@ -31,8 +32,8 @@ enum {
 
 #define MSG_BUFFER_SIZE 1024
 
-#define SetLastErr(module,error) SetLastError(module,error,__FILE__,__LINE__);
-#define SetLastWrn(module,warning) SetLastWarning(module,warning,__FILE__,__LINE__);
+#define ErrorMessage(module,error) ErrorMsg(module,error,__FILE__,__LINE__);
+#define WarningMessage(module,warning) WarningMsg(module,warning,__FILE__,__LINE__);
 #define LogMessage(string) LogMsg(string,SHOW_ALL_ERRORS,__FILE__,__LINE__);
 #define DebugMessage(string) DebugMsg(string,SHOW_ALL_ERRORS,__FILE__,__LINE__);
 #define LogMessageV(string,lvl) LogMsg(string,lvl,__FILE__,__LINE__);
@@ -45,8 +46,7 @@ private:
   FRIEND_TEST(AtomLogTest, Test_GetLogPath);
 #endif  // ATOM_TEST
 public:
-  explicit AtomLog(char *name = "atom", bool alone = false,
-    uint8_t lvl = 0xFF);
+  explicit AtomLog(char *name = "atom", bool alone = false, uint8_t lvl = 0xFF);
   ~AtomLog();
   char MsgBuf[MSG_BUFFER_SIZE];
 // logfile
@@ -60,9 +60,9 @@ public:
 // get verbose level
   inline uint8_t GetLogVerbosity() { return verbose_level; }
 // write last error and warning into the log
-  void ErrorMessage(const char* module, const char* error,
+  void ErrorMsg(const char* module, const char* error,
     const char* file, int32_t line);
-  void WarningMessage(const char* module, const char* warning,
+  void WarningMsg(const char* module, const char* warning,
     const char* file, int32_t line);
 // write log message
   void LogMsg(const char *string, uint8_t lvl, const char *file,

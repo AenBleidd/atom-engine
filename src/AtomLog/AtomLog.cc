@@ -88,7 +88,7 @@ char* AtomLog::CurTime() {
   return timebuf;
 }
 
-void AtomLog::ErrorMessage(const char* module, const char* error,
+void AtomLog::ErrorMsg(const char* module, const char* error,
   const char* file, int32_t line) {
   uint32_t errlen = 300 + strlen(module) +
     strlen(error);
@@ -114,7 +114,7 @@ void AtomLog::ErrorMessage(const char* module, const char* error,
   delete [] description;
 }
 
-void AtomLog::WarningMessage(const char* module, const char* warning,
+void AtomLog::WarningMsg(const char* module, const char* warning,
   const char* file, int32_t line) {
   uint32_t warnlen = 300 + strlen(module) + strlen(warning);
   char *description = new char[warnlen];
